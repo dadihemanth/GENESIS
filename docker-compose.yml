@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: security_research
+      POSTGRES_USER: admin
+      # POSTGRES_PASSWORD must be set in .env — no insecure default is provided
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    # No host port binding — only reachable from the Docker internal network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d security_research"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      # MONGODB_PASSWORD must be set in .env — no insecure default is provided
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:?Set MONGODB_PASSWORD in .env}
+      MONGO_INITDB_DATABASE: security_research
+    # No host port binding — only reachable from the Docker internal network
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2-alpine
+    command: redis-server --appendonly yes
+    # No host port binding — only reachable from the Docker internal network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  chromadb:
+    image: chromadb/chroma:0.5.18
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      ANONYMIZED_TELEMETRY: "false"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      MCP_API_KEY: ${MCP_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - vuln-lab
+    volumes:
+      - security_data:/data/security
+
+  celery_worker:
+    build: ./backend
+    command: celery -A app.services.celery_app worker --loglevel=info -c 4 -Q research
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis:6379
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      MCP_API_KEY: ${MCP_API_KEY:-}
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - security_data:/data/security
+
+  mcp_server:
+    build: ./mcp-server
+    ports:
+      - "3001:3001"
+    networks:
+      - default
+      - vuln-lab
+    volumes:
+      - security_data:/data/security
+    environment:
+      PORT: 3001
+      NODE_ENV: production
+      MCP_API_KEY: ${MCP_API_KEY:-}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  chroma_data:
+  security_data:
+
+networks:
+  default: {}
+  vuln-lab:
+    external: true
+    name: genesis_vuln-lab
