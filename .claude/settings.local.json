@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node build_manual.js)",
+      "Bash(python -m py_compile backend/app/services/ai_orchestrator.py)",
+      "Bash(docker compose *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('llm_api_key set:', bool\\(d.get\\('llm_api_key',''\\).strip\\(\\)\\)\\)\")",
+      "Bash(curl -s http://localhost:8000/api/v1/sessions/__TRACKED_VAR__ -H 'X-API-Key: __TRACKED_VAR__')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f\\\\\"total={d['total']}\\\\\"\\); [print\\(f\\\\\"  - phase={e['phase']} type={e['error_type']} iter={e.get\\('iteration'\\)} msg={e['error_message'][:150]}\\\\\"\\) for e in d['items']]\")",
+      "Bash(curl -s http://localhost:8000/api/v1/sessions/eaacdb66-3aeb-40c2-b338-be2dcdfe3c11/errors -H 'X-API-Key: Gen@1234')",
+      "Bash(python -c ' *)",
+      "Bash(curl -s -X GET http://localhost:8000/api/v1/settings -H 'X-API-Key: Gen@1234')",
+      "Bash(grep -rn \"redact\\\\|\\\\\"123\\\\\"\\\\|'123'\\\\|masked\\\\|asterisk\\\\|\\\\\\\\*\\\\\\\\*\\\\\\\\*\" \"c:/Users/AI-SEC-LAB/Desktop/Claude/GENESIS/backend/app/api/routes/settings.py\" \"c:/Users/AI-SEC-LAB/Desktop/Claude/GENESIS/frontend/src/pages/Settings.tsx\" \"c:/Users/AI-SEC-LAB/Desktop/Claude/GENESIS/frontend/src/pages/SetupWizard.tsx\")",
+      "Bash(python -m py_compile backend/app/api/routes/settings.py)",
+      "Bash(python -m py_compile backend/app/services/ai_orchestrator.py backend/app/services/multi_agent_orchestrator.py)",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/sessions -H 'X-API-Key: Gen@1234' -H 'Content-Type: application/json' -d '{\"target_ip\":\"10.10.0.11\",\"scan_profile\":\"fast\",\"agent_mode\":\"solo\"}')",
+      "Bash(curl -s -X POST http://localhost:8000/api/v1/sessions -H 'X-API-Key: __TRACKED_VAR__' -H 'Content-Type: application/json' -d '{\"target_ip\":\"10.10.0.11\",\"scan_profile\":\"fast\",\"agent_mode\":\"solo\"}')"
+    ]
+  }
+}
