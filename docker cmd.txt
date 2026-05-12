@@ -1,0 +1,20 @@
+Goal	Command
+Rebuild + restart in one step	docker-compose up -d --build backend celery_worker celery_beat
+Rebuild everything (frontend, MCP, backend, sidecars)	docker-compose build then docker-compose up -d
+Force fresh layers (ignore cache)	add --no-cache to the build command
+Frontend changes only	docker-compose up -d --build frontend
+MCP server changes only	docker-compose up -d --build mcp_server
+Full clean restart	docker-compose down && docker-compose up -d --build
+See what's running	docker-compose ps
+Stop everything	docker-compose down
+Quick decision rule for which services to rebuild:
+
+Edited backend/** → rebuild backend celery_worker celery_beat
+Edited frontend/** → rebuild frontend
+Edited mcp-server/** → rebuild mcp_server
+Edited replica-manager/** → rebuild replica_manager
+Edited ghidra/, fuzzer/, symbex/, instrumentation/, renderer/ → rebuild that one service
+Edited requirements.txt / package.json → same as above but expect a longer build (dep layer invalidates)
+Edited docker-compose.yml itself → docker-compose down && docker-compose up -d
+up -d --build is the one I'd memorize — it builds and restarts atomically, so the new image is live the moment the build finishes.
+

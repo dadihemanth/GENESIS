@@ -1,0 +1,51 @@
+# CBOR (RFC 8949) — major-type prefix bytes + common indicators.
+# Major type 0 (uint) samples
+uint0="\x00"
+uint23="\x17"
+uint8_prefix="\x18"
+uint16_prefix="\x19"
+uint32_prefix="\x1a"
+uint64_prefix="\x1b"
+# Major type 1 (neg int)
+neg_zero="\x20"
+neg_23="\x37"
+neg8="\x38"
+# Major type 2 (byte string)
+bstr_empty="\x40"
+bstr_1="\x41"
+bstr_23="\x57"
+bstr8="\x58"
+bstr16="\x59"
+bstr_indef="\x5f"
+# Major type 3 (text string)
+tstr_empty="\x60"
+tstr_5="\x65"
+tstr_23="\x77"
+tstr8="\x78"
+tstr_indef="\x7f"
+# Major type 4 (array)
+arr_empty="\x80"
+arr_1="\x81"
+arr_23="\x97"
+arr_indef="\x9f"
+# Major type 5 (map)
+map_empty="\xa0"
+map_1="\xa1"
+map_indef="\xbf"
+# Major type 6 (tag)
+tag_0="\xc0"
+tag_1="\xc1"
+tag_datetime="\xc0"
+tag_epoch="\xc1"
+tag_bignum_pos="\xc2"
+tag_bignum_neg="\xc3"
+tag_decimal="\xc4"
+# Major type 7 (simple / float)
+simple_false="\xf4"
+simple_true="\xf5"
+simple_null="\xf6"
+simple_undef="\xf7"
+float16="\xf9"
+float32="\xfa"
+float64="\xfb"
+break_stop="\xff"

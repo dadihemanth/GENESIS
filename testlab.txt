@@ -1,0 +1,509 @@
+
+  ---
+  Part 1 — Vulnerable Lab Setup & Testing
+
+  Step 1 — Start the vulnerable lab
+
+  Open a terminal and run:
+
+  cd C:\Users\AI-SEC-LAB\Desktop\Claude\vulnerable-lab
+  docker compose up -d
+
+  This pulls and starts five containers on the genesis_vuln-lab network:
+
+  ┌────────────────┬────────────┬─────────────────────────────────────────────────────────────┐
+  │   Container    │     IP     │                        What it runs                         │
+  ├────────────────┼────────────┼─────────────────────────────────────────────────────────────┤
+  │ metasploitable │ 10.10.0.10 │ 20+ vulnerable services (FTP, SSH, SMB, HTTP, IRC, MySQL…)  │
+  ├────────────────┼────────────┼─────────────────────────────────────────────────────────────┤
+  │ dvwa           │ 10.10.0.11 │ SQLi, XSS, CSRF, LFI, Command Injection, File Upload        │
+  ├────────────────┼────────────┼─────────────────────────────────────────────────────────────┤
+  │ juice-shop     │ 10.10.0.12 │ 100+ modern vulns (JWT, SSRF, XXE, Broken Auth, API flaws)  │
+  ├────────────────┼────────────┼─────────────────────────────────────────────────────────────┤
+  │ webgoat        │ 10.10.0.13 │ Java web vulns (injection, access control, deserialization) │
+  ├────────────────┼────────────┼─────────────────────────────────────────────────────────────┤
+  │ vulnapi        │ 10.10.0.14 │ OWASP API Top 10 (BOLA, mass assignment, auth bypass)       │
+  └────────────────┴────────────┴─────────────────────────────────────────────────────────────┘
+
+  Wait about 60 seconds for all images to download and start.
+
+  ---
+  Step 2 — Verify the lab is running
+
+  docker compose ps
+
+  All five containers should show Up. Then verify GENESIS can see the targets:
+
+  docker exec genesis-mcp_server-1 ping -c 2 10.10.0.10
+  docker exec genesis-mcp_server-1 ping -c 2 10.10.0.11
+
+  Both should reply. If you get "network not found" errors, it means GENESIS was started before the lab (so the genesis_vuln-lab network
+  did not exist yet). Fix this by restarting just the two affected containers:
+
+  cd C:\Users\AI-SEC-LAB\Desktop\claude\GENESIS
+  docker compose restart backend mcp_server
+
+  ---
+  Step 3 — Verify tool availability in MCP
+
+  curl -s -H "X-API-Key: Mcp@gen" http://localhost:3001/tools/status | python -m json.tool
+
+  Look for nmap, nuclei, sqlmap, gobuster, hydra — they should all show "status": "available". If nmap shows missing:
+
+  docker exec genesis-mcp_server-1 which nmap
+
+  If nmap is missing from the MCP container you may need to rebuild it after installing nmap in the Dockerfile. But typically the MCP
+  image includes it.
+
+  ---
+  Step 4 — Quick browser access check (optional but useful)
+
+  Before running GENESIS, browse each target manually so you know what you're looking at:
+
+  - DVWA → http://localhost:4280 — log in with admin / password, set Security Level to Low in the DVWA Security menu for your first test
+  - Juice Shop → http://localhost:4300 — no login needed, it auto-creates a session
+  - WebGoat → http://localhost:4380/WebGoat — register any username/password
+  - vAPI → http://localhost:4400 — explore the API endpoints listed on the home page
+
+  ---
+  Step 5 — Run GENESIS against each target
+
+  Open http://localhost:3000, log in with Gen@1234.
+
+  Target 1 — Metasploitable (10.10.0.10) — Start here
+
+  This is the richest target. Use Full profile, Solo mode.
+
+  1. New Session → Target IP: 10.10.0.10
+  2. Scan Profile: Full
+  3. Agent Mode: Solo
+  4. Click Start
+
+  What to expect (15–25 findings):
+  - vsftpd 2.3.4 backdoor on port 21 — Claude will call a curl probe to trigger it, confirm RCE
+  - Samba username map script on 445 — classic MS08-067-style RCE
+  - UnrealIRCd 3.2.8.1 backdoor on 6667
+  - Anonymous FTP login, readable sensitive files
+  - MySQL with no root password — direct DB access
+  - PostgreSQL with no auth
+  - VNC with weak password (password)
+  - PHP CGI argument injection on port 80
+  - Weak SSH credentials (msfadmin/msfadmin) — hydra will catch this
+
+  Watch the Deep Thought panel — you will see Claude reasoning things like: "Port 6667 is IRC. The running version is UnrealIRCd 3.2.8.1
+  which has a known backdoor triggered by sending AB; to the server. I should probe this before moving on."
+
+  Session duration: 20–40 minutes on Full profile.
+
+  ---
+  Target 2 — DVWA (10.10.0.11) — Web attack focus
+
+  1. New Session → Target IP: 10.10.0.11
+  2. Scan Profile: Deep
+  3. Agent Mode: Solo
+
+  What to expect:
+  - SQL injection on the login form and user input pages
+  - Reflected XSS and stored XSS
+  - Command injection via the ping utility page
+  - Local File Inclusion via the file parameter
+  - Insecure file upload (Claude will attempt to upload a PHP webshell)
+  - CSRF on the password change form
+  - Weak session token entropy
+
+  Tip: DVWA at security level Low is extremely permissive. Claude will find most issues quickly. The interesting part is watching it
+  chain: "File upload accepts PHP → upload a test payload → verify code execution via curl probe → confirm RCE."
+
+  Session duration: 10–20 minutes on Deep.
+
+  ---
+  Target 3 — Juice Shop (10.10.0.12) — Modern app vulns
+
+  1. New Session → Target IP: 10.10.0.12
+  2. Scan Profile: Deep
+  3. Agent Mode: Multi-Agent ← try this here, Juice Shop has many parallel attack surfaces
+
+  What to expect:
+  - JWT algorithm confusion (none algorithm, weak secret)
+  - SQL injection on the search endpoint (/rest/products/search?q=)
+  - Broken access control (accessing other users' orders)
+  - SSRF via the profile picture URL feature
+  - XXE via the B2B order endpoint
+  - Sensitive data exposure in API responses (full user objects)
+  - Admin panel accessible without auth via path traversal
+  - Reflected XSS in product names
+
+  Multi-Agent is useful here because the Recon agent maps all 30+ API routes while the Exploit agent is simultaneously fuzzing the search
+  endpoint.
+
+  Session duration: 20–35 minutes on Deep + Multi-Agent.
+
+  ---
+  Target 4 — vAPI (10.10.0.14) — API security
+
+  1. New Session → Target IP: 10.10.0.14
+  2. Scan Profile: Deep
+  3. Agent Mode: Solo
+
+  What to expect (OWASP API Top 10 coverage):
+  - API1 — Broken Object Level Authorization: access other users' data by changing IDs
+  - API2 — Broken Authentication: JWT flaws, weak tokens
+  - API3 — Excessive Data Exposure: user endpoints returning password hashes
+  - API4 — Lack of Rate Limiting: no throttling on auth endpoints
+  - API6 — Mass Assignment: accepting undocumented fields in POST bodies
+
+  Claude will use curl_probe and arjun_discover heavily here to enumerate API parameters. Watch the Tools tab for the arjun output — it
+  finds hidden parameters that are not in the documentation.
+
+  Session duration: 15–25 minutes.
+
+  ---
+  Target 5 — WebGoat (10.10.0.13) — Java/enterprise vulns
+
+  1. New Session → Target IP: 10.10.0.13
+  2. Scan Profile: Deep
+  3. Agent Mode: Solo
+
+  What to expect:
+  - SQL injection in multiple lesson endpoints
+  - XML External Entity (XXE) injection
+  - Insecure deserialization
+  - Path traversal
+  - Broken access control between user accounts
+  - Cross-site request forgery
+
+  Note: WebGoat requires an active session cookie for most endpoints. Claude will attempt to register and authenticate first via
+  curl_probe, then use that session for further testing. If it struggles, use Fast profile which focuses on unauthenticated surface first.
+
+  ---
+  Step 6 — After each session: review findings
+
+  1. Session Viewer → Findings tab → check every card
+  2. Look for verification_status: confirmed — these Claude actually verified, not just guessed
+  3. Check Attack Chains tab — Metasploitable especially will produce 3–4 chains
+  4. Open Attack Graph (icon in header) for the visual kill-chain diagram
+  5. For any finding with a patch button → View Patch → shows the exact config or code fix
+
+  ---
+  Step 7 — Cross-session intelligence
+
+  After running at least two sessions (e.g. Metasploitable and DVWA):
+
+  1. Go to Intelligence in the sidebar
+  2. You'll see both sessions indexed as patterns
+  3. In the Recall box type: PHP Apache port 80 MySQL and click Recall
+  4. It should surface the DVWA session and show its attack patterns
+
+  This demonstrates the memory system working — if you ran GENESIS against a real target with the same stack, it would pull those patterns
+   before scanning.
+
+  ---
+  Step 8 — Generate fine-tuning data from your sessions
+
+  After running all 5 targets, you have real ground-truth data inside GENESIS. Extract it:
+
+  docker exec genesis-backend-1 python - <<'EOF'
+  import asyncio, json
+  from app.database.postgres import get_db_context
+  from app.models.vulnerability import Vulnerability
+  from sqlalchemy import select
+
+  async def dump():
+      async with get_db_context() as db:
+          result = await db.execute(select(Vulnerability).where(
+              Vulnerability.verification_status == 'confirmed'
+          ))
+          vulns = result.scalars().all()
+          for v in vulns:
+              print(json.dumps({
+                  "session_id": str(v.session_id),
+                  "title": v.title,
+                  "severity": v.severity,
+                  "description": v.description,
+                  "exploit_code": v.exploit_code,
+                  "patch_code": v.patch_code,
+                  "mitre_techniques": v.mitre_techniques,
+                  "attack_chain_id": v.attack_chain_id,
+              }))
+
+  asyncio.run(dump())
+  EOF
+
+  Save that output — it becomes the foundation of your fine-tuning dataset.
+
+  ---
+  ---
+  Part 2 — GPT-4o Fine-Tuning Data
+
+  GPT-4o fine-tuning uses JSONL where each line is one training example. For a security reasoning model the format is conversational:
+  system → user → assistant, where the assistant's response is the exact behavior you want to teach.
+
+  ---
+  What you are actually teaching
+
+  You are not teaching GPT-4o security facts — it already knows CVEs, MITRE, and common vulns. You are teaching it the GENESIS reasoning
+  loop:
+
+  1. Read raw tool output
+  2. Extract what matters
+  3. Decide the next most valuable action
+  4. Emit structured vulnerability blocks when confirmed
+  5. Chain findings into kill chains
+  6. Generate exact patch code
+
+  ---
+  Dataset 1 — Tool Output → Next Action (most important, ~1,000 examples)
+
+  Each example shows raw tool output and the correct next reasoning + tool call.
+
+  Format:
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are GENESIS MYTHOS, an autonomous security assessment engine. You have just received tool output. Reason about
+  what it tells you and decide the single best next action."
+      },
+      {
+        "role": "user",
+        "content": "Tool: nmap_scan\nOutput:\nPORT     STATE SERVICE VERSION\n21/tcp   open  ftp     vsftpd 2.3.4\n22/tcp   open  ssh
+  OpenSSH 4.7p1\n80/tcp   open  http    Apache httpd 2.2.8\n139/tcp  open  netbios-samba\n3306/tcp open  mysql   MySQL 5.0.51a\n\nWhat is
+  the highest priority finding and what tool should you call next?"
+      },
+      {
+        "role": "assistant",
+        "content": "vsftpd 2.3.4 is immediately suspicious — this exact version has a known backdoor (CVE-2011-1707) triggered by sending
+  a username containing ':)' which opens a shell on port 6200. This is a critical, directly exploitable RCE. Before running a full scan I
+  should confirm this is exploitable.\n\nNext action: curl_probe to port 21 sending the backdoor trigger string, then immediately check if
+   port 6200 opens. If confirmed, this becomes chain step 1 toward full root access.\n\nSecondary priority: MySQL 5.0.51a with no version
+  auth challenge shown — likely no root password, which I will verify after the FTP check.\n\nSamba on 139 is worth checking for the
+  username map script vulnerability but FTP backdoor is faster and higher confidence."
+      }
+    ]
+  }
+
+  Sources to generate these:
+  - Run GENESIS against all 5 lab targets and export the MongoDB agent_thoughts collection — each thought is exactly this format
+  - Take nmap/nuclei/gobuster output from public CTF writeups and write the ideal next-action response manually
+  - Use the ExploitDB database: for each exploit entry, create a training example where the tool output shows the vulnerable version and
+  the response reasons through the exploitation path
+
+  ---
+  Dataset 2 — Vulnerability Block Generation (~500 examples)
+
+  Teach the exact JSON output format for confirmed vulnerabilities.
+
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a security assessment AI. When you have confirmed a vulnerability, emit a VULNERABILITY JSON block with all
+  required fields."
+      },
+      {
+        "role": "user",
+        "content": "I sent a request to http://10.10.0.11/dvwa/vulnerabilities/sqli/?id=1'&Submit=Submit and received a MySQL error: 'You
+  have an error in your SQL syntax near ''' at line 1'. I then sent id=1 UNION SELECT user,password FROM users-- and received the admin
+  password hash 5f4dcc3b5aa765d61d8327deb882cf99. The vulnerability is confirmed."
+      },
+      {
+        "role": "assistant",
+        "content": "{\"VULNERABILITY\": {\"title\": \"SQL Injection — DVWA User Lookup Endpoint\", \"severity\": \"critical\",
+  \"cvss_score\": 9.8, \"cve_ids\": [], \"affected_service\": \"DVWA PHP/MySQL\", \"port\": 80, \"description\": \"The id parameter in
+  /dvwa/vulnerabilities/sqli/ is passed unsanitized into a MySQL query. A single quote triggers a syntax error exposing the database
+  engine. UNION-based injection extracts the full users table including password hashes. The admin hash 5f4dcc3b5aa765d61d8327deb882cf99
+  is MD5('password') — trivially cracked.\", \"exploit_code\": \"curl
+  'http://TARGET/dvwa/vulnerabilities/sqli/?id=1+UNION+SELECT+user,password+FROM+users--&Submit=Submit' -H 'Cookie:
+  PHPSESSID=YOUR_SESSION; security=low'\", \"patch_code\": \"// Replace direct query with prepared statement\\n$stmt =
+  $pdo->prepare('SELECT first_name, last_name FROM users WHERE user_id = ?');\\n$stmt->execute([$id]);\", \"remediation\": \"Use
+  parameterized queries or prepared statements. Never interpolate user input directly into SQL strings. Apply input validation as defence
+  in depth.\", \"confidence\": 0.99, \"attack_chain_id\": null, \"chain_position\": null, \"verification_status\": \"confirmed\",
+  \"mitre_techniques\": [\"T1190\", \"T1078\"], \"is_zero_day\": false}}"
+      }
+    ]
+  }
+
+  Sources:
+  - Export all confirmed vulnerabilities from your GENESIS sessions using the dump script above
+  - Each vulnerability record is one training example — reformat as the conversation above
+  - Public HackTheBox writeups: every "I ran sqlmap and got..." section converts directly to this format
+
+  ---
+  Dataset 3 — Attack Chain Construction (~200 examples)
+
+  Teach chaining: seeing multiple findings and grouping them into a kill chain.
+
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a security assessment AI. Review the list of confirmed findings and construct the highest-impact attack chain,
+   assigning chain IDs and positions."
+      },
+      {
+        "role": "user",
+        "content": "Confirmed findings so far:\n1. Anonymous FTP login allowed, directory listing readable\n2. FTP contains file
+  'backup.sql' which includes MySQL root credentials: root/toor\n3. MySQL port 3306 accessible from network, no bind-address
+  restriction\n4. MySQL root login successful with credentials from backup.sql\n5. MySQL has FILE privilege enabled — can write to web
+  root\n\nGroup these into an attack chain."
+      },
+      {
+        "role": "assistant",
+        "content": "These five findings form a single complete kill chain from initial access to web shell:\n\nChain ID:
+  chain-ftp-mysql-rce\n\nStep 1 (chain_position: 1) — Anonymous FTP Access\n  Finding 1. Severity: medium. MITRE: T1083 (File and
+  Directory Discovery)\n  Entry point — no credentials required.\n\nStep 2 (chain_position: 2) — Credential Exposure via Backup File\n
+  Finding 2. Severity: high. MITRE: T1552.001 (Credentials in Files)\n  The backup.sql file in the FTP share contains plaintext MySQL root
+   credentials.\n\nStep 3 (chain_position: 3) — Remote MySQL Root Access\n  Finding 3+4. Severity: critical. MITRE: T1078 (Valid
+  Accounts)\n  MySQL is network-accessible and accepts the harvested root credentials.\n\nStep 4 (chain_position: 4) — RCE via MySQL FILE
+  Privilege\n  Finding 5. Severity: critical. MITRE: T1190, T1059.004\n  MySQL root with FILE privilege can execute: SELECT '<?php
+  system($_GET[cmd]); ?>' INTO OUTFILE '/var/www/html/shell.php' — writing a webshell to the Apache root.\n\nFully exploitable: true.
+  Entry: Anonymous FTP. Final impact: Remote Code Execution as www-data."
+      }
+    ]
+  }
+
+  Sources:
+  - Export attack chains from GENESIS sessions after running against the lab
+  - HackTheBox and VulnHub writeups that show multi-step paths
+  - MITRE ATT&CK case studies (the "Cyber Threat Intelligence" section has real APT campaign chains)
+
+  ---
+  Dataset 4 — Zero-Day Reasoning (~150 examples)
+
+  Teach reasoning beyond CVE databases.
+
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a security researcher reasoning about potential vulnerabilities that may not be in CVE databases. Think like
+  an attacker examining application logic."
+      },
+      {
+        "role": "user",
+        "content": "The application has a password reset flow: user enters email → server sends a reset link → link contains
+  ?token=BASE64(email+timestamp). The token is not stored server-side; the server decodes it and accepts any token where the decoded
+  timestamp is within 24 hours. What vulnerabilities do you see?"
+      },
+      {
+        "role": "assistant",
+        "content": "This is a stateless reset token with several exploitable flaws:\n\n1. Predictable token — if an attacker knows a
+  victim's email and the approximate time they requested a reset (visible from account activity, breach data, or guessing), they can
+  generate a valid token themselves. The server has no way to invalidate it because it is never stored.\n\n2. Token reuse — since validity
+   is based on timestamp not on server state, a captured reset token (from logs, referrer headers, email forwarding) remains valid for the
+   full 24 hours even after the password was changed. An attacker who intercepts the original token can still reset the password
+  later.\n\n3. No binding to IP or user-agent — the token contains only email and timestamp. It can be used from any IP, making it
+  trivially weaponizable after any token leak.\n\n4. Email enumeration — the server presumably behaves differently (200 vs 404, or
+  different timing) when the email exists vs does not. This leaks account existence.\n\nExploit path: if the attacker can observe when the
+   target requests a reset (timing attack via login page, social engineering), they can brute-force the timestamp within a ±60 second
+  window and generate the correct Base64 token. For a known email this is ~120 tokens to try — trivial.\n\nRemediation: generate a
+  cryptographically random token (32 bytes), store its hash server-side with a one-use flag and 15-minute expiry, invalidate on password
+  change or use."
+      }
+    ]
+  }
+
+  Sources:
+  - PortSwigger Web Security Academy labs — each lab has a logic flaw explanation that maps directly to this format
+  - HackTricks book sections on logic flaws
+  - OWASP Testing Guide (OTG) — each test case description + expected finding
+  - Bug bounty writeups from HackerOne/Bugcrowd public disclosures (especially P1/P2 reports)
+
+  ---
+  Dataset 5 — Patch Code Generation (~300 examples)
+
+  {
+    "messages": [
+      {
+        "role": "system",
+        "content": "Given a confirmed vulnerability and its description, generate the exact code change or configuration fix that closes
+  it. Produce a real diff or a concrete code snippet, not general advice."
+      },
+      {
+        "role": "user",
+        "content": "Vulnerability: OS Command Injection\nLanguage: PHP\nVulnerable code:\n$ip = $_GET['ip'];\n$output = shell_exec('ping
+  -c 4 ' . $ip);\necho $output;\n\nAn attacker can supply: 127.0.0.1; cat /etc/passwd"
+      },
+      {
+        "role": "assistant",
+        "content": "```diff\n- $ip = $_GET['ip'];\n- $output = shell_exec('ping -c 4 ' . $ip);\n- echo $output;\n+ $ip = $_GET['ip'] ??
+  '';\n+ // Validate: only allow valid IPv4 or hostname characters\n+ if (!filter_var($ip, FILTER_VALIDATE_IP) &&
+  !preg_match('/^[a-zA-Z0-9.-]{1,253}$/', $ip)) {\n+     http_response_code(400);\n+     echo 'Invalid IP address.';\n+     exit;\n+ }\n+
+  // Use escapeshellarg to prevent injection even if validation passes\n+ $output = shell_exec('ping -c 4 ' . escapeshellarg($ip));\n+
+  echo htmlspecialchars($output, ENT_QUOTES, 'UTF-8');\n```\n\nTwo independent defences applied:\n1. Input validation rejects anything
+  that is not a valid IP or simple hostname before the shell is ever called.\n2. escapeshellarg wraps the value in single quotes and
+  escapes internal quotes, so even if validation is bypassed the shell treats the entire string as a single argument.\n3. Output is
+  HTML-encoded before display to prevent secondary XSS from ping output."
+      }
+    ]
+  }
+
+  Sources:
+  - OWASP Cheat Sheet Series — each cheat sheet has vulnerable code → secure code pairs
+  - CWE (Common Weakness Enumeration) entries — each CWE has demonstrative examples
+  - Semgrep rule repository — each rule has a vulnerable pattern and a fix pattern
+  - Your GENESIS sessions: export the patch_code field from confirmed vulnerabilities
+
+  ---
+  Total target dataset size and split
+
+  ┌────────────────────────────────┬──────────┬──────────┐
+  │            Dataset             │ Examples │ Priority │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Tool output → next action      │ 1,000    │ Critical │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Vulnerability block generation │ 500      │ Critical │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Attack chain construction      │ 200      │ High     │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Patch code generation          │ 300      │ High     │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Zero-day reasoning             │ 150      │ Medium   │
+  ├────────────────────────────────┼──────────┼──────────┤
+  │ Total                          │ 2,150    │          │
+  └────────────────────────────────┴──────────┴──────────┘
+
+  Split: 90% train / 10% validation. GPT-4o fine-tuning starts showing consistent improvement at around 500 examples; 2,000+ is where it
+  behaves reliably.
+
+  ---
+  Where to get the data quickly
+
+  Fastest source — your own lab runs:
+  Run GENESIS in Full profile against all 5 targets. The MongoDB agent_thoughts collection, the PostgreSQL vulnerabilities table, and the
+  ChromaDB patterns give you 200–400 real examples automatically. These are the highest quality because they are ground truth from a
+  confirmed working system.
+
+  Second fastest — public structured sources:
+  - https://github.com/swisskyrepo/PayloadsAllTheThings — payload library with context
+  - https://book.hacktricks.xyz — technique descriptions with tool commands (scrape and reformat)
+  - https://github.com/projectdiscovery/nuclei-templates — each template is a tool → vulnerability mapping
+  - HackTheBox official writeups (available for retired machines) — convert each step to a training example
+
+  Synthetic data generation:
+  Once you have 300+ real examples, use GPT-4o itself (or Claude) to generate variations: "given this nmap output showing Tomcat 7,
+  generate 5 different plausible next-action reasoning chains." This scales your dataset 5–10x with controlled quality.
+
+  ---
+  Fine-tuning call on OpenAI
+
+  Once your JSONL is ready:
+
+  from openai import OpenAI
+  client = OpenAI()
+
+  # Upload training file
+  with open("genesis_finetune.jsonl", "rb") as f:
+      file = client.files.create(file=f, purpose="fine-tune")
+
+  # Start fine-tune job
+  job = client.fine_tuning.jobs.create(
+      training_file=file.id,
+      model="gpt-4o-2024-08-06",
+      hyperparameters={"n_epochs": 3},
+      suffix="genesis-security"
+  )
+  print(job.id)  # monitor at platform.openai.com/fine-tuning
+
+  Once complete, swap the model ID in GENESIS's settings to your fine-tuned model ID
+  (ft:gpt-4o-2024-08-06:your-org:genesis-security:xxxxx) and it will use your tuned model for all sessions.

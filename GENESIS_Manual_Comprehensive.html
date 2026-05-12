@@ -1,0 +1,2827 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GENESIS — Comprehensive User Manual (v1.0 → v8.0)</title>
+<style>
+  :root {
+    --ink:#1a1f2e; --muted:#5a6478; --faint:#e8ecf4;
+    --bg:#fafbfd; --panel:#ffffff; --accent:#4e5ced;
+    --ok:#137a4e; --warn:#b5581a; --danger:#b53030;
+    --code-bg:#f1f3f9; --rule:#dfe3ec;
+    --shadow: 0 1px 2px rgba(30,41,60,.04), 0 8px 24px rgba(30,41,60,.06);
+    --radius:10px;
+    --purple:#6840cf; --teal:#0e7c86; --emerald:#0f7a55; --amber:#9a6d18;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--ink); }
+  body { font: 16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header.top {
+    background: linear-gradient(135deg,#1e2539,#384069 50%,#5a3a90);
+    color:#fff; padding: 48px 48px 40px;
+  }
+  header.top h1 { margin:0 0 8px 0; font-size: 38px; font-weight:700; letter-spacing:-0.5px; }
+  header.top p { margin:0; font-size:16px; opacity:0.88; max-width:840px; }
+  header.top .tag { display:inline-block; margin-bottom:14px; font-size:12px; padding:3px 12px;
+    background: rgba(255,255,255,0.18); border-radius: 99px; letter-spacing:0.6px; text-transform:uppercase; }
+  header.top .credit { margin-top: 18px; font-size: 13px; opacity: 0.75; letter-spacing: 0.3px; }
+  header.top .credit strong { color: #fff; opacity: 1; }
+
+  .layout { display: grid; grid-template-columns: 280px 1fr; max-width: 1320px; margin: 0 auto; }
+  nav.side {
+    background: #fff; border-right: 1px solid var(--rule);
+    padding: 24px 16px; position: sticky; top: 0;
+    height: 100vh; overflow-y: auto; font-size: 13px;
+  }
+  nav.side h4 { font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; margin: 18px 0 8px 4px; }
+  nav.side a { display:block; padding: 4px 8px; color: var(--ink); border-radius: 6px; }
+  nav.side a:hover { background: var(--faint); text-decoration: none; }
+
+  main { padding: 32px 56px 120px; max-width: 1000px; }
+  main h2 { font-size: 28px; font-weight:700; margin: 48px 0 12px; letter-spacing: -0.4px; border-top: 1px solid var(--rule); padding-top: 40px; }
+  main h2:first-child { border-top: 0; padding-top: 0; margin-top: 16px; }
+  main h3 { font-size: 20px; font-weight:700; margin: 32px 0 8px; letter-spacing: -0.2px; }
+  main h4 { font-size: 16px; font-weight:600; margin: 22px 0 4px; }
+  main p, main li { color:#2a3045; }
+
+  code { background: var(--code-bg); color:#2a3045; padding: 1px 6px; border-radius: 4px;
+    font: 13px/1.4 "SF Mono","Consolas",monospace; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: var(--radius);
+    overflow-x: auto; font: 13px/1.5 "SF Mono","Consolas",monospace; color:#1a1f2e; }
+  pre code { background: transparent; padding: 0; }
+
+  .panel { border-left: 3px solid var(--accent); background: #fff;
+    padding: 14px 20px; border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 16px 0; box-shadow: var(--shadow); }
+  .panel.warn   { border-color: var(--warn);   }
+  .panel.danger { border-color: var(--danger); }
+  .panel.ok     { border-color: var(--ok);     }
+  .panel.purple { border-color: var(--purple); }
+  .panel.teal   { border-color: var(--teal); }
+  .panel.emerald{ border-color: var(--emerald); }
+  .panel.amber  { border-color: var(--amber); }
+  .panel .title { font-weight:700; font-size:12px; letter-spacing:1.2px;
+    text-transform:uppercase; color: var(--accent); margin-bottom:4px; }
+  .panel.warn   .title { color: var(--warn); }
+  .panel.danger .title { color: var(--danger); }
+  .panel.ok     .title { color: var(--ok); }
+  .panel.purple .title { color: var(--purple); }
+  .panel.teal   .title { color: var(--teal); }
+  .panel.emerald .title { color: var(--emerald); }
+  .panel.amber  .title { color: var(--amber); }
+  .panel p:last-child { margin-bottom: 0; }
+
+  .analogy { background: #fdfbf7; border: 1px solid #f0e5cf;
+    padding: 12px 18px; border-radius: var(--radius); margin: 12px 0; font-size: 14.5px; }
+  .analogy .title { font-weight:700; font-size:11px; letter-spacing:1.2px;
+    text-transform:uppercase; color: #9a6d18; margin-bottom: 4px; }
+
+  .attack-path { background: #fef3f3; border: 1px solid #f4cfcf;
+    padding: 12px 18px; border-radius: var(--radius); margin: 12px 0; font-size: 14.5px; }
+  .attack-path .title { font-weight:700; font-size:11px; letter-spacing:1.2px;
+    text-transform:uppercase; color: var(--danger); margin-bottom: 4px; }
+
+  .why-card { background: #f6f4ff; border: 1px solid #d6cdf3;
+    padding: 12px 18px; border-radius: var(--radius); margin: 12px 0; font-size: 14.5px; }
+  .why-card .title { font-weight:700; font-size:11px; letter-spacing:1.2px;
+    text-transform:uppercase; color: var(--purple); margin-bottom: 4px; }
+
+  .capability-card { background: #fff; border: 1px solid var(--rule);
+    border-radius: var(--radius); padding: 18px 22px; margin: 14px 0; box-shadow: var(--shadow); }
+  .capability-card .tier-chip { display:inline-block; padding: 2px 8px; font-size: 11px;
+    background: #e7eafc; color: var(--accent); border-radius:99px;
+    letter-spacing:0.6px; font-weight:600; margin-right:8px; }
+  .capability-card .tier-chip.purple { background: #efe5ff; color: var(--purple); }
+  .capability-card .tier-chip.teal   { background: #d4f0f2; color: var(--teal); }
+  .capability-card .tier-chip.emerald{ background: #d6f0e3; color: var(--emerald); }
+  .capability-card .tier-chip.amber  { background: #fdebc6; color: var(--amber); }
+  .capability-card h3 { margin-top: 4px; margin-bottom: 8px; }
+
+  .wave-banner, .theme-banner { background: linear-gradient(90deg, #4e5ced11, #4e5ced05);
+    border: 1px solid #4e5ced33; border-radius: var(--radius); padding: 16px 22px;
+    margin: 24px 0 16px; }
+  .wave-banner h3, .theme-banner h3 { margin: 0 0 6px; color: var(--accent); }
+  .theme-banner.purple { background: linear-gradient(90deg, #6840cf11, #6840cf05); border-color: #6840cf33; }
+  .theme-banner.purple h3 { color: var(--purple); }
+  .theme-banner.teal { background: linear-gradient(90deg, #0e7c8611, #0e7c8605); border-color: #0e7c8633; }
+  .theme-banner.teal h3 { color: var(--teal); }
+  .theme-banner.emerald { background: linear-gradient(90deg, #0f7a5511, #0f7a5505); border-color: #0f7a5533; }
+  .theme-banner.emerald h3 { color: var(--emerald); }
+  .theme-banner.amber { background: linear-gradient(90deg, #9a6d1811, #9a6d1805); border-color: #9a6d1833; }
+  .theme-banner.amber h3 { color: var(--amber); }
+  .wave-banner .wave-meta, .theme-banner .meta { font-size: 13px; color: var(--muted); }
+
+  .layer-card { background: #fff; border: 1px solid var(--rule); border-left: 4px solid var(--accent);
+    border-radius: var(--radius); padding: 14px 20px; margin: 14px 0; }
+
+  table { width:100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 14px; background: #fff; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { background: #f6f8fc; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing:0.7px; }
+  td.cov-yes { color: var(--ok); font-weight: 600; }
+  td.cov-partial { color: var(--warn); font-weight: 600; }
+  td.cov-no { color: var(--danger); font-weight: 600; }
+  td.cov-built { color: var(--ok); font-weight: 600; }
+  td.cov-planned { color: var(--warn); font-weight: 600; }
+
+  ul.feature-list { padding-left: 22px; }
+  ul.feature-list li { margin-bottom: 6px; }
+
+  .arch-diagram { background: #fff; border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 18px 22px; margin: 16px 0; font-family: "SF Mono","Consolas",monospace;
+    font-size: 13px; line-height: 1.6; white-space: pre; overflow-x: auto; }
+
+  .score-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .score-card { background: #fff; border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 14px 16px; box-shadow: var(--shadow); }
+  .score-card .ver { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; }
+  .score-card .pct { font-size: 28px; font-weight: 700; color: var(--teal); margin: 4px 0; }
+  .score-card .lbl { font-size: 13px; color: var(--ink); }
+
+  .vs-card { background: #fff; border: 1px solid var(--rule); border-radius: var(--radius);
+    padding: 14px 18px; margin: 14px 0; }
+  .vs-card .title { font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1.2px;
+    color: var(--emerald); margin-bottom: 8px; }
+  .vs-card .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .vs-card .col { font-size: 14px; }
+
+  .footer { padding: 28px 48px; border-top: 1px solid var(--rule); background: #fff;
+    text-align: center; color: var(--muted); font-size: 14px; }
+  .footer strong { color: var(--ink); }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.side { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--rule); }
+    main { padding: 24px; }
+    header.top { padding: 32px 24px; }
+    .score-grid { grid-template-columns: 1fr 1fr; }
+    .vs-card .row { grid-template-columns: 1fr; }
+  }
+  .mini { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="tag">Comprehensive Manual · v1.0 (Tier-1) → v8.0 (Tier-10) · all editions · v4.0 now shipping</span>
+  <h1>GENESIS — Comprehensive User Manual</h1>
+  <p>
+    A single source of truth for the autonomous security platform GENESIS, integrating every
+    edition from v1.0 (Tier-1 reliability foundation) through v8.0 (Tier-10 custom models and
+    training flywheel). The manual covers the architecture top to bottom — frontend, backend,
+    MCP server, polyglot persistence, AI orchestrator internals, hypothesis-driven loops,
+    real-time WebSocket streaming — and walks every capability block from U1 through T178 with
+    its purpose, why-it-matters, attack-path example, and analogy. Where prior documents lived
+    in separate files (the base manual + v4 / v5 / v6 / v7 / v8 update notes), this edition
+    folds them together into one continuous reference.
+  </p>
+  <div class="credit">Authored &amp; engineered by <strong>Hemanth Dadi</strong></div>
+</header>
+
+<div class="layout">
+<nav class="side">
+  <h4>Getting started</h4>
+  <a href="#what-it-is">What GENESIS is</a>
+  <a href="#version-history">Version history</a>
+  <a href="#who-its-for">Who it's for</a>
+  <a href="#how-to-use">How to use it</a>
+  <a href="#reading-results">Reading the results</a>
+
+  <h4>How it works</h4>
+  <a href="#loop">The autonomous loop</a>
+  <a href="#hypothesis">Hypothesis-driven testing</a>
+  <a href="#profiles">Scan profiles</a>
+  <a href="#agent-modes">Agent modes</a>
+
+  <h4>Architecture (deep dive)</h4>
+  <a href="#arch-overview">System overview</a>
+  <a href="#arch-layout">Top-level repo layout</a>
+  <a href="#arch-stack">Tech stack per service</a>
+  <a href="#arch-entry">Entry points</a>
+  <a href="#arch-flow">End-to-end data flow</a>
+  <a href="#arch-orch">AI Orchestrator internals</a>
+  <a href="#arch-hyp">Hypothesis JSON contract</a>
+  <a href="#arch-vuln">VULNERABILITY emission</a>
+  <a href="#arch-db">Polyglot persistence</a>
+  <a href="#arch-rt">Real-time channel</a>
+  <a href="#arch-auth">Auth model</a>
+  <a href="#arch-mcp">Tool registry &amp; executor</a>
+
+  <h4>Tier-1 (v1.0)</h4>
+  <a href="#tier1-overview">What Tier-1 shipped</a>
+  <a href="#u1">U1 · Evidence rules</a>
+  <a href="#u2">U2 · Loop-breaker</a>
+  <a href="#u3">U3 · Chain suggestions</a>
+  <a href="#u4">U4 · Technique recall</a>
+  <a href="#u5">U5 · Multi-agent messaging</a>
+
+  <h4>Tier-2 (v2.0)</h4>
+  <a href="#t-overview">What changed</a>
+  <a href="#t1">T1 · Target Intent Brief</a>
+  <a href="#t2">T2 · AI Payload Forge</a>
+  <a href="#t3">T3 · Artifact Hunter</a>
+  <a href="#t4">T4 · Binary Decompiler</a>
+  <a href="#t5">T5 · Sandbox Runner</a>
+  <a href="#t6">T6 · Vision</a>
+  <a href="#t7">T7 · CVE Patch Reader</a>
+  <a href="#t8">T8 · Session Reflections</a>
+
+  <h4>Tier-3 (v2.5)</h4>
+  <a href="#tier3-overview">What Tier-3 adds</a>
+  <a href="#t9">T9 · Coverage fuzzer</a>
+  <a href="#t10">T10 · Symbolic execution</a>
+  <a href="#t11">T11 · Plan-tree</a>
+  <a href="#t12">T12 · Agentic browser</a>
+  <a href="#t13">T13 · Model-swap hook</a>
+
+  <h4>Tier-5 (v3.0)</h4>
+  <a href="#v3-overview">What v3.0 adds</a>
+  <a href="#v3-t21">T21 · Neo4j attack graph</a>
+  <a href="#v3-t22">T22 · 5 specialist agents</a>
+  <a href="#v3-t23">T23 · Multi-host + MinIO</a>
+  <a href="#v3-t24">T24 · Grammar fuzz</a>
+  <a href="#v3-t25">T25 · Frida / DynamoRIO</a>
+  <a href="#v3-t26">T26 · Crypto primitives</a>
+  <a href="#v3-t27">T27 · Live observability</a>
+  <a href="#v3-t28">T28 · Sandbox swarm</a>
+  <a href="#v3-exhaustive">Exhaustive mode</a>
+  <a href="#v3-creativity">Creativity mandate</a>
+  <a href="#v3-ui">10-tab session viewer</a>
+
+  <h4>Tier-6 (v4.0)</h4>
+  <a href="#v4-why">Why v4.0</a>
+  <a href="#v4-gaps">Four machinery gaps</a>
+  <a href="#v4-layers">14 attack-surface layers</a>
+  <a href="#v4-waves">13 implementation waves</a>
+  <a href="#v4-w1">Wave 1 · Novelty engine (T29-T31)</a>
+  <a href="#v4-w2">Wave 2 · Parser diff (T32-T36)</a>
+  <a href="#v4-w3">Wave 3 · HTTP modern (T37-T39)</a>
+  <a href="#v4-w4">Wave 4 · Deserialisation (T40-T45)</a>
+  <a href="#v4-w5">Wave 5 · Upload + SSRF (T46-T50)</a>
+  <a href="#v4-w6">Wave 6 · State-aware fuzz (T51-T53)</a>
+  <a href="#v4-w7">Wave 7 · Auth depth (T54-T56)</a>
+  <a href="#v4-w8">Wave 8 · Browser-side (T57-T61)</a>
+  <a href="#v4-w9">Wave 9 · Templates / DB (T62-T64)</a>
+  <a href="#v4-w10">Wave 10 · DoS (T65-T66)</a>
+  <a href="#v4-w11">Wave 11 · LLM (T67-T69)</a>
+  <a href="#v4-w12">Wave 12 · Non-HTTP (T70-T73)</a>
+  <a href="#v4-w13">Wave 13 · AD / Kill-Chain (T74-T79)</a>
+
+  <h4>Tier-7 (v5.0)</h4>
+  <a href="#v5-why">Why v5.0</a>
+  <a href="#v5-fail">5 failure scenarios</a>
+  <a href="#v5-arch">v5 architecture</a>
+  <a href="#v5-th1">Theme 1 · Source-aware (T80-T86)</a>
+  <a href="#v5-th2">Theme 2 · Adversarial (T87-T92)</a>
+  <a href="#v5-th3">Theme 3 · Synthetic envs (T93-T96)</a>
+  <a href="#v5-th4">Theme 4 · Self-improving (T97-T101)</a>
+  <a href="#v5-th5">Theme 5 · Long-horizon (T102-T105)</a>
+  <a href="#v5-th6">Theme 6 · Binary &amp; memory (T106-T109)</a>
+  <a href="#v5-th7">Theme 7 · New surfaces (T110-T116)</a>
+  <a href="#v5-th8">Theme 8 · Output (T117-T120)</a>
+
+  <h4>Tier-8 (v6.0)</h4>
+  <a href="#v6-why">Why v6.0</a>
+  <a href="#v6-yield">0-day yield assessment</a>
+  <a href="#v6-arch">v6 architecture</a>
+  <a href="#v6-thA">Theme A · Blackbox (T121-T124)</a>
+  <a href="#v6-thB">Theme B · Curiosity RL (T125-T128)</a>
+  <a href="#v6-thC">Theme C · Threat intel (T129-T131)</a>
+  <a href="#v6-thD">Theme D · Goal planning (T132-T134)</a>
+  <a href="#v6-thE">Theme E · Personas (T135-T140)</a>
+  <a href="#v6-thF">Theme F · Production (T141-T146)</a>
+  <a href="#v6-thG">Theme G · Explainable UX (T147-T150)</a>
+  <a href="#v6-thH">Theme H · Model ops (T151-T154)</a>
+
+  <h4>Tier-9 (v7.0)</h4>
+  <a href="#v7-why">Why v7.0</a>
+  <a href="#v7-tvl">Tool vs reasoning loop</a>
+  <a href="#v7-alpha">AlphaZero analogy</a>
+  <a href="#v7-arch">v7 architecture</a>
+  <a href="#t155">T155 · ROP composition</a>
+  <a href="#t156">T156 · Code intent</a>
+  <a href="#t157">T157 · Chain composer</a>
+  <a href="#t158">T158 · Heap layout</a>
+  <a href="#t159">T159 · Self-correcting</a>
+  <a href="#t160">T160 · Deliberation framework</a>
+  <a href="#t161">T161 · Tree-of-thought</a>
+  <a href="#t162">T162 · Long-context code</a>
+  <a href="#t163">T163 · Cross-component</a>
+  <a href="#t164">T164 · Causal trace</a>
+  <a href="#t165">T165 · Counterfactual deep</a>
+  <a href="#t166">T166 · Hypothesis decomposition</a>
+
+  <h4>Tier-10 (v8.0)</h4>
+  <a href="#v8-why">Why v8.0</a>
+  <a href="#v8-flywheel">The training flywheel</a>
+  <a href="#v8-paths">Path A vs Path B</a>
+  <a href="#v8-arch">v8 architecture</a>
+  <a href="#v8-alpha">Theme α · Corpus (T167-T170)</a>
+  <a href="#v8-beta">Theme β · Fine-tunes (T171-T174)</a>
+  <a href="#v8-gamma">Theme γ · Mythos (T175-T178)</a>
+
+  <h4>Comparisons &amp; future</h4>
+  <a href="#changelog">Cumulative changelog</a>
+  <a href="#stores">Knowledge stores added</a>
+  <a href="#mythos">GENESIS vs Claude Mythos</a>
+  <a href="#whats-next">What's next (Tier-11)</a>
+
+  <h4>Trust &amp; safety</h4>
+  <a href="#evidence">Verification</a>
+  <a href="#limits">Limitations</a>
+  <a href="#safety">Rules of engagement</a>
+  <a href="#privacy">Data &amp; privacy</a>
+  <a href="#multitenant">Multi-tenant boundaries</a>
+
+  <h4>Reference</h4>
+  <a href="#ui-tour">UI tour</a>
+  <a href="#troubleshooting">Troubleshooting</a>
+  <a href="#glossary">Glossary</a>
+</nav>
+
+<main>
+
+<h2 id="what-it-is">What GENESIS is</h2>
+<p>
+  GENESIS is a program you point at a target — a web application, an IP address, a
+  hostname you own — and it tries to find security weaknesses in it. It runs on its
+  own. You don't have to guide it through each step.
+</p>
+<p>
+  Underneath, there is an AI model (Anthropic's Claude) that acts as the "brain."
+  Around it are dozens of standard security tools (Nmap, Nuclei, SQLMap, and so on)
+  plus custom pieces this platform adds — a binary decompiler, a browser, a sandboxed
+  script runner, a pattern library from past sessions, a Neo4j attack graph, a
+  4-replica payload sandbox, specialist sub-agents, the v4.0 novel-vulnerability
+  research arsenal (differential testing, coverage feedback, 51 new probes — now
+  shipping), and (planned in v5-v8) deeper source-aware reasoning, adversarial
+  hypothesis synthesis, and reasoning loops that compress search space so a generic
+  LLM can match much larger systems within each domain.
+</p>
+
+<div class="analogy">
+<div class="title">Analogy</div>
+<p>
+  Think of GENESIS as a junior security researcher you can hire for a few hours. You
+  give them an address to assess. They open a laptop, take notes, run some standard
+  tools, read the output, form guesses about where the weak spots might be, test
+  those guesses, and write up what they find. GENESIS does that — except the
+  "laptop" is a fleet of containers, the researcher never gets tired, and they
+  remember everything they ever learned about every target you've ever scanned.
+</p>
+</div>
+
+<h2 id="version-history">Version history (editions)</h2>
+<p>
+  GENESIS has been planned across eight meaningful editions, each a strict superset of
+  the one before. v1.0 through <strong>v4.0 are now built and shipping</strong>;
+  v5.0 through v8.0 are <strong>planned roadmaps</strong> documented here so the
+  manual reads as one continuous reference. v4.0 (Tier-6) just deployed — the
+  novel-vulnerability research platform is live, including the differential-testing
+  novelty engine, parser-quirk probes, HTTP-modern probes, the deserialisation
+  gadget arsenal, state-aware fuzzing, browser-side / DOM probes, the LLM probe
+  pack, non-HTTP service probes, and the AD / Kill-Chain wave (T29-T79). The table
+  below maps each edition to its theme and headline contributions.
+</p>
+<table>
+<thead><tr><th>Edition</th><th>Codename</th><th>Status</th><th>Theme</th></tr></thead>
+<tbody>
+<tr><td><strong>v1.0</strong></td><td>Tier-1 (U1–U5)</td><td class="cov-built">Built</td><td>Make the autonomous loop trustworthy and coherent.</td></tr>
+<tr><td><strong>v2.0</strong></td><td>Tier-2 (T1–T8)</td><td class="cov-built">Built</td><td>Move from orchestrator-of-scanners to AI doing original work.</td></tr>
+<tr><td><strong>v2.5</strong></td><td>Tier-3 (T9–T13)</td><td class="cov-built">Built</td><td>Go deeper into native code; longer in horizon; engine pluggable.</td></tr>
+<tr><td><strong>v3.0</strong></td><td>Tier-5 (T21–T28)</td><td class="cov-built">Built</td><td>Cross-session reasoning, specialist depth, parallel novelty hunting, operator UI.</td></tr>
+<tr><td><strong>v4.0</strong></td><td>Tier-6 (T29–T79)</td><td class="cov-built">Built</td><td>Novel-vulnerability research platform — differential testing, coverage feedback, 51 new probes. <strong>Now shipping.</strong></td></tr>
+<tr><td><strong>v5.0</strong></td><td>Tier-7 (T80–T120)</td><td class="cov-planned">Planned</td><td>Zero-day discovery via source-aware reasoning, adversarial synthesis, self-improving tooling, long-horizon Researcher.</td></tr>
+<tr><td><strong>v6.0</strong></td><td>Tier-8 (T121–T154)</td><td class="cov-planned">Planned</td><td>Sophistication + blackbox 0-day — replica spawning, curiosity-driven RL, real-time threat intel, multi-persona, production engineering.</td></tr>
+<tr><td><strong>v7.0</strong></td><td>Tier-9 (T155–T166)</td><td class="cov-planned">Planned</td><td>Reasoning loops — twelve domain-specific deliberation harnesses that compress search space.</td></tr>
+<tr><td><strong>v8.0</strong></td><td>Tier-10 (T167–T178)</td><td class="cov-planned">Planned</td><td>Custom models &amp; training flywheel — corpus → LoRA → reward model → distillation → router.</td></tr>
+</tbody>
+</table>
+
+<div class="analogy">
+<div class="title">One-line framing</div>
+<p>
+  v1.0 made the AI's <em>process</em> reliable. v2.0 made the AI's <em>output</em>
+  original. v2.5 made the AI's <em>reach</em> deeper. v3.0 made its <em>recall</em>
+  persistent and its <em>specialisation</em> depth-first. v4.0 makes it find
+  <em>novelty</em>. v5.0 makes it <em>imagine</em>. v6.0 makes it <em>blackbox-ready
+  and enterprise-deployable</em>. v7.0 makes it <em>reason in loops</em>. v8.0 makes
+  the platform's models <em>improve with every bug it finds</em>.
+</p>
+</div>
+
+<h2 id="who-its-for">Who it's for</h2>
+<p>
+  GENESIS is meant for people who are <em>allowed</em> to test the target. Internal
+  security teams, penetration testers under contract, red-team exercises, bug-bounty
+  researchers on scope, students on a training range. It is <strong>not</strong> for
+  scanning systems you do not own or do not have written permission to test.
+</p>
+
+<div class="panel danger">
+<div class="title">Important</div>
+<p>
+  Running an automated security scanner against a target you have no authorization
+  for is illegal in most places. GENESIS does not check authorization — that's on
+  you. See <a href="#safety">Rules of engagement</a>.
+</p>
+</div>
+
+<h2 id="how-to-use">How to use it</h2>
+<p>
+  You open the web interface (by default at <code>http://localhost:3000</code>). You
+  configure your Anthropic API key once on the Settings page; you start a new
+  session from the dashboard against a target IP or URL with permission to test;
+  you watch the AI work on the session viewer; you read the report when it's done.
+  Confirmed vulnerabilities arrive with severity, evidence, suggested fix, and a full
+  audit trail you can verify yourself.
+</p>
+
+<h2 id="reading-results">Reading the results</h2>
+<p>
+  Every finding GENESIS emits carries a <strong>verification status</strong> —
+  <em>unverified</em>, <em>confirmed</em>, <em>exploited</em>, or <em>disputed</em> —
+  plus a confidence score. The status is not just "the AI said so." The platform has
+  rules that <em>downgrade</em> a finding when the evidence is weak.
+</p>
+<ul class="feature-list">
+  <li><strong>Unverified</strong> — the AI suggested this may be a problem but couldn't prove it this session. Worth a human look.</li>
+  <li><strong>Confirmed</strong> — the AI produced concrete evidence (quoted tool output, a successful exploit round-trip, a callback hit, a passing test predicate).</li>
+  <li><strong>Exploited</strong> — the AI actually demonstrated the bug working against the target.</li>
+  <li><strong>Disputed</strong> — a second AI reviewed the evidence and decided it doesn't hold up. Treat as false positive.</li>
+</ul>
+
+<h2 id="loop">The autonomous loop (how it runs)</h2>
+<p>
+  Inside GENESIS there's a loop that repeats up to a certain number of times. Each
+  round is called an <em>iteration</em>. Per iteration: the AI gets the current
+  state, takes an extended-thinking pass, decides whether to run a tool / write a
+  hypothesis / make a report, runs the tool, reads the result, records hypotheses
+  and vulnerabilities in structured form, and moves on. The loop stops when the AI
+  emits FINAL_REPORT, when the loop-breaker forces a wrap-up, or when the session
+  is manually stopped.
+</p>
+
+<h2 id="hypothesis">Hypothesis-driven testing</h2>
+<p>
+  Most scanners run checks and tell you what failed. GENESIS is different: it is
+  required to <strong>write down what it thinks is happening before it tests
+  it</strong>. Every claim is tied back to a hypothesis with: a statement, evidence
+  for and against, the next test, and a falsification criterion — the specific
+  observation that would make the hypothesis wrong. The exact JSON contract used by
+  the orchestrator is documented in <a href="#arch-hyp">Hypothesis JSON contract</a>.
+</p>
+
+<h2 id="profiles">Scan profiles</h2>
+<p>When you start a session you pick a profile. These control how long and how aggressive the session is.</p>
+<table>
+<thead><tr><th>Profile</th><th>Iterations</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td><strong>Fast</strong></td><td>up to 15</td><td>Quick sweep. Useful for a sanity check.</td></tr>
+<tr><td><strong>Deep</strong></td><td>up to 50</td><td>Full coverage. Default for real assessments.</td></tr>
+<tr><td><strong>Stealth</strong></td><td>up to 30</td><td>Low and slow. Minimizes fingerprint footprint.</td></tr>
+<tr><td><strong>Full</strong></td><td>up to 80</td><td>No constraints. Maximum depth. Expensive in time and tokens.</td></tr>
+<tr><td><strong>APT sim</strong></td><td>up to 60</td><td>Simulates a patient attacker: silent recon, then targeted, then exploit.</td></tr>
+<tr><td><strong>Exhaustive (v3.0+)</strong></td><td>up to 500</td><td>Idle-stop terminates when the agent runs out of novel ideas. The default in v3.0+.</td></tr>
+</tbody>
+</table>
+
+<h2 id="agent-modes">Agent modes</h2>
+<ul class="feature-list">
+  <li><strong>Solo</strong> — one Claude instance handles the whole engagement. Retired from the v3.0+ UI but accepted by the API.</li>
+  <li><strong>Multi-agent</strong> (default v3.0+) — four generalists (Recon, Analyst, Exploit, Code) plus up to four conditional specialists (Crypto, Auth, RevEng, ExploitDev, Network) activated by Phase-1 surface detection. They share a Redis findings bus.</li>
+</ul>
+
+<h2 id="arch-overview">Architecture — system overview</h2>
+<p>
+  GENESIS is a polyglot monorepo composed of three primary services plus a fleet of
+  supporting containers. At the highest level: a React frontend talks to a FastAPI
+  backend over REST + WebSockets, the backend orchestrates Claude (the AI brain) in
+  a tool-use loop, and tool calls flow through an Express MCP server that wraps
+  100+ scanning tools and custom probes.
+</p>
+
+<div class="arch-diagram">
+            ┌────────────────────────────────┐
+            │  Frontend (React + Vite)       │  port 3000
+            │  Pages: Dashboard, Sessions,    │
+            │  Vulnerabilities, Tools,        │
+            │  Attack Graph, Setup Wizard     │
+            └────────────┬────────────────────┘
+                         │   REST (/api/v1)  +  WS (/ws/{session_id})
+                         ▼
+            ┌────────────────────────────────┐
+            │  Backend (FastAPI + Uvicorn)   │  port 8000
+            │  ├─ AI Orchestrator (Claude)   │
+            │  ├─ Session lifecycle          │
+            │  ├─ WebSocketManager (pub/sub) │
+            │  ├─ Database adapters          │
+            │  └─ MCPClient                  │
+            └────────────┬────────────────────┘
+                         │   HTTP (POST /tools/execute)
+                         ▼
+            ┌────────────────────────────────┐
+            │  MCP Server (Express + TS)     │  port 3001
+            │  Registry of 100+ tools:       │
+            │   nmap, nuclei, idor_probe,    │
+            │   jwt_probe, payload_swarm,    │
+            │   forge_runner, fuzz_binary,   │
+            │   crypto_*, http_diff_probe... │
+            └────────────┬────────────────────┘
+                         │   subprocess / docker
+                         ▼
+            ┌────────────────────────────────┐
+            │  Sandbox + tool fleet          │
+            │  forge_sandbox × 4, ghidra,    │
+            │  chromium, fuzzer, symbex,     │
+            │  instrumentation               │
+            └────────────────────────────────┘
+
+  Persistence (polyglot):
+    PostgreSQL  — sessions, vulnerabilities, settings, users
+    MongoDB     — agent thoughts, hypotheses, raw tool outputs
+    Redis       — pub/sub for live updates, shared findings bus
+    Neo4j       — cross-session attack graph
+    ChromaDB    — vector embeddings (techniques, reflections)
+    MinIO       — pulled artifacts (binaries, captures)
+</div>
+
+<h2 id="arch-layout">Top-level repo layout</h2>
+<table>
+<thead><tr><th>Directory</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td><code>frontend/</code></td><td>React 18 + Vite 6 + TypeScript SPA. Dashboard, Sessions, Vulnerabilities, Tools, Attack Graph, Setup Wizard pages.</td></tr>
+<tr><td><code>backend/</code></td><td>FastAPI Python service. Core orchestration, session lifecycle, WebSocket streams, persistence adapters.</td></tr>
+<tr><td><code>mcp-server/</code></td><td>Express.js + TypeScript service registering 100+ scanning tools and custom probes.</td></tr>
+<tr><td><code>memory/</code></td><td>Project-level documentation (<code>project_genesis.md</code>) and supplementary notes.</td></tr>
+<tr><td>Root HTML/MD docs</td><td>Build guides, test guides, presentation notes, version-specific roadmaps. This comprehensive manual is the merged successor to those.</td></tr>
+</tbody>
+</table>
+
+<h2 id="arch-stack">Tech stack per service</h2>
+
+<h3>Frontend</h3>
+<ul class="feature-list">
+  <li>React 18.3 + Vite 6 + TypeScript</li>
+  <li>MUI v5 (Material Design) and <code>@emotion/styled</code> for theming</li>
+  <li>react-router-dom for SPA routing</li>
+  <li>Zustand for client-side state, axios for HTTP</li>
+  <li>Cytoscape + cytoscape-fcose for attack-graph visualization</li>
+  <li>date-fns for formatting</li>
+</ul>
+
+<h3>Backend</h3>
+<ul class="feature-list">
+  <li>FastAPI 0.115 + Uvicorn (async web framework)</li>
+  <li>SQLAlchemy 2.0 (async) + asyncpg for PostgreSQL</li>
+  <li>Motor 3.6 for MongoDB</li>
+  <li>ChromaDB 0.5 for vector storage</li>
+  <li>Anthropic SDK 0.49 for Claude integration</li>
+  <li>Celery 5.4 + Redis 7.2 for job queue and pub/sub</li>
+  <li>Neo4j 5.26 driver for the attack graph</li>
+  <li>Alembic for schema migrations</li>
+  <li>Custom <code>WebSocketManager</code> on top of FastAPI WebSocket</li>
+</ul>
+
+<h3>MCP Server</h3>
+<ul class="feature-list">
+  <li>Express 4.21 + TypeScript 5.7</li>
+  <li>Zod for schema validation</li>
+  <li>gRPC + proto-loader for some tool backends</li>
+  <li><code>pg</code>, <code>mysql2</code>, <code>mqtt</code>, <code>ws</code> drivers for native protocol probes</li>
+</ul>
+
+<h3>Databases</h3>
+<table>
+<thead><tr><th>Store</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>PostgreSQL 16 (<code>security_research</code>)</td><td>Sessions, vulnerabilities, settings, users — relational system of record.</td></tr>
+<tr><td>MongoDB 7</td><td>Agent thoughts, hypothesis journals, raw tool outputs — flexible JSON.</td></tr>
+<tr><td>Redis 7.2</td><td>Pub/sub channels (<code>session:{id}</code>), shared findings bus, ephemeral message queue.</td></tr>
+<tr><td>ChromaDB</td><td>Vector embeddings — past techniques, session reflections, similarity search.</td></tr>
+<tr><td>Neo4j 5.x</td><td>Cross-session attack graph — Targets, Hosts, Services, Findings, Credentials.</td></tr>
+<tr><td>MinIO (v3.0+)</td><td>Pulled artifacts shareable across multi-host workers.</td></tr>
+</tbody>
+</table>
+
+<h2 id="arch-entry">Entry points</h2>
+<table>
+<thead><tr><th>Service</th><th>Entry file</th><th>Boot behavior</th></tr></thead>
+<tbody>
+<tr><td>Frontend</td><td><code>frontend/src/main.tsx</code></td><td>Renders App component, sets up Router and Theme provider, mounts at <code>#root</code>.</td></tr>
+<tr><td>Backend</td><td><code>backend/app/main.py</code></td><td>Builds FastAPI app with lifespan, CORS, API-key middleware, mounts <code>/api/v1</code> + <code>/ws</code>.</td></tr>
+<tr><td>MCP Server</td><td><code>mcp-server/src/index.ts</code></td><td>Express app on port 3001 with <code>/health</code>, <code>/tools</code>, <code>/tools/:name</code>, <code>/tools/execute</code>; initializes the tool registry on boot.</td></tr>
+</tbody>
+</table>
+
+<h2 id="arch-flow">End-to-end data flow</h2>
+<p>
+  A scan against a single target traces this exact path. Numbered for reference; each
+  step has matching code in the entry-point modules above.
+</p>
+<ol>
+  <li>
+    <strong>Session creation.</strong> Operator submits a target via the Setup Wizard
+    or the Dashboard. Frontend POSTs to <code>/api/v1/sessions</code>. Backend writes
+    a <code>ResearchSession</code> row in PostgreSQL and returns
+    <code>session_id</code>.
+  </li>
+  <li>
+    <strong>Orchestrator startup.</strong> Backend kicks off
+    <code>backend/app/services/ai_orchestrator.py</code> for that session.
+    System prompt: "GENESIS MYTHOS" — autonomous red-team operator with hypothesis-
+    driven reasoning, oracle requirements, evidence rules, scan-profile constraints.
+  </li>
+  <li>
+    <strong>5-phase Claude loop.</strong> Each iteration moves through
+    <em>reconnaissance → service_analysis → vulnerability_scan → exploitation →
+    reporting</em>. Claude's tool-use loop fires the Anthropic Messages API with the
+    full tool catalog; the response either contains a tool call (executed below) or a
+    <code>{"HYPOTHESIS": …}</code> / <code>{"VULNERABILITY": …}</code> block.
+  </li>
+  <li>
+    <strong>Tool execution via MCP.</strong> Orchestrator calls
+    <code>MCPClient.execute_tool(tool_name, params)</code>. <code>mcp_client.py</code>
+    maps Claude tool names (e.g. <code>nmap_scan</code>) to MCP-canonical names
+    (<code>nmap</code>) and HTTP-POSTs <code>/tools/execute</code>. The MCP executor
+    spawns a subprocess (or hits an in-process probe), captures stdout/stderr/exit,
+    parses JSON, and returns the result. Sandbox-bound tools
+    (<code>forge_runner</code>, <code>payload_swarm</code>, the seven
+    <code>crypto_*</code> primitives, <code>instrument_trace</code>) execute inside
+    one of the four hardened replicas.
+  </li>
+  <li>
+    <strong>Real-time fanout.</strong> Orchestrator publishes structured messages
+    (thought / tool_call / tool_result / hypothesis / vulnerability / chain
+    suggestion / loop-break / plan-tree event) to Redis channel
+    <code>session:{session_id}</code>. <code>WebSocketManager</code> listens on that
+    channel and broadcasts to every WebSocket client connected to
+    <code>/ws/{session_id}</code>. Frontend updates the live feed, hypothesis panel,
+    findings tab, and Cytoscape graph in place — no polling.
+  </li>
+  <li>
+    <strong>Persistence.</strong> Hypotheses and agent thoughts → MongoDB. Confirmed
+    vulnerabilities (≥0.7 confidence) → PostgreSQL <code>vulnerabilities</code> table
+    with severity, CVSS, exploit code, remediation. Cross-session memory of confirmed
+    findings → Neo4j (Target / Host / Service / Finding nodes; CHAINS_INTO edges).
+    Strategic post-session reflections → ChromaDB. Artifacts (pulled binaries, fuzz
+    crashes, capture files) → MinIO from v3.0 onward.
+  </li>
+</ol>
+
+<h2 id="arch-orch">AI Orchestrator internals</h2>
+<p>
+  <code>backend/app/services/ai_orchestrator.py</code> is the core of GENESIS — the
+  Claude tool-use loop that drives every session. It owns five concerns:
+</p>
+<ol>
+  <li><strong>Prompt assembly.</strong> System prompt = MYTHOS preamble + tool catalog (per-agent allowed set) + recent messages window. Cross-session memory (U4 technique recall + T8 reflections) and v3.0 plan-tree summaries (T11) are injected as user turns.</li>
+  <li><strong>Tool dispatch.</strong> For each Claude <code>tool_use</code> block, the orchestrator routes to <code>MCPClient</code> with mapped tool name and validated parameters, awaits the response (with per-tool timeout), and feeds the result back as a <code>tool_result</code> on the next turn.</li>
+  <li><strong>Hypothesis + vulnerability extraction.</strong> Every text block is scanned for the JSON contracts below; matched blocks are persisted, broadcast on Redis, and tracked in the per-session hypothesis journal (Mongo).</li>
+  <li><strong>Evidence gating.</strong> U1 evidence rule + blind-class rule + Haiku critic run before any finding leaves the orchestrator. A "confirmed" claim with empty evidence list is automatically demoted to "unverified". The Haiku critic can also dispute a passing claim.</li>
+  <li><strong>Loop discipline.</strong> Ring-buffer loop-breaker (U2), idle-stop guard (v3.0 exhaustive mode), creativity nudge after 6 stock-tool iterations, and FINAL_REPORT detection all live here.</li>
+</ol>
+
+<h2 id="arch-hyp">Hypothesis JSON contract</h2>
+<p>
+  Every working theory the AI maintains is structured. The orchestrator parses these
+  blocks from the response stream, attaches them to the session's hypothesis journal,
+  and uses the <code>id</code> field to link follow-up evidence.
+</p>
+<pre><code>{
+  "HYPOTHESIS": {
+    "id": "h1",
+    "statement": "I think /api/orders/:id is IDOR-vulnerable because the auth check is missing on this route",
+    "confidence": 0.62,
+    "evidence_for":     ["GET /api/orders/100 returned another user's order"],
+    "evidence_against": ["The /api/users/* family did enforce auth"],
+    "next_test": "Try POST /api/orders/100 with manipulated body to test write-side IDOR",
+    "falsification_criteria": "If POST returns 403 with the same identity bypass, hypothesis is dead",
+    "status": "active"          // active | confirmed | ruled_out
+  }
+}</code></pre>
+
+<h2 id="arch-vuln">VULNERABILITY emission rules</h2>
+<p>
+  When a hypothesis confirms with confidence ≥ 0.7 (and is not an environment-side
+  hypothesis like "firewall blocked" or "target unreachable"), the agent <em>must</em>
+  emit a matching VULNERABILITY block. v3.0 enforces this in the system prompt and
+  back-stops it with a session-end Hypothesis → Finding bridge that auto-derives any
+  missing rows from confirmed hypotheses.
+</p>
+<pre><code>{
+  "VULNERABILITY": {
+    "title": "IDOR on /api/orders/:id",
+    "severity": "high",          // info | low | medium | high | critical
+    "cvss": 7.5,
+    "verification_status": "confirmed",
+    "confidence": 0.85,
+    "service": "https://target/api",
+    "endpoint": "/api/orders/:id",
+    "evidence_for":  ["...", "..."],
+    "exploit_or_poc": "curl -H 'Cookie: my=session' https://target/api/orders/100",
+    "remediation": "Enforce object-level authorization on the orders fetch path",
+    "attack_chain_id": null,
+    "chain_position": 0,
+    "mitre_techniques": ["T1190"],
+    "driving_hypothesis_id": "h1"
+  }
+}</code></pre>
+
+<h2 id="arch-db">Polyglot persistence — what lives where and why</h2>
+<table>
+<thead><tr><th>Store</th><th>Why this store</th><th>Top collections / tables</th></tr></thead>
+<tbody>
+<tr><td>PostgreSQL</td><td>Strong schema for the report — sessions, severity-graded findings, settings need referential integrity.</td><td><code>research_sessions</code>, <code>vulnerabilities</code>, <code>app_settings</code>, <code>users</code></td></tr>
+<tr><td>MongoDB</td><td>Variable-shape JSON — agent thoughts and tool outputs change shape per tool, can be large, and rarely need joins.</td><td><code>agent_thoughts</code>, <code>tool_outputs</code>, <code>hypothesis_journals</code>, <code>target_briefs</code> (T1), <code>artifacts</code> (T3), <code>plan_trees</code> (T11), <code>session_reflections</code> staging</td></tr>
+<tr><td>Redis</td><td>Microsecond pub/sub for the live feed; Redis lists for the cross-agent shared-findings bus (U5) with TTL.</td><td>channel <code>session:{id}</code>; list <code>genesis:session:{id}:shared_findings</code></td></tr>
+<tr><td>ChromaDB</td><td>Embedding similarity — past techniques (U4), session reflections (T8), and pattern recall against new fingerprints.</td><td><code>attack_techniques</code>, <code>attack_patterns</code>, <code>session_reflections</code></td></tr>
+<tr><td>Neo4j (v3.0+)</td><td>Graph-native queries are required for cross-session attack-chain reasoning. T21 schema covers Target → Host → Service → Finding with CHAINS_INTO edges.</td><td>nodes Target / Host / Service / Finding / Credential / Token / Privilege</td></tr>
+<tr><td>MinIO (v3.0+)</td><td>Object store shared across multi-host Celery workers — pulled binaries, fuzz crashes, captures must be readable by any worker.</td><td>per-session bucket prefix</td></tr>
+<tr><td>Vector store (v5.0)</td><td>Semantic recall over the corpus of source / hypotheses / findings.</td><td>planned</td></tr>
+<tr><td>Property DB (v5.0)</td><td>Formal invariants per target inferred by T83.</td><td>planned</td></tr>
+<tr><td>Tool registry (v5.0)</td><td>Self-synthesised tools registered by T97 — name, schema, validation outcome.</td><td>planned</td></tr>
+<tr><td>Provenance store (v5.0)</td><td>Full reasoning trace per finding for replay / training.</td><td>planned</td></tr>
+<tr><td>Threat-intel store (v6.0)</td><td>CVE feeds + advisories ingested by T129.</td><td>planned</td></tr>
+<tr><td>Audit log (v6.0)</td><td>Append-only RBAC-attributed action log (T142).</td><td>planned</td></tr>
+<tr><td>Event log (v6.0)</td><td>Replay-able session history (T146).</td><td>planned</td></tr>
+<tr><td>Loop-state store (v7.0)</td><td>Intermediate states per reasoning loop (T160) for debug / replay / v8 training data.</td><td>planned</td></tr>
+<tr><td>Training corpus (v8.0)</td><td>Versioned, partitioned (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuples (T167).</td><td>planned</td></tr>
+</tbody>
+</table>
+
+<h2 id="arch-rt">Real-time channel — Redis pub/sub → WebSocketManager</h2>
+<p>
+  The orchestrator is the single producer of session events; many frontend clients
+  may consume them. To keep the design horizontally scalable, the orchestrator never
+  writes to WebSockets directly. It publishes to a Redis channel named
+  <code>session:{session_id}</code>; <code>WebSocketManager</code> subscribes per
+  session and fans events out to all connected clients.
+</p>
+<ul class="feature-list">
+  <li><strong>Producer:</strong> orchestrator emits <code>thought</code>, <code>tool_call</code>, <code>tool_result</code>, <code>hypothesis</code>, <code>vulnerability</code>, <code>chain_suggestion</code>, <code>loop_break</code>, <code>plan_tree_seeded</code>, <code>plan_replan</code>, <code>artifact_pulled</code>, <code>graph_delta</code>.</li>
+  <li><strong>Channel:</strong> <code>session:{id}</code> on Redis. Multi-replica backends can all subscribe; messages fan out per replica.</li>
+  <li><strong>Consumer:</strong> <code>WebSocketManager</code> on each backend instance broadcasts to its connected clients at <code>/ws/{session_id}</code>.</li>
+</ul>
+
+<h2 id="arch-auth">Auth model</h2>
+<ul class="feature-list">
+  <li><strong>REST:</strong> <code>X-API-Key</code> header. Compared with timing-safe equality. Disabled when the <code>API_KEY</code> env var is empty (dev mode).</li>
+  <li><strong>WebSocket:</strong> <code>?token=…</code> query parameter (browsers don't send custom headers on WS handshake). Same timing-safe comparison.</li>
+  <li><strong>Per-tenant (v6.0):</strong> RBAC + audit log (T142) wraps both above with role-attributed actions.</li>
+</ul>
+
+<h2 id="arch-mcp">Tool registry &amp; executor (MCP server)</h2>
+<p>
+  The MCP server is the boundary between the AI's tool calls and the actual scanning
+  fleet. Tools self-register with metadata — name, description, params schema (Zod)
+  — and the executor spawns subprocesses (nmap, masscan, nuclei) or runs in-process
+  TS/JS probes (idor_probe, cors_probe, jwt_probe, cache_probe,
+  prototype_pollution_probe, the <code>crypto_*</code> family, <code>graph_query</code>,
+  <code>payload_swarm</code>, <code>forge_runner</code>, <code>fuzz_binary</code>,
+  <code>symbolic_exec</code>, <code>instrument_trace</code>, <code>browser_session</code>,
+  <code>render_and_see</code>, <code>cve_patch_pull</code>, <code>artifact_hunter</code>,
+  <code>artifact_pull</code>). v4 adds 51 new probes (T29-T79); v5 adds 41 (T80-T120);
+  v6 adds 34 (T121-T154); v7 does <em>not</em> add tools — it adds reasoning loops
+  above the existing tool layer.
+</p>
+
+<h2 id="tier1-overview">Tier-1 (v1.0) — what shipped first</h2>
+<p>
+  Before the AI-driven Tier-2 additions, the team spent a release cycle making the
+  autonomous loop itself reliable. v1.0 is the foundation — five upgrades labeled
+  U1 through U5 — and every later capability relies on its machinery. If you removed
+  Tier-1, the AI would sometimes claim "confirmed" without evidence, get stuck
+  retrying the same tool, record chains without ever acting on them, forget
+  everything between sessions, and run multiple agents that ignored each other.
+</p>
+
+<div class="analogy">
+<div class="title">Analogy</div>
+<p>
+  Tier-1 is like installing guardrails, a notebook, and a telephone in the
+  researcher's office. None of it is the <em>work</em>. All of it makes sure the
+  work is honest, doesn't go in circles, doesn't disappear when they log off, and
+  travels between teammates.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">U1</span> <strong>Evidence rules &amp; adversarial critic</strong></div>
+<h3 id="u1">Findings must prove themselves</h3>
+<p>Two rules now run in code, not in the prompt:</p>
+<ul class="feature-list">
+  <li><strong>Evidence rule.</strong> A finding claiming "confirmed" or "exploited" must cite concrete evidence — a tool call that actually ran in this session, a callback hit, a quoted response diff. Empty list ⇒ automatically demoted to "unverified".</li>
+  <li><strong>Blind-class rule.</strong> Blind bugs (blind SSRF, blind XXE, time-based SQLi, etc.) require either an OOB callback that fired, or — added in v2.0 — a passing Payload Forge oracle.</li>
+</ul>
+<p>
+  On top of those, an <strong>adversarial critic</strong> runs after every high-confidence
+  finding: a smaller model (Claude Haiku) reads the claim and the evidence and votes
+  <em>confirmed</em> / <em>disputed</em>. The critic can downgrade even findings that
+  passed the deterministic rules if the cited evidence is vague.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">U2</span> <strong>Loop-breaker</strong></div>
+<h3 id="u2">Stops the AI from spinning</h3>
+<p>
+  The orchestrator keeps a small ring buffer of the last five tool-call signatures
+  (tool name + a hash of its parameters). When the last three entries are identical,
+  a "loop guard" user message is injected on the next turn. On the second such event
+  in a session, the platform forces the AI to produce a final report. Loop-break
+  events are visible as <code>loop_break</code> entries on the session's live feed.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">U3</span> <strong>Active chain suggestions</strong></div>
+<h3 id="u3">Turns single findings into attack chains</h3>
+<p>
+  Whenever a finding is saved with confirmed or exploited status, the platform
+  checks the title against a keyword playbook. A match injects a follow-up
+  suggestion onto the AI's next user turn. Example playbooks: SQLi → dump schema
+  / find credentials / try <code>--os-shell</code>; SSRF → cloud metadata, internal
+  services, gopher://; file upload → polyglots, LFI-to-RCE; JWT weak secret → mint
+  admin token, kid header injection; GraphQL introspection → enumerate mutations.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">U4</span> <strong>Technique recall (with negative signals)</strong></div>
+<h3 id="u4">Cross-session memory of what works</h3>
+<p>
+  Per-technique cross-session memory in ChromaDB. For every confirmed finding the
+  platform records the endpoint, canonical payload, tool, and a short technique tag
+  (e.g. <code>jwt-alg-none</code>, <code>cache-xfh-reflection</code>,
+  <code>nosql-ne-boolean</code>). At the start of a new session, top-K techniques
+  from similar-fingerprint past targets are pulled back. Crucially, <strong>"didn't
+  work" is also recorded</strong> — unverified and disputed rows become negative
+  signals so future sessions deprioritize known dead ends.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">U5</span> <strong>Multi-agent messaging</strong></div>
+<h3 id="u5">Parallel agents that actually cooperate</h3>
+<p>U5 ships two channels:</p>
+<ul class="feature-list">
+  <li><strong>PRIOR_PHASE_FINDINGS seed.</strong> Between Phase 1 and Phase 2, structured Phase-1 findings (open ports, live endpoints, detected stack, WAF verdict) are injected as a seeded user message at the start of Phase 2.</li>
+  <li><strong>Shared findings bus.</strong> Each agent publishes key findings to a per-session Redis list (<code>genesis:session:{id}:shared_findings</code>, capped at 200 entries with a 2-hour TTL). Every agent reads fresh entries at the top of each iteration.</li>
+</ul>
+</div>
+
+<h2 id="t-overview">Tier-2 (v2.0) — AI Discovery</h2>
+<p>
+  Earlier versions were mostly a smart orchestrator on top of standard scanners.
+  Tier-2 changes that. The AI now writes exploit requests itself, pulls binaries off
+  the target and reads them, runs custom scripts in a sandbox, looks at rendered
+  pages visually, reads the fix for a CVE to understand the bug, and carries
+  strategic lessons across sessions.
+</p>
+
+<div class="capability-card">
+<div><span class="tier-chip">T1</span> <strong>Target Intent Brief</strong></div>
+<h3 id="t1">Thinking before acting</h3>
+<p>
+  Before any tool runs, the AI takes a few thousand tokens of extended reasoning and
+  produces a structured "brief": predicted tech stack, attack-surface hypotheses,
+  vulnerability classes likely to exist, artifacts worth hunting for, payload seeds,
+  and expected dead ends. The brief is saved (you can inspect it) and injected as
+  the starting point of the main loop.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T2</span> <strong>AI Payload Forge</strong></div>
+<h3 id="t2">Writing the exploit itself</h3>
+<p>
+  The AI uses <code>ai_request_forge</code> to write the full HTTP request — method,
+  URL, headers, body — by hand. Alongside it, it declares an <strong>oracle</strong>:
+  status 500 with body containing <code>psycopg</code>; response time greater than
+  8000 ms; body must contain a planted token; body length differs by more than 200
+  bytes between baseline and attack. A passing oracle counts as genuine evidence and
+  satisfies the blind-class rule.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T3</span> <strong>Artifact Hunter &amp; Pull</strong></div>
+<h3 id="t3">Finding and grabbing binaries and source</h3>
+<p>
+  Artifact Hunter probes for known exposure patterns — webpack sourcemaps, anonymous
+  SMB/FTP, <code>/v2/_catalog</code> Docker registries, Swagger, <code>/WEB-INF/web.xml</code>,
+  leaked <code>.env</code>, dependency manifests. Artifact Pull downloads the
+  interesting ones into an isolated per-session folder, hashes each file, records
+  size/type, and shares the fact of the download with other agents. Capped at 100 MB
+  per file, 500 MB per session.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T4</span> <strong>Binary Decompiler &amp; Code Reader</strong></div>
+<h3 id="t4">Reading the software it pulled</h3>
+<p>
+  Ghidra-headless decompiles pulled binaries to pseudo-C via <code>binary_decompile</code>;
+  <code>code_read</code> behaves like a file-tree browser plus a symbol-grep over
+  pulled source. The AI reads the code looking for hard-coded credentials, unchecked
+  inputs, weak crypto, and authentication bypass. A claim based only on what the
+  decompiled code looks like is not accepted — the bug must be demonstrated on the
+  live target via T2 or T5.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T5</span> <strong>Sandbox Runner</strong></div>
+<h3 id="t5">Writing and running its own scripts</h3>
+<p>
+  <code>forge_runner</code> takes a short Python / Node / Bash script (up to 8 KB)
+  and runs it inside a hardened sandbox: no root, read-only rootfs (only
+  <code>/tmp/work</code> writable), 256 MB cap, 60-second wall-clock default,
+  egress restricted to the target and OOB callback domain only, pinned library
+  set. The AI attaches an oracle; a pass counts as evidence under the same rules
+  as Payload Forge.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T6</span> <strong>Vision — looking at the page</strong></div>
+<h3 id="t6">Seeing the UI, not just the HTTP</h3>
+<p>
+  Headless Chromium opens a URL via <code>render_and_see</code>, runs JS, and
+  returns DOM, console logs, network calls, and a PNG screenshot. The screenshot is
+  attached to the next Claude turn as a vision image block — Claude can literally
+  look at the picture and tell you "this is a Cloudflare bot challenge" or "the
+  admin panel has a hidden toggle in the top right."
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T7</span> <strong>CVE Patch Reader</strong></div>
+<h3 id="t7">Reading the fix to understand the bug</h3>
+<p>
+  <code>cve_patch_pull</code> takes a CVE number (or package + version) and returns
+  the unified diff plus the commit message from the upstream repo. The AI reads the
+  diff, infers the pre-patch behavior by subtraction, and writes a targeted Payload
+  Forge request or Sandbox Runner script that exercises the unpatched version.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T8</span> <strong>Session Reflections (long memory)</strong></div>
+<h3 id="t8">Learning across sessions</h3>
+<p>
+  When a session ends, a cheaper model reads the whole session and writes a short
+  structured reflection: what worked, what wasted iterations, what should have been
+  tried sooner, a one-sentence strategic lesson, and the shape of targets the lesson
+  applies to. Stored in ChromaDB; injected into the prompt of similar-target future
+  sessions.
+</p>
+</div>
+
+<h2 id="tier3-overview">Tier-3 (v2.5) — frontier additions</h2>
+<p>
+  Tier-3 goes <strong>deeper into native code and longer in horizon</strong>. It
+  adds the ability to fuzz binaries for memory-safety bugs, symbolically prove
+  whether a suspect code path is reachable, plan engagements as a persistent tree of
+  sub-goals, drive a real browser across many steps, and swap the underlying AI
+  model without code changes.
+</p>
+
+<div class="capability-card">
+<div><span class="tier-chip">T9</span> <strong>Coverage-guided fuzzer</strong></div>
+<h3 id="t9">Breaking binaries to find memory-safety bugs</h3>
+<p>
+  Dedicated container running <strong>AFL++</strong> and <strong>honggfuzz</strong>.
+  <code>fuzz_binary</code> picks a binary, takes a starting corpus, mutates inputs
+  aggressively, and watches which code branches get exercised. Crashes are returned
+  as base64 inputs the AI can study, minimize, and feed into Payload Forge or
+  Sandbox Runner to prove exploitability. Per-run wall-clock cap 600 s.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T10</span> <strong>Symbolic execution (angr)</strong></div>
+<h3 id="t10">Proving a code path is reachable</h3>
+<p>
+  Container running <strong>angr</strong>. Treats inputs as mathematical variables
+  and explores every possible code path. Given a target address, returns a concrete
+  input that reaches it, or a definite "unreachable" verdict. Hard 180-second cap;
+  pairs with T9 — narrow the search to inputs that reach an interesting function,
+  then fuzz that narrower region intensively.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T11</span> <strong>Persistent plan-tree planner</strong></div>
+<h3 id="t11">Keeping a long engagement coherent</h3>
+<p>
+  Plan tree stored in MongoDB. At session start, the AI decomposes the engagement
+  into a root goal, two to five phases, and two to six concrete actions per phase.
+  Every six iterations a condensed view is re-injected. Auto-replan triggers after
+  eight iterations with no completed action; a second AI pass rewrites the tree
+  around what is actually working. Up to three replans per session.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T12</span> <strong>Agentic browser (multi-step Playwright)</strong></div>
+<h3 id="t12">Driving a real browser the way a human would</h3>
+<p>
+  Stateful <code>browser_session</code> API. The AI calls <code>action=start</code>,
+  then issues <code>goto</code> / <code>click</code> / <code>fill</code> /
+  <code>press</code> / <code>wait</code> / <code>eval_js</code> /
+  <code>snapshot</code>. Cookies, local storage, navigation history persist
+  between steps. Every step returns a fresh screenshot attached as a vision block.
+  Up to 8 concurrent sessions; 5-minute idle / 30-minute hard expiration.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T13</span> <strong>Model-swap hook</strong></div>
+<h3 id="t13">Making the AI engine pluggable</h3>
+<p>
+  The orchestrator's call to <code>api.anthropic.com</code> is abstracted behind a
+  provider adapter. Switchable via settings between Anthropic API (default), Azure-
+  hosted Anthropic, Amazon Bedrock, and a custom Anthropic-compatible endpoint with
+  a configurable URL and optional auth header. Designed to plug in a future Mythos
+  endpoint when access is granted — no code changes, no redeploy.
+</p>
+</div>
+
+<h2 id="v3-overview">Tier-5 (v3.0) — what shipped</h2>
+<p>
+  v3.0 is about <strong>persistence, specialisation, and visibility</strong>: the
+  agent now remembers what it learned across every session (Neo4j attack graph),
+  spawns conditional specialists when a surface deserves them (auth → AuthAgent,
+  crypto → CryptoAgent, native binary → RevEng + ExploitDev), fans payload variants
+  in parallel across a 4-replica sandbox pool, and produces an output surface — ten
+  tabs of evidence-linked context per session — that an operator can actually read.
+</p>
+
+<div class="capability-card">
+<div><span class="tier-chip">T21</span> <strong>Neo4j attack knowledge graph</strong></div>
+<h3 id="v3-t21">Cross-session memory as a graph</h3>
+<p>
+  Every confirmed finding and every enumerated host/service is mirrored into a
+  Neo4j graph in real time. Cross-session — every prior engagement against the same
+  target (or any target sharing a service fingerprint) is queryable. Schema covers
+  Target / Host / Service / Finding / Credential / Token / Privilege nodes with
+  LISTENS_ON / ON_TARGET / AFFECTS / CHAINS_INTO / AUTHENTICATES_TO / GRANTS edges.
+  The agent reaches it via <code>graph_query</code> (Cypher, read-only). Frontend
+  reaches it via <code>GET /api/v1/graph/session/{id}</code>.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T22</span> <strong>Five conditional specialist agents</strong></div>
+<h3 id="v3-t22">Depth on demand</h3>
+<p>v3.0 adds five specialists that activate after Phase 1 detects matching surface:</p>
+<ul class="feature-list">
+  <li><strong>CryptoAgent</strong> — TLS / JWT / OAuth / cookie signature. Tools: T26 primitive library + <code>jwt_probe</code> + <code>sslscan_check</code> + <code>openssl_check</code> + <code>graph_query</code>.</li>
+  <li><strong>AuthAgent</strong> — login / OAuth / SAML / OIDC. Tools: <code>oauth_probe</code>, <code>jwt_probe</code>, <code>idor_probe</code>, <code>cors_probe</code>, <code>session_memory</code>, <code>crypto_jwt_confusion</code>, <code>payload_swarm</code>.</li>
+  <li><strong>RevEngAgent</strong> — pulled native binary. Tools: <code>binary_decompile</code>, <code>code_read</code>, <code>symbolic_exec</code>, <code>fuzz_binary</code>, <code>instrument_trace</code>.</li>
+  <li><strong>ExploitDevAgent</strong> — fuzz crash or RevEng-identified primitive. Tools: <code>forge_runner</code>, <code>ai_request_forge</code>, <code>fuzz_binary</code>, <code>symbolic_exec</code>, <code>instrument_trace</code>, <code>payload_swarm</code>.</li>
+  <li><strong>NetworkAgent</strong> — multi-host / pivot-capable services. Tools: <code>nmap_scan</code>, <code>masscan_scan</code>, <code>enum4linux</code>, <code>netexec</code>, <code>impacket</code>, <code>kerbrute</code>, <code>graph_query</code>.</li>
+</ul>
+<p>At most four specialists per session; all share the hypothesis journal and the Redis findings bus.</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T23</span> <strong>Multi-host workers + MinIO</strong></div>
+<h3 id="v3-t23">Horizontally scalable scanning</h3>
+<p>
+  Celery workers can run on multiple hosts against a shared Redis broker, each
+  registering its tool capabilities. Artifacts (pulled binaries, logs, captures,
+  crash inputs) are written to a new MinIO service so any worker can read any
+  artifact regardless of which host pulled it. Backwards-compatible —
+  <code>artifact_resolver</code> falls back to <code>on_disk_path</code> if no
+  <code>s3_key</code> is present.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T24</span> <strong>Grammar-aware + differential fuzzing</strong></div>
+<h3 id="v3-t24">Structured fuzz, plus parser disagreement</h3>
+<p>
+  <code>fuzz_binary</code> accepts an optional <code>grammar</code> parameter. 15
+  shipped grammars: <code>json</code>, <code>xml</code>, <code>http</code>,
+  <code>js</code>, <code>yaml</code>, <code>toml</code>, <code>sql</code>,
+  <code>jwt</code>, <code>dns</code>, <code>tls</code>, <code>pdf</code>,
+  <code>protobuf</code>, <code>asn1</code>, <code>msgpack</code>, <code>cbor</code>.
+  <code>fuzz_differential</code> takes two binaries plus a corpus, runs each seed
+  through both, and reports seeds where stdout / exit_code diverge — used to prove
+  CVE patches and to find semantic-disagreement bugs across competing parsers.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T25</span> <strong>Frida / DynamoRIO instrumentation</strong></div>
+<h3 id="v3-t25">Runtime tracing for state-dependent bugs</h3>
+<p>
+  <code>instrument_trace</code> exposes two modes:
+  <code>mode="frida"</code> spawns the binary under Frida and injects a JS hook,
+  returning up to 1000 events; <code>mode="dynamorio"</code> runs zero-config DynamoRIO
+  clients (drcov / drstrace / drltrace). Runs inside the new
+  <code>instrumentation</code> container against its own <code>/tmp</code>; does not
+  reach the target network. Treat it as a lab microscope for already-pulled artifacts.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T26</span> <strong>Crypto primitive library</strong></div>
+<h3 id="v3-t26">Seven well-known attacks one tool call away</h3>
+<ul class="feature-list">
+  <li><code>crypto_padding_oracle</code> — PKCS#7 CBC padding oracle (Vaudenay)</li>
+  <li><code>crypto_bleichenbacher</code> — PKCS#1 v1.5 RSA padding oracle (B'98)</li>
+  <li><code>crypto_ecdsa_nonce_reuse</code> — closed-form key recovery from shared <code>r</code></li>
+  <li><code>crypto_length_extension</code> — forge <code>H(key||known||glue||append)</code> for MD5 / SHA-1 / SHA-256</li>
+  <li><code>crypto_rsa_low_e</code> — small-public-exponent RSA (plain, Håstad, Franklin-Reiter)</li>
+  <li><code>crypto_lattice</code> — Wiener small-d via continued fractions (Coppersmith / Boneh-Durfee stubbed)</li>
+  <li><code>crypto_jwt_confusion</code> — alg_none, hs_rs_swap, weak_secret, kid_inject</li>
+</ul>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T27</span> <strong>Live observability panels</strong></div>
+<h3 id="v3-t27">UI built around the agent's actual reasoning</h3>
+<p>
+  The Session Viewer is a full-width, ten-tab strip backed by a Cytoscape graph view
+  (<code>cytoscape-fcose</code>), an evidence-flow timeline, and a per-session
+  report endpoint. Every panel updates from the same WebSocket dispatcher — no
+  polling.
+</p>
+</div>
+
+<div class="capability-card">
+<div><span class="tier-chip">T28</span> <strong>Sandbox pool + payload_swarm</strong></div>
+<h3 id="v3-t28">Parallel variant fanout with a novelty score</h3>
+<p>
+  Four hardened replicas (<code>forge_sandbox</code> through <code>forge_sandbox_4</code>)
+  share the same hardening (rootless, read-only rootfs, 256 MB, dropped caps,
+  no-new-privileges). The MCP server's <code>sandbox_pool.ts</code> round-robins
+  <code>forge_runner</code> calls. <code>payload_swarm</code> fans variants of the
+  same template across the pool in parallel; output is ranked by oracle verdict
+  first, then by a behavioural-shape novelty score (length bucket × exit code ×
+  normalised head/tail bytes). Variants ≥ 0.5 surface as candidates the agent
+  should re-run with a precise oracle.
+</p>
+</div>
+
+<h3 id="v3-exhaustive">Exhaustive scan mode + idle-stop</h3>
+<p>
+  v3.0 defaults every scan to <code>exhaustive</code> with <code>max_iter: 500</code>
+  as a sanity net. The real stop signal is one of three: agent emits
+  <code>{"SESSION_COMPLETE": true}</code>, agent emits <code>FINAL_REPORT</code>, or
+  five consecutive iterations with zero new tool call / hypothesis / finding (after
+  a 15-iteration warm-up). The Dashboard's Scan Profile selector was removed.
+</p>
+
+<h3 id="v3-creativity">Creativity mandate (the novelty directive)</h3>
+<ul class="feature-list">
+  <li><strong>Re-frame the target as a system</strong>, not as ports.</li>
+  <li><strong>Look for the second hop</strong> — chat input → LLM tool-use → SQL; upload → AV scanner output → log viewer; webhook → JSON → queue → email template.</li>
+  <li><strong>Pattern-match against scenario classes</strong> (LLM-backed app, webhook receiver, multi-tenant SaaS, file uploader, CI runner, search/SQL-builder, websocket, email feature, admin panel, GraphQL, rate-limiter).</li>
+  <li><strong>Before iteration 2</strong>, at least one hypothesis must have a custom <code>forge_runner</code> or <code>payload_swarm</code> as <code>next_test</code>.</li>
+  <li><strong>Creativity nudge</strong> fires once per session if 6+ iterations have run without a custom script.</li>
+</ul>
+
+<h3 id="v3-ui">UI redesign — 10-tab session viewer</h3>
+<ol>
+  <li><strong>Findings</strong> — confirmed VULNERABILITY rows, severity-coloured.</li>
+  <li><strong>Chains</strong> — multi-step attack chains ordered by severity.</li>
+  <li><strong>Activity</strong> — merged chronological feed of thoughts + tool calls + hypotheses.</li>
+  <li><strong>Tools</strong> — per-tool histogram + every invocation.</li>
+  <li><strong>Sandbox</strong> — payload workshop with rationale, code, oracle verdict, novelty for swarm cards.</li>
+  <li><strong>Iterations</strong> — per-iteration accordion grouping all events.</li>
+  <li><strong>Story</strong> — plain-English narration for non-technical readers.</li>
+  <li><strong>Graph</strong> — Cytoscape rendering of the Neo4j attack graph.</li>
+  <li><strong>Evidence</strong> — horizontal evidence-flow strip with click-to-modal.</li>
+  <li><strong>Errors</strong> — structured error log oldest-first.</li>
+</ol>
+
+<h2 id="v4-why">Tier-6 (v4.0) — Novel-Vulnerability Research Platform <em>(now shipping)</em></h2>
+
+<div class="panel ok">
+  <div class="title">Deployment status</div>
+  <p>v4.0 has been <strong>deployed and is now shipping</strong>. Every block in
+  this chapter (T29-T79) — the novelty engine, the parser-differential probes,
+  the HTTP-modern probes, the deserialisation gadget arsenal, upload + SSRF
+  expansion, state-aware fuzzing, auth depth, browser-side / DOM probes,
+  template / DB / LDAP depth, DoS / algorithmic complexity, the LLM /
+  agentic-endpoint pack, non-HTTP service probes, and the AD / Kill-Chain wave
+  — is live in the deployed platform. The v4.0 capability is not a roadmap
+  anymore; it is the floor for everything v5+ builds on top of.</p>
+</div>
+
+<p>
+  v3.0 finds <em>signature-shaped</em> bugs well — bug classes that have been
+  described publicly. The bugs that win bug bounties and become CVE-of-the-year
+  aren't signature-shaped. They live at the seams between two parsers that
+  disagree, between two states an application should be reachable in only one
+  order, between a new protocol layer and the back-end's older assumptions, or in
+  entirely new surfaces (LLM-backed apps) no scanner is mature enough to address.
+  v4.0 closed that gap by making GENESIS a differential-testing platform first
+  and a probe arsenal second.
+</p>
+
+<div class="panel">
+  <div class="title">v4.0 thesis in one sentence</div>
+  <p>Most novel vulnerabilities are <em>differential</em> bugs — they live where
+  two implementations of the same idea disagree. v4.0 makes GENESIS a
+  differential-testing platform first, and a probe arsenal second.</p>
+</div>
+
+<h3 id="v4-gaps">Four machinery gaps that block novel discovery</h3>
+
+<div class="capability-card">
+  <h3>1. No HTTP-layer coverage feedback</h3>
+  <p>When GENESIS fuzzes a binary it uses AFL-style coverage to steer payloads
+  toward unreached code. When it fuzzes HTTP it is blind. Coverage feedback is the
+  single biggest multiplier for novel bug discovery; without it, the swarm produces
+  variation toward random bytes instead of unhit code paths.</p>
+</div>
+
+<div class="capability-card">
+  <h3>2. No HTTP-layer differential testing</h3>
+  <p><code>fuzz_differential</code> exists for binaries; nothing equivalent for
+  HTTP. Yet every famous parser-confusion CVE of the last five years was discovered
+  by spotting a parser disagreement.</p>
+</div>
+
+<div class="capability-card">
+  <h3>3. No state-machine model of the target</h3>
+  <p>The agent reasons step-by-step but never builds an explicit FSM of the
+  target's flow. Multi-step business-logic bugs (skip a step, repeat a step, run
+  two in parallel) are the most lucrative class on the modern web.</p>
+</div>
+
+<div class="capability-card">
+  <h3>4. Anomaly detection is shape-only</h3>
+  <p><code>payload_swarm</code>'s novelty score is a hash of length-bucket +
+  exit-code + head/tail bytes. Catches structural anomalies but misses semantic
+  ones — different internal phrasing, an error message that hints at a bug class.</p>
+</div>
+
+<h3 id="v4-layers">14 attack-surface layers — where novelty hides</h3>
+<table>
+<thead><tr><th>Layer</th><th>Surface</th><th>v3 status</th></tr></thead>
+<tbody>
+<tr><td>L1</td><td>Wire-format parsers (URL / JSON / Unicode / multipart / charset / YAML / XML)</td><td class="cov-no">Mostly absent</td></tr>
+<tr><td>L2</td><td>HTTP protocol semantics (h1 smuggling, h2-specific, h3, host-header, methods, range)</td><td class="cov-partial">Partial</td></tr>
+<tr><td>L3</td><td>SSRF surfaces (gopher, DNS rebinding, cloud metadata, internal services)</td><td class="cov-partial">Partial</td></tr>
+<tr><td>L4</td><td>Deserialisation gadget chains (Java / .NET / PHP / Python / Ruby / Node)</td><td class="cov-no">Absent</td></tr>
+<tr><td>L5</td><td>Auth subtleties (SAML XSW, cookie prefixes, CSWSH, WebAuthn misuse)</td><td class="cov-partial">Partial</td></tr>
+<tr><td>L6</td><td>Upload pipelines (polyglots, ImageTragick, ZIP-slip, filename CRLF)</td><td class="cov-no">Absent</td></tr>
+<tr><td>L7</td><td>Database tier (second-order SQLi, LDAPi, JSON-mode SQL)</td><td class="cov-partial">Partial</td></tr>
+<tr><td>L8</td><td>Template engines (per-engine RCE gadgets)</td><td class="cov-partial">Detection only</td></tr>
+<tr><td>L9</td><td>Browser-side / DOM (clobbering, postMessage, mXSS, CSP bypass, xs-leaks)</td><td class="cov-no">Mostly absent</td></tr>
+<tr><td>L10</td><td>Race / concurrency (single-packet attack, state-machine race)</td><td class="cov-partial">Partial</td></tr>
+<tr><td>L11</td><td>Side channels / timing (BREACH, xs-leaks, iframe oracles)</td><td class="cov-no">Absent</td></tr>
+<tr><td>L12</td><td>Resource exhaustion (ReDoS, hash flooding, decompression bombs)</td><td class="cov-no">Absent</td></tr>
+<tr><td>L13</td><td>LLM / agentic endpoints (prompt injection, RAG poisoning, tool-use confusion)</td><td class="cov-no">Absent</td></tr>
+<tr><td>L14</td><td>Non-HTTP services on the same target (Redis, gRPC, MQTT, RMI)</td><td class="cov-no">Mostly absent</td></tr>
+</tbody>
+</table>
+
+<h3 id="v4-waves">13 implementation waves</h3>
+<table>
+<thead><tr><th>Wave</th><th>Theme</th><th>T-blocks</th><th>Effort</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Novelty engine — differential, coverage, anomaly</td><td>T29-T31</td><td>S</td></tr>
+<tr><td>2</td><td>Parser-differential probes</td><td>T32-T36</td><td>M</td></tr>
+<tr><td>3</td><td>HTTP modern (h2 / h3 / verbs)</td><td>T37-T39</td><td>M</td></tr>
+<tr><td>4</td><td>Deserialisation gadget arsenal</td><td>T40-T45</td><td>L</td></tr>
+<tr><td>5</td><td>Upload pipelines + SSRF expansion</td><td>T46-T50</td><td>M</td></tr>
+<tr><td>6</td><td>State-aware fuzzing (logic flaws)</td><td>T51-T53</td><td>L</td></tr>
+<tr><td>7</td><td>Auth / SSO depth</td><td>T54-T56</td><td>S</td></tr>
+<tr><td>8</td><td>Browser-side / DOM</td><td>T57-T61</td><td>M</td></tr>
+<tr><td>9</td><td>Templates / DB / LDAP depth</td><td>T62-T64</td><td>M</td></tr>
+<tr><td>10</td><td>DoS / algorithmic complexity</td><td>T65-T66</td><td>S</td></tr>
+<tr><td>11</td><td>LLM / agentic endpoints</td><td>T67-T69</td><td>M</td></tr>
+<tr><td>12</td><td>Non-HTTP services</td><td>T70-T73</td><td>M</td></tr>
+<tr><td>13</td><td>AD / Kill-Chain completion</td><td>T74-T79</td><td>L</td></tr>
+</tbody>
+</table>
+
+<h3 id="v4-w1">Wave 1 — Novelty engine</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T29</span>
+  <h3>http_diff_probe — HTTP-layer differential testing</h3>
+  <p>Send identical payload to two targets (or edge vs origin on the same target) and diff status / headers / body shape. Flag divergence as a hypothesis seed.</p>
+  <div class="attack-path"><div class="title">Attack path</div><p>Send <code>GET /api/admin/users?id=1..100</code> via the public CDN edge — get 403 for ids you don't own. Same path via the origin (discovered via certificate-transparency leak of an internal hostname) — get 200 with full response. The probe surfaces this as a critical-severity diff.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T30</span>
+  <h3>response_signature + adaptive payload_swarm</h3>
+  <p>Replace shape-hash novelty with a multi-feature response signature (status, header-set hash, body-length bucket, body-keyword cluster, latency bucket, content-type, error-token cluster). Steer the next swarm round toward signature buckets that haven't been filled — the HTTP equivalent of AFL coverage feedback.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T31</span>
+  <h3>semantic anomaly grader</h3>
+  <p>Embedding pass over response bodies in a swarm. Pairwise cosine distance flags outliers — responses semantically distinct even when their shape-hash matches.</p>
+</div>
+
+<h3 id="v4-w2">Wave 2 — Parser-differential probes</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T32</span>
+  <h3>url_parser_diff</h3>
+  <p>Crafted URLs designed to be parsed differently by RFC 3986, WHATWG, and the target's framework parser. Compare observed routing / authorisation / fetch behaviour.</p>
+  <div class="attack-path"><div class="title">Attack path</div><p>Send <code>https://target/proxy?url=https://allow-listed.com#@evil.com/</code>. Edge parser sees <code>allow-listed.com</code>; origin parser fetches <code>evil.com</code>.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T33</span>
+  <h3>json_parser_diff</h3>
+  <p>JSON with parser-quirk payloads: duplicate keys, BOM, BigInt literals, comments, trailing commas, NaN, Infinity. Diff observed back-end behaviour.</p>
+  <div class="attack-path"><div class="title">Attack path</div><p>Send <code>{"role":"user","role":"admin"}</code>. JS / Python keep the last value (admin); Go's <code>encoding/json</code> takes the first (user). If gateway is Go and back-end is Node, gateway sees "user" and approves; back-end sees "admin" and grants admin.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T34</span>
+  <h3>unicode_diff_probe</h3>
+  <p>Probes for NFC / NFKC / case-fold / IDN / RTL-override divergence. Includes Turkish-i, full-width digits, ZWJ, homograph IDs.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T35</span>
+  <h3>multipart_diff_probe</h3>
+  <p>Multipart payloads with CRLF in filenames, repeated boundaries, missing terminators, content-type override.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T36</span>
+  <h3>charset_confusion_probe</h3>
+  <p>UTF-7 XSS, UTF-16BE injection, ISO-2022-JP shift, GB18030 multibyte tricks.</p>
+</div>
+
+<h3 id="v4-w3">Wave 3 — HTTP modern</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T37</span>
+  <h3>h2_smuggle_probe</h3>
+  <p>HTTP/2-specific weaknesses: CONTINUATION flood (CVE-2024-27316 class), h2c upgrade smuggling, h2-to-h1 downgrade abuse, pseudo-header tricks.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T38</span>
+  <h3>method_confusion_probe</h3>
+  <p>Tests PURGE, TRACE, CONNECT, custom verbs, GET-with-body. Many cache and proxy stacks treat unknown methods inconsistently.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T39</span>
+  <h3>range_probe + trailer_probe</h3>
+  <p>Range header overlap, large offset, integer overflow; trailing-headers / chunk-extension abuse.</p>
+</div>
+
+<h3 id="v4-w4">Wave 4 — Deserialisation gadget arsenal</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T40</span>
+  <h3>java_deserial_probe</h3>
+  <p>Wraps ysoserial gadget chains (CommonsCollections, Spring, Hibernate, Groovy). Detects and exploits Java deserialisation sinks via OOB callback confirmation.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T41</span>
+  <h3>dotnet_deserial_probe</h3>
+  <p>ViewState-MAC abuse, BinaryFormatter, JSON.NET TypeNameHandling, NetDataContractSerializer.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T42</span>
+  <h3>php_deserial_probe</h3>
+  <p><code>phar://</code> stream-wrapper attacks, magic-method gadgets (<code>__destruct</code>, <code>__wakeup</code>), unserialise-via-cookie.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T43</span>
+  <h3>python_deserial_probe</h3>
+  <p>pickle, jsonpickle, PyYAML <code>!!python/object/apply</code>.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T44</span>
+  <h3>ruby_deserial_probe</h3>
+  <p>Marshal, YAML <code>!ruby/object</code>, ERB injection.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T45</span>
+  <h3>node_proto_to_gadget</h3>
+  <p>Extends prototype-pollution detection to gadget execution: pollute then trigger via known sinks (lodash, express, ejs).</p>
+</div>
+
+<h3 id="v4-w5">Wave 5 — Upload pipelines + SSRF expansion</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T46</span>
+  <h3>upload_polyglot_probe</h3>
+  <p>Polyglot upload payloads (GIFAR, SVG-JS, phar-jpg), filename CRLF / null / unicode-RTL, MIME-sniff override.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T47</span>
+  <h3>image_parser_probe</h3>
+  <p>Curated payloads for ImageTragick (CVE-2016-3714), GhostScript SAFER bypass, libwebp (CVE-2023-4863), libjxl, mozjpeg.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T48</span>
+  <h3>ssrf_scheme_probe</h3>
+  <p>gopher / file / dict / ldap / jar / netdoc scheme-tunnelling against URL fetchers. Encoded-newline payloads for SMTP / Redis smuggling.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T49</span>
+  <h3>cloud_imds_probe</h3>
+  <p>AWS IMDSv1 / IMDSv2-with-auth-header smuggling, Azure IMDS, GCP metadata, Alibaba metadata.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T50</span>
+  <h3>dns_rebind_probe</h3>
+  <p>Controlled-rebinding domain that flips A-record between attacker IP and internal IP after the SSRF allow-list check passes.</p>
+</div>
+
+<h3 id="v4-w6">Wave 6 — State-aware fuzzing (logic flaws)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T51</span>
+  <h3>flow_recorder</h3>
+  <p>Drives Playwright through a target's normal user flow; captures every request, response, cookie, JS event into an FSM JSON skeleton.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T52</span>
+  <h3>flow_fuzzer</h3>
+  <p>Mutates transitions in the FSM. Skips a step, repeats one, runs two in parallel, replays with a mutated field, calls a step from an unreachable state.</p>
+  <div class="attack-path"><div class="title">Attack path</div><p>FSM: addToCart → applyCoupon → checkout → confirm. Fuzzer calls <code>applyCoupon</code> twice in parallel before confirm. Server reserves the coupon once but applies it twice; user buys for half price (Stripe class).</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T53</span>
+  <h3>race_probe_h2_singlepacket</h3>
+  <p>Single-packet attack: HTTP/2 multiplexing fires N requests in a single TCP packet, last-byte-synced. Eliminates network jitter — nanosecond-level races become exploitable.</p>
+</div>
+
+<h3 id="v4-w7">Wave 7 — Auth / SSO depth</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T54</span>
+  <h3>saml_xsw_probe</h3>
+  <p>SAML XML signature wrapping (XSW1-XSW8), signature exclusion, comment-injection in NameID.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T55</span>
+  <h3>cookie_prefix_probe + cookie_tossing</h3>
+  <p>Tests <code>__Host-</code> / <code>__Secure-</code> prefix enforcement and same-site subdomain cookie-tossing.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T56</span>
+  <h3>cswsh_probe</h3>
+  <p>Cross-Site WebSocket Hijacking. Confirms whether websocket connections enforce origin / token at handshake.</p>
+</div>
+
+<h3 id="v4-w8">Wave 8 — Browser-side / DOM</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T57</span>
+  <h3>dom_clobber_probe</h3>
+  <p>HTML injection that overrides global JS variables via <code>id=</code> / <code>name=</code> attributes. Drives browser_session to confirm clobber-induced behaviour change.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T58</span>
+  <h3>postmessage_probe</h3>
+  <p>Drives an iframe of the target, fires postMessage events with mismatched origins / data shapes, observes which handlers respond.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T59</span>
+  <h3>mxss_probe</h3>
+  <p>Curated mutation-XSS payload library (DOMPurify, sanitise-html, Bleach bypasses).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T60</span>
+  <h3>csp_bypass_probe</h3>
+  <p>Tests known CSP bypass gadgets: jsonp endpoints, AngularJS sandbox-escape, base-uri injection, script-src 'self' with file-upload.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T61</span>
+  <h3>xsleaks_probe</h3>
+  <p>Cross-site leak primitives — <code>window.length</code> oracle, frame-counting, error-event timing, scroll-anchor oracle.</p>
+</div>
+
+<h3 id="v4-w9">Wave 9 — Templates / DB / LDAP depth</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T62</span>
+  <h3>ssti_gadget_probe</h3>
+  <p>Per-engine RCE gadget library (Jinja2, Twig, Smarty, Velocity, Freemarker, Thymeleaf, Pebble, Mako, Handlebars, Razor, Spel). Converts ssti_detect signal into exploit.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T63</span>
+  <h3>ldap_inject_probe</h3>
+  <p>LDAP filter injection (<code>*)(uid=*</code>), boolean blind, LDAP referral abuse.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T64</span>
+  <h3>second_order_sqli_probe</h3>
+  <p>Stateful — insert payload at endpoint A, retrieve via endpoint B, observe injection at the read-side.</p>
+</div>
+
+<h3 id="v4-w10">Wave 10 — DoS / algorithmic complexity</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T65</span>
+  <h3>redos_probe</h3>
+  <p>Grammar-aware ReDoS payload generator. Detects regex catastrophic backtrack via increasing-size payloads with response-time measurement.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T66</span>
+  <h3>bomb_probe</h3>
+  <p>JSON / XML / YAML / zip / image decompression bombs. Tests billion-laughs, deeply nested arrays, hash flooding, decompression amplification.</p>
+</div>
+
+<h3 id="v4-w11">Wave 11 — LLM / agentic endpoints</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T67</span>
+  <h3>llm_inject_probe</h3>
+  <p>Direct prompt-injection battery. System-prompt extraction, jailbreak chains, instruction override.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T68</span>
+  <h3>indirect_inject_probe</h3>
+  <p>Page-as-context injection. Plants payloads in pages the LLM will later ingest (web search, RAG, summary endpoint).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T69</span>
+  <h3>rag_poison_probe</h3>
+  <p>For RAG systems, plants high-similarity adversarial documents in any user-writable corpus and observes whether the retriever surfaces them on benign queries.</p>
+</div>
+
+<h3 id="v4-w12">Wave 12 — Non-HTTP services</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T70</span>
+  <h3>redis_probe</h3>
+  <p>Detects no-auth Redis on the target host; tests <code>MODULE LOAD</code>, replication abuse, <code>CONFIG SET dir</code> + <code>SAVE</code> for arbitrary file write.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T71</span>
+  <h3>grpc_probe</h3>
+  <p>Protobuf-aware gRPC probe. Reflection enumeration, unauthenticated method discovery, proto-field fuzzing.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T72</span>
+  <h3>db_wire_probe</h3>
+  <p>Native PostgreSQL / MySQL wire-protocol probe. Tests anonymous connect, weak auth, <code>COPY FROM PROGRAM</code> (Postgres), <code>INTO OUTFILE</code> (MySQL).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T73</span>
+  <h3>mqtt_amqp_probe</h3>
+  <p>Broker enumeration, anonymous topic subscribe, message replay.</p>
+</div>
+
+<h3 id="v4-w13">Wave 13 — AD / lateral movement / Kill-Chain</h3>
+
+<div class="capability-card">
+  <span class="tier-chip">T74</span>
+  <h3>AD prompt nudges (cheapest fix)</h3>
+  <p>Prompt-only update. The Network specialist already has impacket, kerbrute, netexec — but the system prompt never names Kerberoast / ASREProast / DCSync. Add directives: "If port 88, 389, or 445 is observed, hypothesise Kerberoast → ASREProast → DCSync in sequence."</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T75</span>
+  <h3>bloodhound_collect + ad_path_finder</h3>
+  <p>SharpHound-equivalent collector + AD-aware Cypher queries that return shortest attack paths from current credential to Domain Admin.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T76</span>
+  <h3>password_spray + cred_stuffing + ntlm_relay</h3>
+  <p>Lockout-aware web / O365 / VPN / Kerberos spray; breach-list-driven credential stuffing; Responder + ntlmrelayx in a sandbox listener.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T77</span>
+  <h3>pivot_socks + pth / ptt executors</h3>
+  <p>SOCKS proxy via SSH or impacket smbexec; pass-the-hash for SMB / WinRM / RDP via netexec primitives; pass-the-ticket via impacket.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T78</span>
+  <h3>DLP exfil channels — dns_tunnel + slow_drip + covert encodings</h3>
+  <p>DNS / ICMP tunnels with controlled listener; rate-aware splitter for slow-drip; base32 / hex / image-stego / whitespace encodings.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip">T79</span>
+  <h3>Kill-Chain completion — c2_beacon + staged_delivery + persist_probe</h3>
+  <p>Closes the Kill-Chain phases (Deliver, Install, C2, Actions on Objectives) inside sandbox containers. Defaults to opt-in; operator decides during planning given the dual-use risk.</p>
+  <div class="panel warn"><div class="title">Operator approval required</div><p>The most powerful gap to close (full Kill-Chain coverage) but also the most operationally sensitive.</p></div>
+</div>
+
+<h2 id="v5-why">Tier-7 (v5.0) — Zero-Day Discovery Platform</h2>
+<p>
+  Every prior version of GENESIS is an exercise in <em>recognising</em> bugs. The
+  system gets better at finding bugs that someone, somewhere, has already named.
+  v5.0 is the version where GENESIS starts <strong>imagining</strong> — reasoning
+  about a target from first principles, proposing a bug class that has never been
+  documented, designing an experiment to test it, and confirming it.
+</p>
+
+<div class="panel purple">
+  <div class="title">v5.0 thesis in one sentence</div>
+  <p>The platform that finds 0-days is not the one with the most probes — it is
+  the one that <em>reads source code, reasons over invariants, debates itself
+  adversarially, and builds new tools when the existing ones aren't enough</em>.</p>
+</div>
+
+<h3 id="v5-fail">Five failure scenarios v3 + v4 cannot handle</h3>
+
+<div class="panel warn">
+  <div class="title">Scenario A — logic flaw only visible in source</div>
+  <p>A SaaS billing platform's <code>applyDiscount()</code> checks <code>uses_remaining</code>, decrements, applies — three SQL statements without a transaction. A skilled attacker reads this in leaked source and exploits the race. v4's flow_fuzzer fires concurrent requests blindly but has no way to <em>know</em> the three-statement structure exists.</p>
+</div>
+
+<div class="panel warn">
+  <div class="title">Scenario B — bug class is genuinely new</div>
+  <p>Target uses an LLM to translate user input into SQL. Nobody has documented "LLM-translated SQL injection via prompt-shape" yet. Every probe in v4 is for a known class.</p>
+</div>
+
+<div class="panel warn">
+  <div class="title">Scenario C — proprietary protocol behaviour</div>
+  <p>Target speaks a custom binary protocol over WebSockets. v4's grpc_probe and mqtt_probe don't apply. v3's fuzz_binary needs a corpus and a binary. Without learned grammar the agent cannot fuzz meaningfully.</p>
+</div>
+
+<div class="panel warn">
+  <div class="title">Scenario D — multi-day reasoning chain</div>
+  <p>Day 1: low-sev info disclosure (admin email). Day 4: medium SSRF. Day 10: a CVE drops in a library the target uses. The chain is the bug — each piece is too low to act on alone, but together they're a critical RCE.</p>
+</div>
+
+<div class="panel warn">
+  <div class="title">Scenario E — the agent needs a tool that doesn't exist yet</div>
+  <p>Target uses a custom HMAC scheme over an exotic encoding. None of v4's 100+ tools fit. The agent writes a one-off forge_runner script — runs once, dies, no record, no reuse.</p>
+</div>
+
+<h3 id="v5-arch">v5 architecture</h3>
+<div class="arch-diagram">
+                          ┌────────────────────────────┐
+                          │   Researcher Agent (NEW)   │ ← long-horizon goals,
+                          │   long-horizon planner     │   multi-week reasoning
+                          └───────────────┬────────────┘
+                                          │
+              ┌──── Hypothesis Market ────┴──── Adversarial Pair ────┐
+              │     (T89)                       (T87 red ⇄ blue)    │
+              │                                                      │
+              │     ┌──────── Philosopher Agent (T88) ───────┐       │
+              │     │        re-frames hypotheses             │      │
+              ▼     ▼                                                ▼
+   ┌────────────────────────┐    ┌──────────────────────────────────────┐
+   │  Existing Orchestrator │    │  Specialists (v3 + v5 new)           │
+   │  + 5 v3 specialists    │    │  + Causal-reasoning agent (T86)      │
+   └──────────┬─────────────┘    │  + Source-analysis agent (T80–T85)   │
+              │                  └──────────────────────────────────────┘
+              │
+   ┌──────────┴──────────────┬──────────────────┬────────────────────┐
+   ▼                         ▼                  ▼                    ▼
+Tool layer (MCP)       Sandbox pool      Synthetic-env pool     Surface watcher
+(self-extending        (T94 destructive  (T93–T96, NEW)         (T98, NEW —
+via T97)               harness)                                  always-on daemon)
+
+Knowledge layer additions:
+  ├─ Vector store        (semantic recall over corpus)
+  ├─ Property database   (formal invariants per target)
+  ├─ Tool registry       (T97 self-synthesised tools)
+  └─ Provenance store    (T103 — full reasoning trace per finding)
+
+Always-on daemons:
+  ├─ Cross-session pattern miner (T90)
+  ├─ CVE extrapolator (T91)
+  ├─ Surface watcher (T98)
+  ├─ Mutation-grammar learner (T99)
+  └─ Knowledge-graph compactor (T101)
+</div>
+
+<h3 id="v5-th1">Theme 1 — Source-aware reasoning (T80–T86)</h3>
+
+<div class="theme-banner purple"><h3>Why this theme is first</h3><p class="meta">If source code is reachable — leaked .git, open-source components, decompiled binaries, deobfuscated JS — every other heuristic is weaker than reading the code. Theme 1 is the highest single multiplier on bug yield in v5.</p></div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T80</span>
+  <h3>repo_ingest</h3>
+  <p>Deep clone of any source GENESIS finds (via artifact_hunter, artifact_pull, decompilation, deobfuscation). Builds a symbol table, identifies framework conventions, labels entry points.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T81</span>
+  <h3>ast_walker</h3>
+  <p>Builds the AST and CFG for ingested source. Exposes a query interface ("find every function that takes user input and reaches a sink", "find every catch block that swallows the exception and continues").</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T82</span>
+  <h3>taint_engine</h3>
+  <p>Full source-to-sink taint analysis. Marks user-input sources, tracks them through assignments, function calls, async boundaries, ORM calls, until they hit a sink. Produces ranked tainted paths.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T83</span>
+  <h3>invariant_inferer</h3>
+  <p>Watches the live target across many requests and infers invariants. Stores in the new Property database. Then hypothesises what would break each invariant.</p>
+  <div class="attack-path"><div class="title">Attack path</div><p>Invariant: "balance never decreases except after POST /spend". Experiment: can /transfer or /refund decrease balance without going through /spend? Broken invariant = bug.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T84</span>
+  <h3>app_symbolic_exec</h3>
+  <p>Application-level symbolic execution for Python / Node / Java / Go. Treats input fields as symbols, computes constraints to reach each branch — finds untested error paths, dead authentication branches, unreachable assertions.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T85</span>
+  <h3>js_deobfuscator</h3>
+  <p>Un-minifies, recovers symbol names, evaluates string-array obfuscation, traces dead-code-elimination, extracts hidden endpoints from large bundle.js files.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T86</span>
+  <h3>causal_root_cause</h3>
+  <p>When the agent observes an anomaly, runs isolation experiments to pin down which input dimension caused it. Builds a causal model — forces the agent to <em>understand</em> each anomaly until it can name the underlying defect.</p>
+</div>
+
+<h3 id="v5-th2">Theme 2 — Adversarial hypothesis synthesis (T87–T92)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T87</span>
+  <h3>red_blue_dialectic</h3>
+  <p>Every hypothesis goes through a red-team / blue-team pair. Red proposes the attack; blue argues why it would fail. Red must address blue's counter or the hypothesis dies.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T88</span>
+  <h3>philosopher_agent</h3>
+  <p>A re-framer. Reads the session's anomalies and partial findings and asks "what bug class — including ones not in any taxonomy — would explain all of these?" Generates candidate bug-class definitions from first principles.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T89</span>
+  <h3>hypothesis_market</h3>
+  <p>Every hypothesis carries a confidence stake. Red, blue, philosopher, and orchestrator each bet. Sandbox time and tool calls are allocated proportional to the market's confidence.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T90</span>
+  <h3>cross_session_miner</h3>
+  <p>Always-on daemon that mines patterns across every session. Detects repeated-finding signatures, clusters bugs by root cause, surfaces highest-yield hypothesis classes for new sessions to inherit.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T91</span>
+  <h3>cve_extrapolator</h3>
+  <p>Continuously ingests new CVEs. For each: "does any target in our graph use the affected component? does any target run code that resembles the bug class?" Drives 1-day window probing before patches roll out.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T92</span>
+  <h3>architectural_reasoner</h3>
+  <p>Ingests architecture diagrams, threat-model docs, OpenAPI specs, GraphQL schemas, sequence diagrams. Reasons about trust boundaries.</p>
+</div>
+
+<h3 id="v5-th3">Theme 3 — Synthetic environments (T93–T96)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T93</span>
+  <h3>target_replicator</h3>
+  <p>Where source + dependencies are available (Docker compose, Helm chart, Terraform), automatically stand up a clone of the target inside the GENESIS sandbox network.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T94</span>
+  <h3>destructive_test_harness</h3>
+  <p>Once a replica exists, fires payloads that would be unethical against production: full DoS, destructive deserial chains, bombs, RCE write-tests, persistence primitives.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T95</span>
+  <h3>invariant_violator</h3>
+  <p>Takes invariants from T83 and uses property-based testing tools (Hypothesis, fast-check) inside the replica to find inputs that violate them.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T96</span>
+  <h3>model_checker</h3>
+  <p>Lightweight TLA+ / Alloy adapter for protocol and state-machine properties. Express the target's contract as a formal property; the model-checker hunts for counterexamples.</p>
+</div>
+
+<h3 id="v5-th4">Theme 4 — Self-improving tooling (T97–T101)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T97</span>
+  <h3>tool_synthesizer</h3>
+  <p>When a forge_runner script proves useful, this agent promotes it: wraps it in MCP-tool boilerplate, writes the knowledge-dictionary entry, runs it against a synthetic test, and registers it permanently in the tool registry. Next session inherits it.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T98</span>
+  <h3>surface_watcher (always-on daemon)</h3>
+  <p>Continuous monitor of every target's attack surface — DNS records, certificate-transparency logs, JS bundle hashes, subdomain set, exposed port set, swagger.json, robots.txt. Triggers a re-scan on any delta.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T99</span>
+  <h3>mutation_grammar_learner</h3>
+  <p>Genetic-algorithm payload evolution. Starts from hand-curated grammars; mutates based on signature outliers (T30 + T31 score). Over time learns target-specific grammars no human would have written.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T100</span>
+  <h3>reward_model_novelty</h3>
+  <p>Small fine-tuned classifier that grades responses for "interestingness" using a learned reward signal — supervised by which hypotheses turned into confirmed bugs.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T101</span>
+  <h3>graph_compactor (always-on daemon)</h3>
+  <p>Periodically deduplicates and summarises the Neo4j attack graph. Without compaction the graph drifts, slows, and produces stale recommendations.</p>
+</div>
+
+<h3 id="v5-th5">Theme 5 — Long-horizon reasoning (T102–T105)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T102</span>
+  <h3>long_horizon_planner (Researcher agent)</h3>
+  <p>Maintains a rolling attack tree per engagement. Every finding becomes a node. Open questions tracked across sessions ("can we weaponise the admin email from week 1 against the new SSRF in week 3?"). New sessions inherit the open questions and the tree.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T103</span>
+  <h3>provenance_recorder</h3>
+  <p>For every finding, records the full reasoning chain: which signals fired which hypothesis, which hypothesis spawned which probe, which probe produced which evidence.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T104</span>
+  <h3>surface_diff</h3>
+  <p>Delta-aware view of the attack surface between scans. New endpoints highlighted. Removed endpoints noted (might be deprecated and forgotten — old endpoints are bug magnets). Changed responses flagged.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T105</span>
+  <h3>persistent_recon</h3>
+  <p>Low-touch baseline recon that runs continuously per target — cheap probes (DNS, certs, JS hash, open-port delta) every hour. Aggressive scans triggered only on delta or by Researcher request.</p>
+</div>
+
+<h3 id="v5-th6">Theme 6 — Binary &amp; memory corruption (T106–T109)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T106</span>
+  <h3>auto_exploit_pipeline</h3>
+  <p>Crash → triage (exploitable / not / probably) → primitive identification (write-what-where, leak primitive, control of RIP) → exploit-chain assembly. Combines AFL output with symbolic_exec and a new gadget-chainer.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T107</span>
+  <h3>heap_shaper</h3>
+  <p>Heap layout planner. Given a target allocator (glibc, jemalloc, Windows heap), computes the request sequence to shape the heap into a pattern where a UAF or double-free becomes exploitable.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T108</span>
+  <h3>rop_chainer</h3>
+  <p>Searches the target binary for ROP gadgets, composes a chain to satisfy a goal. Honours ASLR / PIE constraints by chaining with the leak primitive identified in T106.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T109</span>
+  <h3>sanitizer_orchestrator</h3>
+  <p>When source and a build system are available, rebuild the target in the sandbox with ASan / UBSan / MSan / TSan, replay the fuzz corpus, surface latent bugs that the un-sanitised binary masks.</p>
+</div>
+
+<h3 id="v5-th7">Theme 7 — New attack surfaces (T110–T116)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T110</span>
+  <h3>ml_model_attacker</h3>
+  <p>Probes against deployed ML model endpoints — model-extraction, training-data extraction, membership inference, adversarial-input crafting, model-inversion.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T111</span>
+  <h3>ml_pipeline_probe</h3>
+  <p>Tests the ML training pipeline rather than the model — data-poisoning, supply-chain poisoning of pre-trained weights, gradient leakage across federated boundaries.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T112</span>
+  <h3>smart_contract_probe</h3>
+  <p>Solidity / Vyper static analysis (Slither), symbolic execution (Mythril/Manticore wrapper), invariant testing (Echidna), gas-grief detection, re-entrancy, oracle manipulation, MEV exposure.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T113</span>
+  <h3>blockchain_protocol_probe</h3>
+  <p>Consensus / mempool / RPC abuse — selfish mining, eclipse attacks, RPC method enumeration, gas-pricing attacks, sandwich-attack feasibility.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T114</span>
+  <h3>firmware_extractor</h3>
+  <p>Extract and analyse UEFI / BMC / IPMI / coreboot / OEM firmware. Wraps existing tools (binwalk, UEFITool, firmwalker) and feeds extracted binaries into Theme-1 source / Theme-6 binary pipelines.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T115</span>
+  <h3>cellular_probe</h3>
+  <p>5G NAS, GTP, Diameter probing in lab environments. With private 5G deployment growing, attack-surface tools are needed.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T116</span>
+  <h3>pq_crypto_audit</h3>
+  <p>Inventories the target's crypto primitives, cross-references against post-quantum migration timelines, flags any long-lived secret protected by a quantum-vulnerable algorithm.</p>
+</div>
+
+<h3 id="v5-th8">Theme 8 — Researcher-grade output (T117–T120)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T117</span>
+  <h3>disclosure_drafter</h3>
+  <p>Full bug-bounty-quality disclosure: title, summary, CVSS, technical detail, reproduction steps, raw HTTP, MITRE ATT&amp;CK / CWE mapping, affected versions inferred from artifact_pull, suggested fix, references.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T118</span>
+  <h3>fix_suggester</h3>
+  <p>Proposes a concrete code patch (when source is available) using ast_walker + taint_engine. Output is a unified diff the developer can review.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T119</span>
+  <h3>impact_analyzer</h3>
+  <p>Walks the attack chain from the bug to realistic business outcomes — produces the impact narrative leadership reads ("this allows account takeover; account takeover allows reading PII; PII includes SSN; ergo this is a regulated-data exposure under GDPR / HIPAA / PCI").</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip purple">T120</span>
+  <h3>patch_verifier</h3>
+  <p>When the operator marks a finding "patched", re-runs the exact reproduction. Confirms closure or flags the patch as insufficient. Maintains a regression watch list.</p>
+</div>
+
+<h2 id="v6-why">Tier-8 (v6.0) — Sophistication &amp; Blackbox 0-Day</h2>
+<p>
+  v6.0 has two intertwined goals: <strong>close the blackbox-IP 0-day gap</strong>
+  (every v5 theme leans on at least one of source access, leaked artifacts,
+  identified OSS components, or substantial OSINT) and <strong>convert the platform
+  from research prototype to sophisticated enterprise system</strong> — multi-tenant,
+  RBAC + audit, SOC integration, compliance reporting, budget controls, event
+  sourcing, explainable UX, continuous model operations.
+</p>
+
+<h3 id="v6-yield">Honest 0-day yield assessment</h3>
+<div class="score-grid">
+  <div class="score-card"><div class="ver">v3 (built)</div><div class="pct">~5%</div><div class="lbl">novel-0-day yield on arbitrary IP</div></div>
+  <div class="score-card"><div class="ver">+ v4 (built)</div><div class="pct">~20%</div><div class="lbl">via parser-differential and HTTP-modern probes — now shipping</div></div>
+  <div class="score-card"><div class="ver">+ v5 (planned)</div><div class="pct">~45%</div><div class="lbl">when source / artifacts are reachable</div></div>
+  <div class="score-card"><div class="ver">+ v6 (planned)</div><div class="pct">~70%</div><div class="lbl">on multi-day blackbox engagement</div></div>
+</div>
+<p class="mini">Calibrated estimates per the no-hallucination ground rule — real measurement requires running each version against targets carrying known-but-undisclosed-to-the-system 0-days. The v4 number can now be measured directly since the platform shipped.</p>
+
+<div class="panel danger">
+  <div class="title">Concrete failure mode v5 does not solve</div>
+  <p>Closed-source SaaS behind Cloudflare. No leaked code. No subdomain takeover artifacts. No identifiable framework version from response headers. v5's source agent has nothing to read; v5's adversarial agents debate hypotheses blindly. v6's Theme A closes this.</p>
+</div>
+
+<h3 id="v6-arch">v6 architecture</h3>
+<div class="arch-diagram">
+                          ┌────────────────────────────────┐
+                          │  Operator-supplied GOAL (T132) │ ← "compromise admin"
+                          └───────────────┬────────────────┘
+                                          ▼
+                          ┌────────────────────────────────┐
+                          │   Goal Compiler (T132)         │
+                          │   produces structured tree     │
+                          └───────────────┬────────────────┘
+                                          │
+              ┌──── Curiosity / RL scheduler (T125–T127) ──┐
+              │     allocates sandbox + LLM tokens         │
+              │                                            │
+              │     ┌── Persona Orchestrator (T135) ────┐  │
+              │     │  paranoid / ransomware / nation /  │  │
+              │     │  insider / opportunistic           │  │
+              ▼     ▼                                       ▼
+   ┌──────────────────────────┐    ┌────────────────────────────────────────────┐
+   │ v5 Researcher Agent      │    │ v5 Specialists + v6 new specialists        │
+   │ + v3 Orchestrator        │    │ (IoT, mobile, OT/ICS, embedded — T137-140) │
+   └──────────┬───────────────┘    └────────────────────────────────────────────┘
+              │
+   ┌──────────┴────────┬─────────────────┬──────────────────┬─────────────────┐
+   ▼                   ▼                 ▼                  ▼                 ▼
+Tool layer        Sandbox pool      Synthetic-env       Replica pool      Surface watcher
+                                                         (T122 — NEW)
+                                                         fingerprint→
+                                                         spawn matched OSS
+
+Knowledge additions:
+  ├─ Threat-intel store (T129/T130)
+  ├─ Multi-tenant namespacing (T141)
+  ├─ Audit log (T142, append-only)
+  └─ Event log (T146, replay-able)
+
+Always-on daemons:
+  ├─ Threat-intel ingestor (T129)
+  ├─ CVE variant matcher (T130)
+  ├─ Reward-model trainer (T151)
+  ├─ Novelty A/B harness (T152)
+  └─ Drift-detection monitor (T154)
+
+Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
+              Cortex XSOAR / Sentinel / Splunk SIEM / Elastic Security
+</div>
+
+<h3 id="v6-thA">Theme A — Blackbox 0-day enablement (T121–T124)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T121</span>
+  <h3>behavioral_fingerprinter</h3>
+  <p>Deep response-byte fingerprinting beyond Wappalyzer-style header matching. Combines TLS handshake bytes (JA3 / JA4S), header ordering, default 404 page byte sequences, error message tokenisation, microsecond-level timing patterns, HTTP/2 frame ordering. Produces a confident pin: "nginx 1.18.0 + Express 4.17.1 + Mongoose 5.13 on Debian 11, lua-resty-jwt 0.2.3, mod_security 3.0.4 in detection mode."</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T122</span>
+  <h3>replica_spawner</h3>
+  <p>Given a T121 fingerprint, automatically pulls the exact OSS components at matched versions, spins them up in a sandbox container, scaffolds the application reflecting observed routes. Now there's an exact replica to attack without consequences. v5's source-aware tools aim at the replica. <strong>The single highest-leverage blackbox capability in the entire v6 plan.</strong></p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T123</span>
+  <h3>timing_oracle_memory</h3>
+  <p>For binary-backed services with no source and no reachable binary, infers memory layout via timing channels alone. Heap-spray + microsecond-level timing measurements + statistical analysis = blackbox heap shaping.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T124</span>
+  <h3>cross_component_diff (reference set)</h3>
+  <p>Maintains a reference set of N popular implementations of the same protocol or format. For any input, pre-computes the response from every reference implementation. Where target diverges from the reference set, vulnerability candidate. v4's http_diff_probe compares target-vs-target; T124 is target-vs-reference-set — much stronger differential signal.</p>
+</div>
+
+<h3 id="v6-thB">Theme B — Curiosity-driven RL (T125–T128)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T125</span>
+  <h3>curiosity_model</h3>
+  <p>Small model trained on labelled (input, response) pairs where labels are "did this hypothesis lead to a bug?" Scores prospective hypotheses by predicted information gain. High-curiosity hypotheses get more compute.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T126</span>
+  <h3>rl_probe_selector</h3>
+  <p>RL over (target_class, probe, outcome) tuples. Across thousands of sessions, learns which probe orderings find bugs fastest for which target classes.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T127</span>
+  <h3>surprise_budget</h3>
+  <p>Each session has a fixed compute budget. Scheduler allocates compute proportional to expected surprise (T125) plus observed surprise (T31 anomaly grader). Boring branches throttled; surprising branches amplified.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T128</span>
+  <h3>counterfactual_reasoner</h3>
+  <p>When a probe is blocked (WAF, rate limiter, CSP), the agent asks: "if this defense weren't there, would my attack work?" Then designs experiments to bypass the defense or to confirm the underlying vuln exists despite it.</p>
+</div>
+
+<h3 id="v6-thC">Theme C — Real-time threat-intel ingestion (T129–T131)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T129</span>
+  <h3>threatintel_ingestor (always-on daemon)</h3>
+  <p>Pulls from CVE feeds (NVD, MITRE, vendor advisories), security Twitter / Mastodon, Hacker News, security mailing lists, GitHub Security Advisory database, Project Zero, Talos, Unit42, Mandiant, CrowdStrike. Tags each entry with affected components, severity estimate, known PoC presence.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T130</span>
+  <h3>cve_variant_matcher</h3>
+  <p>For each ingested CVE, runs source-pattern abstraction and matches against components recorded in our targets' graphs. Returns a ranked list of probably-affected fleet members with variant probes ready to fire.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T131</span>
+  <h3>sameday_replay</h3>
+  <p>When a CVE includes a public PoC, replays it inside a T122 replica of the affected target version, abstracts the exploit into a parameterised template, applies parameter variations, then probes the production target with verified-safe variants only. Closes the 1-day window.</p>
+</div>
+
+<h3 id="v6-thD">Theme D — Goal-driven attack planning (T132–T134)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T132</span>
+  <h3>goal_compiler</h3>
+  <p>Operator inputs a goal in natural language — "compromise admin@target.example", "exfiltrate any PII", "achieve persistence on host", "demonstrate lateral movement to the database tier". Translates to a structured attack tree with concrete probe leaves.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T133</span>
+  <h3>counterfactual_planner</h3>
+  <p>Extends T128 to the planning level. For each step in an attack tree, asks "if I can't get this directly, what equivalent path exists?" Generates 3-5 alternative attack paths per blocked step.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T134</span>
+  <h3>multistep_planner</h3>
+  <p>Chains primitives across hours and days. Plans full kill-chains: phish → access → privesc → lateral → exfil. Each step consumes prior step's output. Carries state across many sessions in v5's long-horizon memory.</p>
+</div>
+
+<h3 id="v6-thE">Theme E — Multi-persona adversarial agents (T135–T140)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T135</span>
+  <h3>persona_orchestrator</h3>
+  <p>Spawns simultaneous adversary personas: <em>paranoid pentester</em> (only confirmed-safe payloads), <em>ransomware operator</em> (impact-maximising paths), <em>nation-state APT</em> (long-horizon, low-noise), <em>insider threat</em> (using legit credentials), <em>opportunistic crook</em> (lowest-effort paths). Each generates different hypotheses scored by the curiosity model.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T136</span>
+  <h3>collaborative_refinement</h3>
+  <p>Beyond v5's red/blue (which generate vs critique), agents iteratively refine each other's hypotheses. A proposes → B refines with new technique → C refines with constraint analysis → A has final say.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T137</span>
+  <h3>iot_specialist</h3>
+  <p>Specialist agent for IoT devices — UPnP / mDNS / SSDP enumeration, default-credential libraries, firmware OTA hijacking, Zigbee / Z-Wave / BLE protocol probes, Matter / Thread protocol-stack abuse.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T138</span>
+  <h3>mobile_specialist</h3>
+  <p>Mobile app analysis (APK / IPA), runtime hooking via Frida, deeplink hijacking, intent spoofing, SSL pinning bypass, keystore extraction, biometric-bypass patterns.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T139</span>
+  <h3>ot_ics_specialist</h3>
+  <p>OT / ICS environments — Modbus, DNP3, S7Comm, EtherNet/IP, BACnet, OPC UA. Safety-mode default-on: read-only by default; never sends actuator commands without explicit operator confirmation.</p>
+  <div class="panel warn"><div class="title">Hard safety gate</div><p>OT/ICS attacks can have physical consequences. Default-deny actuator policy.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T140</span>
+  <h3>embedded_specialist</h3>
+  <p>Embedded systems — UART / JTAG / SWD side channels, glitch attacks (voltage, clock, EM), secure-boot bypass, signed-firmware analysis. Pairs with T114 firmware_extractor.</p>
+</div>
+
+<h3 id="v6-thF">Theme F — Production engineering (T141–T146)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T141</span>
+  <h3>multi_tenant</h3>
+  <p>Org → team → project hierarchy with hard isolation. Per-tenant Neo4j namespace, per-tenant Postgres schema, per-tenant sandbox quota, per-tenant LLM-token budget.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T142</span>
+  <h3>rbac_audit</h3>
+  <p>Role-based access control + immutable audit log. Operator, reviewer, admin, read-only roles. Every action attributed to a person with timestamp, IP, tenancy.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T143</span>
+  <h3>soc_integration</h3>
+  <p>Native integrations to Jira, ServiceNow, Slack, Microsoft Teams, PagerDuty, Splunk SOAR, Cortex XSOAR, Splunk SIEM, Microsoft Sentinel, Elastic Security. Findings auto-create tickets; status syncs back when tickets close; on-call gets paged on critical-severity findings.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T144</span>
+  <h3>compliance_reporter</h3>
+  <p>Pre-built report templates for PCI-DSS, HIPAA, SOC 2, ISO 27001, NIST CSF, NIST 800-53, OWASP ASVS. Each finding tagged against relevant control IDs.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T145</span>
+  <h3>budget_controls</h3>
+  <p>Per-target SLA + cost-budget controls. "Spend no more than $X / month on target Y; alert at 80%". Sandbox CPU / RAM quotas, LLM-token budgets, surface-watcher polling-rate ceilings, replica-pool size caps.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T146</span>
+  <h3>event_sourcing</h3>
+  <p>All state changes flow through an append-only event log. Sessions replay from any historical event. Crash recovery automatic. Compliance auditors reconstruct any historical run.</p>
+</div>
+
+<h3 id="v6-thG">Theme G — Explainable UX (T147–T150)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T147</span>
+  <h3>explanation_panel</h3>
+  <p>Live "why" panel beside the Session Viewer. Shows the current decision: "I'm running curl_probe with this payload because hypothesis H-042 (confidence 0.7) needs evidence E-3 to advance. Next hypothesis if this fails is H-051, proposed by the philosopher agent at iteration 17."</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T148</span>
+  <h3>agent_chorus_view</h3>
+  <p>Side-by-side view of all parallel agents' current thoughts — orchestrator, 5 v3 specialists, red / blue / philosopher (v5), persona orchestrator with 5 personas (v6). Color-coded by role, scrolling in real time.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T149</span>
+  <h3>hypothesis_tree_viewer</h3>
+  <p>Live visualisation of v5's hypothesis market (T89). Each hypothesis is a node, sized by confidence stake, coloured by status (open / confirmed / rejected).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T150</span>
+  <h3>oncall_companion</h3>
+  <p>Mobile app (iOS / Android) showing live finding alerts, agent-status snapshots, one-tap escalate-to-team. Built for on-call, not for daily use. Push notifications on critical findings.</p>
+</div>
+
+<h3 id="v6-thH">Theme H — Model operations (T151–T154)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T151</span>
+  <h3>reward_model_trainer (always-on daemon)</h3>
+  <p>Continuous training pipeline for v5's reward-model-novelty (T100) and v6's curiosity model (T125). Daily fine-tunes on confirmed-bug labels. Ships to production with shadow-mode evaluation before promotion.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T152</span>
+  <h3>novelty_ab_testing (always-on harness)</h3>
+  <p>Runs two novelty-grader variants in parallel on a fraction of sessions; compares which produces more confirmed bugs per unit compute. Promotes the winner; rolls back the loser.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T153</span>
+  <h3>specialist_finetune</h3>
+  <p>Per-specialist fine-tuning pipeline. Crypto specialist gets fine-tuned on confirmed crypto findings; auth specialist on auth findings.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T154</span>
+  <h3>drift_detection (always-on monitor)</h3>
+  <p>Production model monitoring. Flags when novelty grades, embeddings, or reward predictions drift from baseline distributions. Pages MLOps when models go bad.</p>
+</div>
+
+<h2 id="v7-why">Tier-9 (v7.0) — Reasoning Architecture &amp; Custom Loops</h2>
+<p>
+  Across v3 + v4 + v5 + v6, GENESIS specifies ~120 capability blocks. Counting
+  honestly: ~85% of those are tools, integrations, UX, ops; ~10% are custom
+  reasoning architecture; only ~5% is custom model work. That last 5% is exactly
+  what separates Mythos from GENESIS-on-Opus. v7.0 corrects this by deliberately
+  not adding any new MCP probes — all twelve T-blocks are reasoning loops.
+</p>
+
+<div class="panel emerald">
+  <div class="title">v7 thesis</div>
+  <p>A loop that compresses a 10,000-token reasoning task into ten 1,000-token turns
+  lets a generic Opus model reach conclusions a 10x more capable monolithic model
+  would be needed to reach in a single turn. <strong>Loop structure substitutes for
+  reasoning depth</strong> within the loop's domain.</p>
+</div>
+
+<h3 id="v7-tvl">Tool vs reasoning loop</h3>
+<div class="vs-card">
+  <div class="title">Concrete example — composing a ROP chain</div>
+  <div class="row">
+    <div class="col"><strong>Tool approach (v5/v6 T108):</strong> a "rop_chainer" tool searches binary for gadgets, returns a ranked list. The LLM reads the list and asks: "given these 47 gadgets, build a chain that calls execve and fits in 200 bytes." The model handles all constraint reasoning, gadget composition, and budget arithmetic in a single forward pass with no scratch space.</div>
+    <div class="col"><strong>Reasoning loop approach (v7 T155):</strong> the loop runs gadget search → constraint propagation → register-state simulation → byte-budget check → gadget re-search if over budget → iterate. The model is the controller, but the loop holds the working memory. Each turn is small and tractable; the loop's structure compensates for the model's bounded reasoning span.</div>
+  </div>
+</div>
+
+<h3 id="v7-alpha">The AlphaZero analogy</h3>
+<p>
+  AlphaZero plays go better than any human despite having a neural network that, on
+  its own, would be merely strong-amateur level. The trick is the combination: MCTS
+  explores branches + the network evaluates each branch. The search structure does
+  most of the heavy lifting; the network does cheap evaluations. Every v7 loop is
+  built on this template — <strong>the loop</strong> is the search structure;
+  <strong>the LLM</strong> is the evaluator.
+</p>
+
+<h3 id="v7-arch">v7 architecture</h3>
+<div class="arch-diagram">
+                    ┌─────────────────────────────────────┐
+                    │   Operator Goal (v6 T132)           │
+                    └─────────────────┬───────────────────┘
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │   Multi-agent orchestrator (v3)     │
+                    │   + Researcher agent (v5 T102)      │
+                    └─────────────────┬───────────────────┘
+                                      │
+   ┌──────────────────────────────────────────────────────────────────┐
+   │                  REASONING LOOP LAYER (NEW — v7)                  │
+   │  ┌─────────────────────────────────────────────────────────────┐ │
+   │  │  Deliberation Framework (T160) — meta-architecture          │ │
+   │  │   provides: state, branching, backtracking, ToT (T161),     │ │
+   │  │             constraint propagation, decomposition (T166)    │ │
+   │  └─────────────────────────────────────────────────────────────┘ │
+   │                                                                   │
+   │  Domain-specific loops (each composes the framework):             │
+   │   ├── ROP composition (T155)                                      │
+   │   ├── Code intent (T156, multi-zoom)                              │
+   │   ├── Chain composition (T157)                                    │
+   │   ├── Heap layout (T158)                                          │
+   │   ├── Self-correcting exploit (T159)                              │
+   │   ├── Long-context code reasoning (T162, 1M+ tokens)              │
+   │   ├── Cross-component invariant tracking (T163)                   │
+   │   ├── Causal exploit trace (T164)                                 │
+   │   └── Counterfactual exploration (T165, deep)                     │
+   └──────────┬─────────────────┬───────────────────────┬─────────────┘
+              ▼                 ▼                       ▼
+   Tool layer (~120 probes)  Sandbox + replicas   Loop-state store (NEW)
+                                                   persisted intermediate
+                                                   states for replay /
+                                                   v8 training
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T155</span>
+  <h3 id="t155">rop_composition_loop</h3>
+  <p>Constraint-aware ROP-chain composition. Iterative: gadget search → constraint satisfaction → register-state simulation → byte-budget arithmetic → re-search if over budget → final assembly. Mythos's FreeBSD NFS exploit compressed a 1000-byte ROP chain into 200 bytes via 6 sequential RPC requests; the loop externalises that working memory so a generic Opus model can do the same.</p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>Goal: <code>execve("/bin/sh", 0, 0)</code> in &lt; 200 bytes. T1: search → 47 candidates. T2: model scores → 12 promising. T3: simulate → 8 valid. T4: byte budget — shortest 312 bytes, over budget. T5: model proposes multi-write strategy. T6: re-search write primitives. T7: assemble multi-write chain at 184 bytes. Done.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T156</span>
+  <h3 id="t156">code_intent_loop (multi-zoom)</h3>
+  <p>Reads code at multiple zoom levels — function → file → module → cross-module → architectural — emitting an intent hypothesis at each level. Subsequent levels confirm or refute upstream hypotheses.</p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>Function: TLS record parser, intent "validate length then read body". File: function called from three sites; one doesn't check return value. Module: that one site is in the renegotiation path. Architectural: renegotiation path receives attacker-controlled data. <strong>The loop has identified a Heartbleed-class candidate</strong> via four cited zoom levels.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T157</span>
+  <h3 id="t157">chain_composer_loop</h3>
+  <p>Given a set of primitive vulnerabilities, plans valid composition orderings. Tracks pre/post-conditions of each primitive (e.g., a leak primitive must precede an ASLR-defeated write).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T158</span>
+  <h3 id="t158">heap_layout_loop</h3>
+  <p>Allocator-aware heap shaping. Predict → execute → observe → refine. The model learns allocator-specific patterns (glibc tcache, jemalloc bins, Windows LFH) within the loop. Each iteration narrows the prediction.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T159</span>
+  <h3 id="t159">self_correcting_exploit_loop</h3>
+  <p>When an exploit attempt crashes wrong, the loop diagnoses the failure (wrong offset, wrong primitive, wrong allocator state, ASLR drift, defensive intervention) and proposes a corrected attempt. Replays in sandbox until success or budget exhaustion.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T160</span>
+  <h3 id="t160">deliberation_framework (meta-architecture)</h3>
+  <p>Shared infrastructure that all v7 loops compose. Provides: deliberation state, branching, backtracking, constraint propagation, ToT (T161) integration, decomposition (T166) integration, loop-state persistence. Future loops in v9, v10... compose it instead of starting from scratch.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T161</span>
+  <h3 id="t161">tree_of_thought_search</h3>
+  <p>Branching exploration with explicit backtrack. At each decision point, the loop generates N candidate branches; evaluates each by simulation or model scoring; commits to the best while keeping siblings as fallbacks. Backtracks on dead-end.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T162</span>
+  <h3 id="t162">long_context_code_harness</h3>
+  <p>Reasoning over 1M+ token codebases via segment-summarise-recurse. Each segment summarised; summaries fed to a higher-level summary; recurse until a single root summary. Queries descend the tree.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T163</span>
+  <h3 id="t163">cross_component_invariant_tracker</h3>
+  <p>Tracks invariants that span multiple files, services, or processes. Maintained as a graph; validates at every code change; flags inconsistencies as bug candidates.</p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>Service A returns <code>"role": "user"|"admin"</code>; Service B uses <code>role.toLowerCase()</code> for authorization. Invariant: "role values from A are always lowercase". A is later modified to allow capitalised role names; B is not updated. <strong>Tracker flags privesc candidate.</strong></p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T164</span>
+  <h3 id="t164">causal_exploit_trace_builder</h3>
+  <p>For every confirmed exploit, builds a causal graph: which input bytes led to which side effects, which side effects enabled which downstream primitives. Foundation for both explanation and self-correction (T159 input).</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T165</span>
+  <h3 id="t165">counterfactual_exploration_deep</h3>
+  <p>Extends T128 from single-step to multi-step counterfactual. "If we had a leak primitive, what attacks open up? if we also had a write primitive, what then?" Generates the tree of attack-paths conditional on hypothetical primitives.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip emerald">T166</span>
+  <h3 id="t166">hypothesis_decomposition_framework</h3>
+  <p>Breaks complex hypotheses into atomic claims. "There's a privesc bug here" decomposes into: "X is reachable from unauthenticated context", "X writes to Y", "Y is a privileged resource", "the write doesn't sanitise the privilege check". Each atomic claim becomes a target for individual experimentation.</p>
+</div>
+
+<h2 id="v8-why">Tier-10 (v8.0) — Custom Models &amp; Training Flywheel</h2>
+<p>
+  v7 builds reasoning loops; v8 trains the models inside them. Where v7 compresses
+  search space so Opus can match larger systems within a domain, v8 grows the models
+  themselves through a closed-loop training flywheel: every confirmed finding becomes
+  training data, training data fine-tunes specialists, fine-tuned specialists find
+  more findings.
+</p>
+
+<div class="panel amber">
+  <div class="title">v8 thesis</div>
+  <p>Mythos's reasoning depth comes from training on real exploit corpora at scale.
+  We can't replicate that scale. But we can build a flywheel where every confirmed
+  GENESIS finding becomes training data, every fine-tune produces a slightly better
+  specialist, and every better specialist produces more confirmed findings. The
+  flywheel grows the model the platform deserves over time.</p>
+</div>
+
+<h3 id="v8-flywheel">The training flywheel</h3>
+<ol>
+  <li><strong>Confirmed bug.</strong> Any session produces a confirmed finding with cited evidence.</li>
+  <li><strong>Corpus ingestion (T167).</strong> Daemon ingests it into a structured (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuple.</li>
+  <li><strong>Counterexample mining (T168).</strong> For the same target_class, mines near-miss code that is <em>not</em> vulnerable — contrastive labels.</li>
+  <li><strong>Quality gate (T170).</strong> High-impact tuples reviewed by humans; rest auto-accepted.</li>
+  <li><strong>Specialist fine-tune (T171).</strong> Per-specialist LoRA pipeline triggers when corpus delta exceeds threshold.</li>
+  <li><strong>Reward-model update (T172).</strong> Reward model re-trained on success/failure labels.</li>
+  <li><strong>Continual deployment (T174).</strong> Updated specialists ship with drift-checks; v6 T154 monitors health.</li>
+  <li><strong>Better specialists find more bugs.</strong> Loop continues.</li>
+</ol>
+
+<h3 id="v8-paths">Path A vs Path B</h3>
+<table>
+<thead><tr><th>Path</th><th>What it is</th><th>Status</th><th>Estimated gap closure</th></tr></thead>
+<tbody>
+<tr><td><strong>Path A — Mythos via T13</strong></td><td>When access granted, swap the underlying model. v3-v8 platform amplifies it.</td><td>Hook live since v2.5; T175-T177 prepare end-to-end</td><td>~95% of Mythos-direct + deterministic evidence enforcement</td></tr>
+<tr><td><strong>Path B — Custom flywheel</strong></td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>Themes α + β + partial γ</td><td>~30-50% of Mythos-direct on covered domains</td></tr>
+</tbody>
+</table>
+
+<h3 id="v8-arch">v8 architecture</h3>
+<div class="arch-diagram">
+       ┌──────────────────────────────────────┐
+       │  Confirmed finding (any GENESIS run) │
+       └─────────────────┬────────────────────┘
+                         ▼
+       ┌──────────────────────────────────────┐
+       │  Corpus Curator (T167) — daemon      │
+       │  + Counterexample Miner (T168)       │
+       │  + Synthetic Generator (T169)        │
+       │  + Quality Gate (T170, HITL queue)   │
+       └─────────────────┬────────────────────┘
+                         ▼
+       ┌──────────────────────────────────────┐
+       │   Training Corpus (NEW — versioned)  │
+       │   ├─ Per-domain partitions           │
+       │   │  (crypto / auth / kernel / web…) │
+       │   └─ Counterexample partitions       │
+       └─────────────────┬────────────────────┘
+                         │
+   ┌─────────────────────┼─────────────────────┐
+   ▼                     ▼                     ▼
+LoRA Pipeline      Reward Model         Distillation
+(T171)             (T172)               (T173)
+per specialist     P(exploit works)     small fast models
+   │                     │                     │
+   └─────────────────────┴─────────────────────┘
+                         ▼
+       ┌──────────────────────────────────────┐
+       │   Model Registry (NEW)                │
+       │   ├─ Opus 4.7 (base, generic)        │
+       │   ├─ Specialist LoRAs (crypto/auth/…) │
+       │   ├─ Distilled smalls (haiku-class)   │
+       │   ├─ Reward model                     │
+       │   └─ Mythos when available            │
+       └─────────────────┬─────────────────────┘
+                         ▼
+       ┌──────────────────────────────────────┐
+       │  Model Portfolio Router (T177)       │
+       │  picks per task by depth / latency / │
+       │  cost / domain match                 │
+       └──────────────────────────────────────┘
+</div>
+
+<h3 id="v8-alpha">Theme α — Training-data flywheel (T167–T170)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T167</span>
+  <h3>exploit_corpus_curator (always-on daemon)</h3>
+  <p>Ingests every confirmed GENESIS finding, every successful forge_runner script, every public CVE patch + PoC, every adversarial-debate convergence, every invariant-violation. Normalises into structured tuples. Stored in the new versioned, partitioned Training Corpus.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T168</span>
+  <h3>counterexample_miner</h3>
+  <p>For every confirmed-vulnerable code pattern, mines near-miss code that is structurally similar but <em>not</em> vulnerable. Provides contrastive labels — the difference between brittle and useful fine-tunes.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T169</span>
+  <h3>synthetic_data_generator</h3>
+  <p>Uses v6's replica spawner (T122) to programmatically inject known bug patterns into clean code, generating labelled training data at scale. Bug patterns: SQLi sinks, missing auth checks, race conditions, integer overflows, deserialisation sinks.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T170</span>
+  <h3>corpus_quality_gate</h3>
+  <p>HITL review queue for high-impact training examples. Examples with high uncertainty, novelty, or importance get queued for human verification. Rest auto-accepted on lower bar. <strong>Mandatory immune system</strong> — a single mislabelled "this is exploitable" example poisons every subsequent fine-tune.</p>
+</div>
+
+<h3 id="v8-beta">Theme β — Specialist fine-tuning (T171–T174)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T171</span>
+  <h3>per_specialist_lora_pipeline</h3>
+  <p>Per-specialist LoRA fine-tuning on partition-specific corpus. Crypto / auth / kernel / web / IoT / mobile / OT / embedded specialists each tune on their domain. LoRA adapters are ~300MB each vs 200GB for a full model — cheap to train, deploy, swap.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T172</span>
+  <h3>reward_model_exploit_success</h3>
+  <p>Small classifier predicting P(exploit_succeeds | target, vulnerability_candidate, exploit_attempt). Used by v7's loops as a ranker — higher P gets sandbox time first. Inspired by AlphaZero's value network.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T173</span>
+  <h3>distillation_pipeline</h3>
+  <p>Distils specialist behaviour into smaller, faster models. Crypto-Opus-LoRA → crypto-haiku-distilled. High-throughput screening at low cost — big models for deep reasoning, small models for breadth.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T174</span>
+  <h3>continual_learning_loop</h3>
+  <p>Combines T154 drift-detection + T167 corpus + T171 fine-tunes into a closed continual-learning system. Confirmed bugs flow into corpus daily; specialist re-tunes weekly; drift-controlled rollout; auto-rollback on drift signal.</p>
+</div>
+
+<h3 id="v8-gamma">Theme γ — Mythos integration &amp; portfolio routing (T175–T178)</h3>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T175</span>
+  <h3>t13_conformance_test_suite</h3>
+  <p>Validates that every existing agent / specialist / loop produces structurally identical outputs when the underlying model swaps from Opus to Mythos to a custom fine-tune. Battery of contract tests run on every PR.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T176</span>
+  <h3>mythos_ab_harness</h3>
+  <p>Runs identical engagement scenarios with (a) raw Mythos API calls and (b) GENESIS-orchestrated Mythos. Measures bug yield, time-to-first-bug, exploit quality, false-positive rate, cost. The killer demo: empirical data that GENESIS-on-Mythos &gt; raw Mythos because of evidence enforcement and tool amplification.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T177</span>
+  <h3>model_portfolio_router</h3>
+  <p>Routes per-task to the right backend in the registry. Decision factors: required reasoning depth (deep → Opus or Mythos; shallow → distilled small), latency budget, cost ceiling, task domain. <strong>The most important block in v8.</strong></p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>A session contains: surface scan (1000 calls — distilled small); fingerprinting (50 — distilled small); hypothesis formation (200 — Opus); ROP-composition loop (12 — Mythos when available else Opus); evidence summarisation (5 — distilled medium). Total cost 1/8th of "everything Opus" with quality matching on calls that need it.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip amber">T178</span>
+  <h3>closed_loop_improvement</h3>
+  <p>The flywheel itself — wires T167 corpus + T171 fine-tune + T172 reward-model + T173 distillation + T174 continual-learning + T177 router into a single self-improving system. After 6-12 months the corpus contains a private offensive-security training set no other security platform has access to. <strong>The moat.</strong></p>
+</div>
+
+<h2 id="changelog">Cumulative changelog — v1.0 → v8.0</h2>
+<table>
+<thead><tr><th>Edition</th><th>Headline</th><th>Capability blocks</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>v1.0 Tier-1</td><td>Reliability foundation</td><td>U1-U5 (5 blocks)</td><td class="cov-built">Built</td></tr>
+<tr><td>v2.0 Tier-2</td><td>AI Discovery</td><td>T1-T8 (8 blocks)</td><td class="cov-built">Built</td></tr>
+<tr><td>v2.5 Tier-3</td><td>Frontier capabilities</td><td>T9-T13 (5 blocks)</td><td class="cov-built">Built</td></tr>
+<tr><td>v3.0 Tier-5</td><td>Cross-session reasoning, specialist depth, parallel novelty, operator UI</td><td>T21-T28 + UI redesign (8+ blocks)</td><td class="cov-built">Built</td></tr>
+<tr><td>v4.0 Tier-6</td><td>Novel-vulnerability research platform — differential testing + 51 new probes</td><td>T29-T79 (51 blocks)</td><td class="cov-built">Built</td></tr>
+<tr><td>v5.0 Tier-7</td><td>Zero-day discovery — source-aware reasoning, adversarial synthesis, self-improving tooling, long-horizon</td><td>T80-T120 (41 blocks)</td><td class="cov-planned">Planned</td></tr>
+<tr><td>v6.0 Tier-8</td><td>Sophistication + blackbox 0-day — replica spawner, curiosity RL, threat intel, multi-persona, production engineering</td><td>T121-T154 (34 blocks)</td><td class="cov-planned">Planned</td></tr>
+<tr><td>v7.0 Tier-9</td><td>Reasoning architecture — twelve domain-specific deliberation loops</td><td>T155-T166 (12 blocks)</td><td class="cov-planned">Planned</td></tr>
+<tr><td>v8.0 Tier-10</td><td>Custom models &amp; training flywheel</td><td>T167-T178 (12 blocks)</td><td class="cov-planned">Planned</td></tr>
+</tbody>
+</table>
+
+<h2 id="stores">Knowledge stores added across editions</h2>
+<table>
+<thead><tr><th>Store</th><th>Introduced</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>PostgreSQL / MongoDB / Redis / ChromaDB</td><td>v1.0</td><td>Sessions, vulnerabilities, thoughts, pub/sub, technique recall.</td></tr>
+<tr><td>Mongo <code>target_briefs</code>, <code>artifacts</code>; Chroma <code>session_reflections</code></td><td>v2.0</td><td>T1 brief, T3 artifact metadata, T8 strategic reflections.</td></tr>
+<tr><td>Mongo <code>plan_trees</code></td><td>v2.5</td><td>T11 persistent plan tree.</td></tr>
+<tr><td>Neo4j attack graph + MinIO artifact store</td><td>v3.0</td><td>T21 cross-session graph; T23 artifact share for multi-host workers.</td></tr>
+<tr><td>Vector store, Property DB, Tool registry, Provenance store</td><td>v5.0</td><td>Semantic recall; formal invariants; T97 self-synthesised tools; T103 reasoning trace.</td></tr>
+<tr><td>Threat-intel store, Audit log, Event log</td><td>v6.0</td><td>T129/T130 CVE feeds; T142 immutable RBAC log; T146 replay-able session history.</td></tr>
+<tr><td>Loop-state store</td><td>v7.0</td><td>T160 intermediate states for replay / debug / v8 training data.</td></tr>
+<tr><td>Training corpus + Model registry</td><td>v8.0</td><td>T167 versioned tuples; multi-backend registry feeding T177 router.</td></tr>
+</tbody>
+</table>
+
+<h2 id="mythos">GENESIS vs Claude Mythos</h2>
+<p>
+  Anthropic publicly announced <strong>Claude Mythos Preview</strong> in March-April
+  2026 as a frontier cyber-capable model. Mythos has demonstrated autonomous
+  zero-day discovery at scale, end-to-end exploit synthesis (the FreeBSD NFS
+  17-year RCE), 73% on expert-CTF benchmarks no prior model could complete, and
+  first-of-class long-horizon network attack (32-step takeover). It is gated
+  through Project Glasswing to ~40 organizations.
+</p>
+
+<div class="panel">
+  <div class="title">Short version</div>
+  <p>GENESIS v3.0 is <strong>not Mythos-class</strong>. The ceiling on raw reasoning
+  depth is the model. <strong>The T13 model-swap hook is already live</strong>, so
+  when Mythos becomes reachable it is a settings change to plug it in. Path B
+  (v7 reasoning loops + v8 fine-tuning) closes ~30-50% of the gap on covered
+  domains while waiting for access. Path A (Mythos via T13) closes ~95% of the
+  gap when access materialises.</p>
+</div>
+
+<table>
+<thead><tr><th>Axis</th><th>v4.0 today</th><th>+ v5-v6 (planned)</th><th>+ v7-v8 (planned)</th><th>Mythos-via-T13</th></tr></thead>
+<tbody>
+<tr><td>Modern web-app assessment</td><td>~80%</td><td>~92%</td><td>~95%</td><td>~98%</td></tr>
+<tr><td>Native-code exploitation (user-mode)</td><td>~45%</td><td>~60%</td><td>~75%</td><td>~90%</td></tr>
+<tr><td>Browser / OS zero-day</td><td>~15%</td><td>~30%</td><td>~50%</td><td>~75%</td></tr>
+<tr><td>Long-horizon network attack</td><td>~55%</td><td>~70%</td><td>~80%</td><td>~90%</td></tr>
+<tr><td>Expert-CTF solving</td><td>~45%</td><td>~60%</td><td>~70%</td><td>~95%</td></tr>
+<tr><td>Verification rigor</td><td>~110%</td><td>~115%</td><td>~115%</td><td>~115%</td></tr>
+<tr><td>Audit trail / reproducibility</td><td>~120%</td><td>~125%</td><td>~125%</td><td>~125%</td></tr>
+</tbody>
+</table>
+
+<h2 id="whats-next">What's next — beyond v8.0 (Tier-11 candidates)</h2>
+<ul class="feature-list">
+  <li><strong>Tier-4 leftovers</strong> — instrumented browser/OS fuzz harnesses (T14), kernel + firmware emulation (T15), mobile pipelines (T16), taint + ROP synthesis (T17), campaign / multi-target mode (T18), HITL mid-session (T19), live plan-tree editor (T20).</li>
+  <li><strong>Mythos integration polish</strong> once access drops — T175-T178 are scaffolded but the empirical A/B numbers come from real engagement data.</li>
+  <li><strong>Industry-collaboration corpus</strong> — federate the v8 training corpus across consenting customers without leaking findings (federated learning / differential-privacy fine-tunes).</li>
+</ul>
+
+<h2 id="evidence">How findings are verified</h2>
+<p>A finding marked <em>confirmed</em> or <em>exploited</em> in the report has been through these gates:</p>
+<ol>
+  <li><strong>Evidence rule (U1).</strong> Concrete evidence cited or auto-demoted to unverified.</li>
+  <li><strong>Blind-class rule (U1).</strong> OOB callback or passing oracle required.</li>
+  <li><strong>Critic pass (U1).</strong> Haiku reads claim + evidence and votes.</li>
+  <li><strong>Hypothesis confirmation rule (v3.0).</strong> ≥0.7 confidence on a target-side hypothesis must emit a matching VULNERABILITY block.</li>
+</ol>
+
+<h2 id="limits">What GENESIS can't do</h2>
+<ul class="feature-list">
+  <li><strong>No destructive actions.</strong> Run on targets you can restore.</li>
+  <li><strong>Not a replacement for a human auditor.</strong> Use the report as a starting point.</li>
+  <li><strong>No kernel, firmware, or hypervisor analysis</strong> in v3.0. v5.0 T114 + T139/T140 + Tier-4 T15 close this.</li>
+  <li><strong>No browser-engine zero-day</strong> in v3.0; would need instrumented harnesses.</li>
+  <li><strong>Memory-corruption exploitation is partial.</strong> v3 T9/T10 find crashes and prove reachability; v5 T106-T109 + v7 T155/T158 + v8 T172 are needed for autonomous weaponisation on hardened targets.</li>
+  <li><strong>Frontier-model ceiling.</strong> No amount of scaffolding lifts a model above its reasoning ceiling. T13 is the path to raise that ceiling.</li>
+</ul>
+
+<h2 id="safety">Rules of engagement</h2>
+<div class="panel danger">
+<div class="title">You are responsible</div>
+<p>GENESIS has no authorization check built in. Don't run it against systems you don't own or haven't been explicitly authorized to test.</p>
+</div>
+<ul class="feature-list">
+  <li>Use a dedicated, isolated target-lab network (the compose file sets up <code>vuln-lab</code>).</li>
+  <li>Don't aim it at production without a change window, rollback plan, and the owner's written consent.</li>
+  <li>The sandbox runner is isolated, but an AI-written script is still code you authorized. Read what it's doing on the session viewer.</li>
+  <li>Keep your Anthropic API key out of version control — stored encrypted, redacted in the UI.</li>
+  <li><strong>v6.0 onward:</strong> the OT/ICS specialist (T139) ships with default-deny actuator policy. Persistence/C2 (T79) is opt-in. Persona orchestrator (T135) generates impact-maximising hypotheses — keep against replicas only.</li>
+</ul>
+
+<h2 id="privacy">Data &amp; privacy</h2>
+<ul class="feature-list">
+  <li>All session data lives on your own machine (Postgres, Mongo, Redis, Chroma).</li>
+  <li>Target artifacts (pulled binaries, source trees) live in a Docker volume scoped per session.</li>
+  <li>AI calls go out over HTTPS to Anthropic. Your target payloads and tool outputs <em>are</em> sent as context. Check policy before sensitive scans.</li>
+  <li>The only data persisting across sessions is the intelligence library — technique hashes, strategic reflections, fingerprints. Wipe via the ChromaDB volume.</li>
+</ul>
+
+<h2 id="multitenant">Multi-tenant boundaries (v6.0+)</h2>
+<ul class="feature-list">
+  <li><strong>Hierarchy:</strong> org → team → project. Per-tenant Neo4j namespace, Postgres schema, sandbox quota, LLM-token budget (T141).</li>
+  <li><strong>RBAC roles:</strong> operator, reviewer, admin, read-only. Every action attributed (T142).</li>
+  <li><strong>Audit log:</strong> append-only, immutable, queryable for compliance (T142).</li>
+  <li><strong>Event log:</strong> replay-able session history (T146); ML researchers can A/B new agents against historical sessions.</li>
+  <li><strong>Compliance reports:</strong> PCI-DSS, HIPAA, SOC 2, ISO 27001, NIST CSF, NIST 800-53, OWASP ASVS templates (T144).</li>
+</ul>
+
+<h2 id="ui-tour">UI tour</h2>
+<h3>Dashboard</h3>
+<p>Lists all sessions — recent first. Shows target, profile, status, vulnerability counts, start time. Click a session to open the viewer.</p>
+<h3>Sessions page</h3>
+<p>Paginated table of every session ever run. Status filter + Refresh. Each row has 📥 Download report (Markdown) and ↗️ Open buttons.</p>
+<h3>Session viewer (10 tabs)</h3>
+<p>Findings, Chains, Activity, Tools, Sandbox, Iterations, Story, Graph, Evidence, Errors. Click a Finding row → identification dialog with driving hypothesis, custom-script badge, oracle verdict.</p>
+<h3>Settings</h3>
+<p>Six tabs: LLM · MCP Server · Tools · Agents · Database · Storage · Containers. API key management with redaction; Test Connection; model selection; container fleet status.</p>
+<h3>Intelligence Library</h3>
+<p>Administrative view of what GENESIS has learned across sessions — fingerprints, techniques, reflections.</p>
+<h3>v6.0+ additions</h3>
+<ul class="feature-list">
+  <li>Explanation panel beside the Session Viewer (T147).</li>
+  <li>Agent chorus view — color-coded per role, scrolling in real time (T148).</li>
+  <li>Hypothesis tree viewer with stake-weighted nodes (T149).</li>
+  <li>Mobile companion for on-call (T150).</li>
+</ul>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h4>"LLM test connection failed"</h4>
+<p>Check the API key, provider (Anthropic vs Azure vs Bedrock vs custom — T13 hook), and that your machine can reach the endpoint. On Azure, ensure the URL does <em>not</em> include the <code>/v1/messages</code> suffix.</p>
+
+<h4>Session stuck on "Iteration 0"</h4>
+<p>Almost always the first AI call failed. Open the Errors tab — typically a 401, 400, or network error.</p>
+
+<h4>"Scan failed without running any tool"</h4>
+<p>Look at the Errors tab for phase <code>target_brief</code>. If pre-scan reasoning errored, the loop falls back to the old seed and runs.</p>
+
+<h4>Chromium renderer crashes on memory</h4>
+<p>768 MB cap. A very JS-heavy page can blow it; the render returns an error but the session continues.</p>
+
+<h4>Ghidra container takes forever on first run</h4>
+<p>First-time decompilation takes minutes. Subsequent calls for the same file (by hash) are cached.</p>
+
+<h4>Sandbox says "timed_out: true"</h4>
+<p>The script hit the 60 s wall-clock limit. Either an infinite loop or a slow target.</p>
+
+<h4>Loop-breaker fires too often (v3.0+)</h4>
+<p>The plan tree (T11) should be reducing this. Check the Activity tab for <code>plan_tree_seeded</code>. If absent, the brief failed and the loop is operating without strategic context.</p>
+
+<h4>payload_swarm returns no novelty &gt;0.5 (v3.0+ / v4.0+)</h4>
+<p>Either the variants are too similar (the agent should diversify) or the target is too uniform (the response signature collapses everything to one bucket). v4.0 T30 + T31 widen the signature space.</p>
+
+<h4>Replica spawner failed to scaffold (v6.0)</h4>
+<p>Either T121 fingerprint confidence was below threshold (target is genuinely opaque) or the matched OSS components have license / image-pull issues. Check the Containers tab for the <code>replica_pool</code> service.</p>
+
+<h4>Reasoning loop dead-ends after N turns (v7.0)</h4>
+<p>Loop-state store keeps the trail. Inspect via the Loops tab in the Session Viewer; common causes are budget exhaustion or constraint propagation pruning all branches.</p>
+
+<h4>Specialist drift detected (v6.0/v8.0)</h4>
+<p>T154 fired — the specialist's predictions deviated from baseline. T174 auto-rollback to the last green checkpoint, then alerts MLOps. Check the model registry for active version vs deployed version.</p>
+
+<h2 id="glossary">Glossary</h2>
+<table>
+<tbody>
+<tr><th>Term</th><th>Plain English</th></tr>
+<tr><td>Agent</td><td>One Claude instance running a session or sub-role.</td></tr>
+<tr><td>Artifact</td><td>Any file GENESIS pulled off the target — binary, source, config.</td></tr>
+<tr><td>Attack chain</td><td>A sequence of related bugs: weakness A leads to B leads to compromise.</td></tr>
+<tr><td>CVE</td><td>A publicly disclosed software vulnerability with an ID.</td></tr>
+<tr><td>Deliberation framework</td><td>v7 T160 — shared infrastructure underneath every reasoning loop.</td></tr>
+<tr><td>Decompile</td><td>Turning compiled machine code back into readable source-ish.</td></tr>
+<tr><td>Differential testing</td><td>Sending the same payload to two implementations and looking for divergence (v4 T29).</td></tr>
+<tr><td>Daemon</td><td>An always-on background process. v5/v6 introduce several.</td></tr>
+<tr><td>Evidence</td><td>A concrete observation supporting a vulnerability claim.</td></tr>
+<tr><td>Forge</td><td>This project's name for AI-authored attacks (Payload Forge, Sandbox Runner).</td></tr>
+<tr><td>Fuzzing</td><td>Feeding a program large numbers of generated inputs to find crashes (T9, T24, T99).</td></tr>
+<tr><td>Hypothesis</td><td>A written guess about the target with a plan to prove or disprove it.</td></tr>
+<tr><td>Hypothesis market</td><td>v5 T89 — confidence-staked allocation of sandbox time.</td></tr>
+<tr><td>Iteration</td><td>One cycle of the AI's loop — think, act, read the result.</td></tr>
+<tr><td>LLM</td><td>Large language model — the AI brain (Claude).</td></tr>
+<tr><td>LoRA</td><td>Low-Rank Adaptation — a small adapter on top of a frozen base model. v8 trains one per specialist.</td></tr>
+<tr><td>MCP</td><td>Model Context Protocol — the service that exposes tools the AI can call.</td></tr>
+<tr><td>Model-swap hook</td><td>v2.5 T13 — provider adapter that lets the orchestrator talk to any backend.</td></tr>
+<tr><td>Oracle</td><td>A structured predicate the AI writes alongside an attack, saying what proof looks like.</td></tr>
+<tr><td>OOB</td><td>Out-of-band: a unique URL planted in a payload; firing the URL proves the bug.</td></tr>
+<tr><td>Persona</td><td>v6 T135 — paranoid / ransomware / nation-state / insider / opportunistic adversary frame.</td></tr>
+<tr><td>Plan tree</td><td>v2.5 T11 — Mongo-backed root → phases → actions tree that survives context compression.</td></tr>
+<tr><td>Profile</td><td>How thorough / aggressive a scan is. Fast / Deep / Stealth / Full / APT-sim / Exhaustive.</td></tr>
+<tr><td>Reasoning loop</td><td>v7 — structured multi-turn deliberation harness over a domain (ROP composition, code intent, etc.).</td></tr>
+<tr><td>Reflection</td><td>v2.0 T8 — post-session strategic note stored for future similar-target sessions.</td></tr>
+<tr><td>Replica spawner</td><td>v6 T122 — auto-builds an OSS clone of the target for fearless testing.</td></tr>
+<tr><td>Reward model</td><td>v8 T172 — a classifier predicting P(exploit_succeeds) used to rank sandbox queue.</td></tr>
+<tr><td>Sandbox</td><td>The isolated container where AI-written scripts run — no root, no free internet.</td></tr>
+<tr><td>Session</td><td>One run of GENESIS against one target.</td></tr>
+<tr><td>Symbolic execution</td><td>Treats inputs as math variables to decide reachability. GENESIS uses angr (T10).</td></tr>
+<tr><td>Tier-1 / 2 / 3 / 5 / 6</td><td>Built editions: v1.0 / v2.0 / v2.5 / v3.0 / v4.0.</td></tr>
+<tr><td>Tier-7 / 8 / 9 / 10</td><td>Planned editions: v5.0 / v6.0 / v7.0 / v8.0.</td></tr>
+<tr><td>Training corpus</td><td>v8 T167 — versioned, partitioned tuples of (target_class, vulnerability_pattern, exploit_attempt, outcome, citations).</td></tr>
+<tr><td>Vision</td><td>Claude's ability to see images — GENESIS feeds it browser screenshots (T6, T12).</td></tr>
+</tbody>
+</table>
+
+<p class="mini" style="margin-top:48px;border-top:1px solid var(--rule);padding-top:20px;">
+  This comprehensive manual integrates GENESIS v1.0 (Tier-1, U1-U5), v2.0 (Tier-2,
+  T1-T8), v2.5 (Tier-3, T9-T13), v3.0 (Tier-5, T21-T28), and v4.0 (Tier-6, T29-T79)
+  — all built and shipping — alongside the planned roadmaps for v5.0 (Tier-7,
+  T80-T120), v6.0 (Tier-8, T121-T154), v7.0 (Tier-9, T155-T166), and v8.0 (Tier-10,
+  T167-T178).
+  Architecture, data flow, and the hypothesis JSON contract reflect the actual
+  shipping code in the GENESIS monorepo. For the build-from-source walkthrough see
+  <code>GENESIS_BUILD_FROM_SCRATCH.md</code>; for friendlier framing see the
+  companion <code>GENESIS_for_Dummies.html</code>.
+</p>
+
+</main>
+</div>
+
+</body>
+</html>

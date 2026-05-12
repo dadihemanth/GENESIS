@@ -1,0 +1,35 @@
+# Protobuf wire format — tag bytes for common (field_no, wire_type) pairs.
+# Wire types: 0=varint, 1=fixed64, 2=length-delim, 5=fixed32
+tag1_varint="\x08"
+tag1_64bit="\x09"
+tag1_lendelim="\x0a"
+tag1_32bit="\x0d"
+tag2_varint="\x10"
+tag2_lendelim="\x12"
+tag3_varint="\x18"
+tag3_lendelim="\x1a"
+tag4_varint="\x20"
+tag4_lendelim="\x22"
+tag5_varint="\x28"
+tag5_lendelim="\x2a"
+tag7_varint="\x38"
+tag15_varint="\x78"
+tag16_varint="\x80\x01"
+tag31_varint="\xf8\x01"
+# Common varint values
+varint_0="\x00"
+varint_1="\x01"
+varint_neg1="\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01"
+varint_max_i64="\xff\xff\xff\xff\xff\xff\xff\xff\x7f"
+# Length-delimited prefixes
+len_0="\x00"
+len_1="\x01"
+len_4="\x04"
+len_8="\x08"
+len_255="\xff\x01"
+# Strings often encoded as lendelim
+hello_tag="\x0a\x05hello"
+empty_tag="\x0a\x00"
+# Group / deprecated
+group_start="\x0b"
+group_end="\x0c"

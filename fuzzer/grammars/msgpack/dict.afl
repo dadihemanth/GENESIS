@@ -1,0 +1,60 @@
+# MessagePack — type byte markers (https://github.com/msgpack/msgpack).
+# positive fixint 0x00-0x7f (sample a few)
+pfixint_0="\x00"
+pfixint_7f="\x7f"
+# fixmap 0x80-0x8f
+fixmap_empty="\x80"
+fixmap_1="\x81"
+fixmap_15="\x8f"
+# fixarray 0x90-0x9f
+fixarray_empty="\x90"
+fixarray_1="\x91"
+fixarray_15="\x9f"
+# fixstr 0xa0-0xbf
+fixstr_empty="\xa0"
+fixstr_1="\xa1"
+fixstr_31="\xbf"
+# nil / reserved / bool
+nil="\xc0"
+never_used="\xc1"
+false="\xc2"
+true="\xc3"
+# bin
+bin8="\xc4"
+bin16="\xc5"
+bin32="\xc6"
+# ext
+ext8="\xc7"
+ext16="\xc8"
+ext32="\xc9"
+# float
+float32="\xca"
+float64="\xcb"
+# uint
+uint8="\xcc"
+uint16="\xcd"
+uint32="\xce"
+uint64="\xcf"
+# int
+int8="\xd0"
+int16="\xd1"
+int32="\xd2"
+int64="\xd3"
+# fixext
+fixext1="\xd4"
+fixext2="\xd5"
+fixext4="\xd6"
+fixext8="\xd7"
+fixext16="\xd8"
+# str
+str8="\xd9"
+str16="\xda"
+str32="\xdb"
+# array / map 16/32
+array16="\xdc"
+array32="\xdd"
+map16="\xde"
+map32="\xdf"
+# negative fixint 0xe0-0xff
+nfixint_m1="\xff"
+nfixint_m32="\xe0"

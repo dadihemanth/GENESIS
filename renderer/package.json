@@ -1,0 +1,10 @@
+{
+  "name": "genesis-chromium-renderer",
+  "version": "5.0 - Tier 7",
+  "private": true,
+  "description": "Headless Chromium snapshot service for GENESIS T6 vision tool",
+  "main": "server.js",
+  "dependencies": {
+    "playwright": "1.48.1"
+  }
+}

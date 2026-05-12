@@ -1,0 +1,4 @@
+flask==3.0.3
+waitress==3.0.0
+frida==16.4.10
+frida-tools==12.4.3

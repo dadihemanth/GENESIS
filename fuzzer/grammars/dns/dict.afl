@@ -1,0 +1,37 @@
+# DNS wire format — RFC 1035 bytewise tokens.
+# Flags / QR + opcode
+flag_qr_std="\x00\x00"
+flag_qr_resp="\x80\x00"
+flag_nxdomain="\x81\x83"
+flag_truncated="\x82\x00"
+flag_aa="\x84\x00"
+# Common record type codes (u16)
+qt_a="\x00\x01"
+qt_ns="\x00\x02"
+qt_cname="\x00\x05"
+qt_soa="\x00\x06"
+qt_ptr="\x00\x0c"
+qt_mx="\x00\x0f"
+qt_txt="\x00\x10"
+qt_aaaa="\x00\x1c"
+qt_srv="\x00\x21"
+qt_naptr="\x00\x23"
+qt_opt="\x00\x29"
+qt_any="\x00\xff"
+# Class
+qc_in="\x00\x01"
+# Label / compression
+empty_label="\x00"
+label_len3="\x03"
+label_len8="\x08"
+# DNS compression pointer byte prefix
+ptr_hi="\xc0"
+# Full label examples
+lab_www="\x03www"
+lab_localhost="\x09localhost"
+# EDNS OPT / Extension RCODE
+edns_rcode="\x00\x00\x10\x00"
+# Hex IPv4 payload (A RR)
+rr_a_ttl="\x00\x00\x00\x3c"
+rr_rdlen_4="\x00\x04"
+ipv4_127="\x7f\x00\x00\x01"

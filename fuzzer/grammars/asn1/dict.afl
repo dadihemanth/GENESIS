@@ -1,0 +1,41 @@
+# ASN.1 / DER — tag + universal class bytes.
+# Universal class, primitive
+tag_boolean="\x01"
+tag_integer="\x02"
+tag_bitstring="\x03"
+tag_octetstring="\x04"
+tag_null="\x05"
+tag_oid="\x06"
+tag_utf8="\x0c"
+tag_printable="\x13"
+tag_t61="\x14"
+tag_ia5="\x16"
+tag_utctime="\x17"
+tag_gentime="\x18"
+# Constructed
+tag_sequence="\x30"
+tag_set="\x31"
+# Context-specific
+ctx0_cons="\xa0"
+ctx1_cons="\xa1"
+ctx2_cons="\xa2"
+ctx3_cons="\xa3"
+# Length forms
+len_0="\x00"
+len_short_1="\x01"
+len_short_8="\x08"
+len_long_81="\x81\x80"
+len_long_82_0100="\x82\x01\x00"
+len_indef="\x80"
+eoc="\x00\x00"
+# OIDs (packed) — rsaEncryption 1.2.840.113549.1.1.1
+oid_rsa="\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01"
+# sha256WithRSA 1.2.840.113549.1.1.11
+oid_sha256_rsa="\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x0b"
+# ecPublicKey 1.2.840.10045.2.1
+oid_ec_public="\x06\x07\x2a\x86\x48\xce\x3d\x02\x01"
+# Booleans
+bool_true="\x01\x01\xff"
+bool_false="\x01\x01\x00"
+int_0="\x02\x01\x00"
+int_big="\x02\x05\x00\xff\xff\xff\xff"

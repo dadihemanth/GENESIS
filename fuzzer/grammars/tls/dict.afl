@@ -1,0 +1,42 @@
+# TLS record + handshake byte-level tokens.
+# Content types
+rt_ccs="\x14"
+rt_alert="\x15"
+rt_handshake="\x16"
+rt_appdata="\x17"
+# Versions (record)
+ver_ssl3="\x03\x00"
+ver_tls10="\x03\x01"
+ver_tls11="\x03\x02"
+ver_tls12="\x03\x03"
+ver_tls13="\x03\x04"
+# Handshake types
+hs_hello_req="\x00"
+hs_client_hello="\x01"
+hs_server_hello="\x02"
+hs_cert="\x0b"
+hs_skex="\x0c"
+hs_cert_req="\x0d"
+hs_shello_done="\x0e"
+hs_cert_verify="\x0f"
+hs_ckex="\x10"
+hs_finished="\x14"
+# Alert descriptions
+alert_close="\x01\x00"
+alert_unexpected="\x02\x0a"
+alert_bad_record="\x02\x14"
+# Common cipher suites
+cs_tls_rsa_aes128="\x00\x2f"
+cs_tls_rsa_aes256="\x00\x35"
+cs_ecdhe_rsa_aes128="\xc0\x13"
+cs_ecdhe_rsa_aes256="\xc0\x14"
+cs_tls13_aes128_gcm="\x13\x01"
+cs_tls13_chacha20="\x13\x03"
+# Heartbeat (Heartbleed) extension
+ext_heartbeat="\x00\x0f"
+heartbeat_request="\x01"
+heartbeat_resp="\x02"
+# SNI
+ext_sni="\x00\x00"
+# Compression null
+comp_null="\x00"

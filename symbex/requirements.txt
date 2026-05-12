@@ -1,0 +1,3 @@
+angr==9.2.115
+flask==3.0.3
+waitress==3.0.0

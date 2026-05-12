@@ -1,0 +1,1941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GENESIS for Dummies — A Reference for Vuln Hunters of All Stripes</title>
+<style>
+  :root {
+    --dummies-yellow: #FCD12A;
+    --dummies-yellow-soft: #FFE680;
+    --dummies-black: #1a1a1a;
+    --dummies-red: #D62828;
+    --dummies-blue: #1f6fb2;
+    --dummies-green: #2f8f3f;
+    --cream: #FFFEF7;
+    --paper: #FFFCEE;
+    --ink: #1a1a1a;
+    --rule: #d8cfae;
+    --shadow: 0 2px 0 rgba(26,26,26,0.10), 0 8px 24px rgba(26,26,26,0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background: var(--paper); color: var(--ink); }
+  body { font: 16px/1.65 Georgia, "Iowan Old Style", "Palatino Linotype", serif; }
+  a { color: #b8580a; text-decoration: none; border-bottom: 1px dotted #b8580a; }
+  a:hover { color: var(--dummies-red); border-bottom-color: var(--dummies-red); }
+
+  /* Yellow brand band header */
+  header.brand {
+    background: var(--dummies-yellow);
+    border-bottom: 6px solid var(--dummies-black);
+    padding: 36px 48px 28px;
+    position: relative;
+  }
+  header.brand .bookband {
+    background: var(--dummies-black);
+    color: var(--dummies-yellow);
+    display: inline-block;
+    padding: 6px 18px;
+    font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+  header.brand h1 {
+    margin: 0;
+    font: 900 56px/1.0 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    letter-spacing: -1.5px;
+  }
+  header.brand h1 .for-dummies {
+    color: var(--dummies-black);
+    font-weight: 900;
+  }
+  header.brand .tagline {
+    margin: 14px 0 0;
+    font: italic 18px/1.3 Georgia, serif;
+    color: var(--dummies-black);
+  }
+  header.brand .registered {
+    font-size: 11px; vertical-align: super;
+  }
+  header.brand .author {
+    margin-top: 18px;
+    font: 700 14px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  header.brand .corner-tag {
+    position: absolute;
+    top: 24px; right: 36px;
+    background: var(--dummies-black);
+    color: var(--dummies-yellow);
+    padding: 8px 14px;
+    font: 700 11px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transform: rotate(4deg);
+    border-radius: 4px;
+    box-shadow: 2px 2px 0 var(--dummies-black);
+  }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; max-width: 1280px; margin: 0 auto; }
+  nav.toc {
+    background: var(--cream);
+    border-right: 2px solid var(--rule);
+    padding: 24px 18px;
+    position: sticky; top: 0;
+    height: 100vh; overflow-y: auto;
+    font: 14px/1.45 "Helvetica Neue", Arial, sans-serif;
+  }
+  nav.toc h4 {
+    font: 900 11px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    background: var(--dummies-yellow);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin: 14px 0 6px 0;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  nav.toc a { display: block; padding: 3px 6px; color: var(--ink); border-bottom: 0; }
+  nav.toc a:hover { background: var(--dummies-yellow-soft); color: var(--dummies-black); }
+
+  main { padding: 32px 56px 120px; max-width: 920px; }
+  main h2 {
+    font: 900 32px/1.15 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    margin: 48px 0 6px;
+    letter-spacing: -0.5px;
+    border-bottom: 4px solid var(--dummies-yellow);
+    padding-bottom: 8px;
+  }
+  main h2:first-child { margin-top: 0; }
+  main h3 {
+    font: 800 22px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    margin: 32px 0 6px;
+  }
+  main h4 {
+    font: 700 16px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    margin: 22px 0 4px;
+  }
+  main p { margin: 8px 0; }
+  main p, main li { color: var(--ink); }
+
+  code {
+    background: #f3edd8; color: #5a3a00;
+    padding: 1px 6px; border-radius: 3px;
+    font: 13px/1.4 "SF Mono","Consolas",monospace;
+  }
+  pre {
+    background: #1a1a1a; color: #f7e98c;
+    padding: 14px 16px; border-radius: 4px;
+    overflow-x: auto; font: 13px/1.5 "SF Mono","Consolas",monospace;
+    border-left: 4px solid var(--dummies-yellow);
+  }
+  pre code { background: transparent; padding: 0; color: inherit; }
+
+  /* In This Chapter — bright yellow box at chapter open */
+  .in-this-chapter {
+    background: var(--dummies-yellow);
+    border: 3px solid var(--dummies-black);
+    padding: 16px 22px;
+    margin: 16px 0 24px;
+    border-radius: 6px;
+    box-shadow: 5px 5px 0 var(--dummies-black);
+  }
+  .in-this-chapter .label {
+    font: 900 12px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .in-this-chapter ul {
+    margin: 0; padding-left: 22px;
+    font: 15px/1.55 Georgia, serif;
+  }
+  .in-this-chapter li { margin-bottom: 4px; color: var(--dummies-black); }
+  .in-this-chapter li::marker { content: "▶ "; color: var(--dummies-black); }
+
+  /* Margin icon callouts — Tip / Remember / Warning / Technical Stuff */
+  .icon-box {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 14px;
+    margin: 18px 0;
+    padding: 12px 16px 12px 12px;
+    border-left: 4px solid var(--dummies-black);
+    background: var(--cream);
+    border-radius: 0 6px 6px 0;
+  }
+  .icon-box .glyph {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font: 900 18px/1 "Helvetica Neue", Arial, sans-serif;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 2px 2px 0 var(--dummies-black);
+    border: 2px solid var(--dummies-black);
+  }
+  .icon-box.tip       .glyph { background: var(--dummies-yellow); color: var(--dummies-black); }
+  .icon-box.remember  .glyph { background: var(--dummies-red); color: #fff; }
+  .icon-box.warning   .glyph { background: #ffae00; color: var(--dummies-black); border-radius: 8px; transform: rotate(45deg); }
+  .icon-box.warning   .glyph span { transform: rotate(-45deg); display: inline-block; }
+  .icon-box.tech      .glyph { background: var(--dummies-blue); color: #fff; }
+  .icon-box .body { font: 15.5px/1.5 Georgia, serif; }
+  .icon-box .body strong:first-child {
+    font: 900 12px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Part divider */
+  .part-divider {
+    background: var(--dummies-yellow);
+    border: 4px solid var(--dummies-black);
+    padding: 40px 36px;
+    margin: 60px 0 32px;
+    border-radius: 8px;
+    box-shadow: 8px 8px 0 var(--dummies-black);
+  }
+  .part-divider .part-label {
+    font: 900 14px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--dummies-black);
+    margin: 0;
+  }
+  .part-divider .part-num {
+    font: 900 96px/0.9 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    margin: 4px 0 12px;
+    letter-spacing: -3px;
+  }
+  .part-divider .part-title {
+    font: 900 32px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-black);
+    margin: 0 0 18px;
+  }
+  .part-divider .part-chapters {
+    background: var(--cream);
+    border: 2px solid var(--dummies-black);
+    padding: 14px 20px;
+    border-radius: 4px;
+    font: 15px/1.55 Georgia, serif;
+  }
+  .part-divider .part-chapters strong {
+    font: 900 11px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .part-divider .part-chapters ul {
+    margin: 0; padding-left: 22px;
+  }
+
+  /* Comic-bubble analogy box */
+  .bubble {
+    background: #fff;
+    border: 3px solid var(--dummies-black);
+    border-radius: 18px;
+    padding: 14px 22px;
+    margin: 16px 0;
+    position: relative;
+    box-shadow: 4px 4px 0 var(--dummies-black);
+  }
+  .bubble::before {
+    content: "";
+    position: absolute;
+    top: 100%; left: 36px;
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 14px solid var(--dummies-black);
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    top: 100%; left: 39px;
+    width: 0; height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 11px solid #fff;
+    margin-top: -2px;
+  }
+  .bubble .label {
+    font: 900 11px/1.2 "Helvetica Neue", Arial, sans-serif;
+    color: var(--dummies-red);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .bubble p { margin: 0; font-style: italic; }
+
+  /* Standard table */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 22px; font-size: 14.5px; background: #fff; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 2px solid var(--rule); vertical-align: top; }
+  th {
+    background: var(--dummies-yellow);
+    color: var(--dummies-black);
+    font: 900 12px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 3px solid var(--dummies-black);
+  }
+  tr:nth-child(even) td { background: var(--paper); }
+
+  /* Numbered floor diagram */
+  .floor-list { list-style: none; padding: 0; margin: 14px 0; }
+  .floor-list li {
+    background: var(--cream);
+    border-left: 6px solid var(--dummies-yellow);
+    border-bottom: 2px solid var(--rule);
+    padding: 12px 18px;
+    margin-bottom: 4px;
+  }
+  .floor-list li strong {
+    color: var(--dummies-red);
+    font: 900 13px/1.2 "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: inline-block;
+    min-width: 120px;
+  }
+
+  ul.fl, ol.fl { padding-left: 24px; }
+  ul.fl li, ol.fl li { margin-bottom: 6px; }
+
+  .ascii-art {
+    background: #1a1a1a; color: #f7e98c;
+    padding: 16px 20px; border-radius: 4px;
+    font: 13px/1.6 "SF Mono","Consolas",monospace;
+    white-space: pre; overflow-x: auto;
+    margin: 16px 0;
+    border-left: 4px solid var(--dummies-yellow);
+  }
+
+  .footer-note {
+    background: var(--dummies-yellow);
+    border-top: 4px solid var(--dummies-black);
+    padding: 24px 48px;
+    text-align: center;
+    font: 13px/1.5 Georgia, serif;
+    color: var(--dummies-black);
+  }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: 0; border-bottom: 2px solid var(--rule); }
+    main { padding: 24px; }
+    header.brand { padding: 28px 24px 22px; }
+    header.brand h1 { font-size: 40px; }
+    header.brand .corner-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <span class="corner-tag">Special Edition · v1.0 → v8.0</span>
+  <span class="bookband">A Reference Book</span>
+  <h1>GENESIS <span class="for-dummies">for Dummies<span class="registered">®</span></span></h1>
+  <p class="tagline">A Reference for Vuln Hunters of All Stripes — from "what is a port?" to "I'm fine-tuning my own LoRA, thanks"</p>
+  <p class="author">By Hemanth Dadi · Edited for the rest of us</p>
+</header>
+
+<div class="layout">
+<nav class="toc">
+  <h4>Front matter</h4>
+  <a href="#about">About this book</a>
+  <a href="#assumptions">Foolish assumptions</a>
+  <a href="#conventions">Conventions used</a>
+  <a href="#icons">Icons used</a>
+  <a href="#organized">How this book is organized</a>
+  <a href="#go-from-here">Where to go from here</a>
+
+  <h4>Part I · Knowing GENESIS</h4>
+  <a href="#part1">Part I cover</a>
+  <a href="#ch1">Ch 1 · What the heck is GENESIS?</a>
+  <a href="#ch2">Ch 2 · The 30,000-foot view</a>
+  <a href="#ch3">Ch 3 · Getting up and running</a>
+
+  <h4>Part II · Under the Hood</h4>
+  <a href="#part2">Part II cover</a>
+  <a href="#ch4">Ch 4 · Architecture, demystified</a>
+  <a href="#ch5">Ch 5 · How GENESIS thinks</a>
+  <a href="#ch6">Ch 6 · Where the data lives</a>
+
+  <h4>Part III · The Tier Tour</h4>
+  <a href="#part3">Part III cover</a>
+  <a href="#ch7">Ch 7 · Tier-1 foundations</a>
+  <a href="#ch8">Ch 8 · Tier-2 &amp; Tier-3</a>
+  <a href="#ch9">Ch 9 · v3.0 / Tier-5</a>
+  <a href="#ch10">Ch 10 · v4.0 / Tier-6</a>
+  <a href="#ch11">Ch 11 · v5.0 / Tier-7</a>
+  <a href="#ch12">Ch 12 · v6.0 / Tier-8</a>
+  <a href="#ch13">Ch 13 · v7.0 / Tier-9</a>
+  <a href="#ch14">Ch 14 · v8.0 / Tier-10</a>
+
+  <h4>Part IV · Day-to-day</h4>
+  <a href="#part4">Part IV cover</a>
+  <a href="#ch15">Ch 15 · Running your first session</a>
+  <a href="#ch16">Ch 16 · Reading the results</a>
+  <a href="#ch17">Ch 17 · Tuning settings</a>
+
+  <h4>Part V · Trust &amp; Safety</h4>
+  <a href="#part5">Part V cover</a>
+  <a href="#ch18">Ch 18 · Rules of engagement</a>
+  <a href="#ch19">Ch 19 · Verifying findings</a>
+  <a href="#ch20">Ch 20 · When to doubt GENESIS</a>
+
+  <h4>Part VI · The Part of Tens</h4>
+  <a href="#part6">Part VI cover</a>
+  <a href="#ch21">Ch 21 · Ten common mistakes</a>
+  <a href="#ch22">Ch 22 · Ten capabilities to try first</a>
+  <a href="#ch23">Ch 23 · Ten resources for going deeper</a>
+
+  <h4>Back matter</h4>
+  <a href="#index">Index</a>
+</nav>
+
+<main>
+
+<h2 id="about">About This Book</h2>
+<p>
+  Welcome to <em>GENESIS for Dummies</em>. This book introduces an autonomous
+  security platform called GENESIS to readers who don't (yet) want to wade through
+  the comprehensive technical manual. Whether you're a security engineer kicking
+  the tires, a curious operator who just inherited a deployment, or a CISO who
+  needs to explain to leadership "what does this thing actually do," you're in
+  the right place.
+</p>
+<p>
+  GENESIS has shipped in eight major editions (the team calls them <em>tiers</em>):
+  v1.0 through v3.0 are running today, and v4.0 through v8.0 are planned roadmaps.
+  This book covers all eight — explaining the architecture, the autonomous loop,
+  the hypothesis-driven thinking, every capability block, the safety guardrails,
+  and how to actually use the thing on a Tuesday afternoon. We've left the
+  hardcore JSON schemas and CSS variables for the comprehensive manual; here we
+  focus on plain English.
+</p>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  If you want the deep technical reference instead, see the companion file
+  <code>GENESIS_Manual_Comprehensive.html</code> — same content, denser format,
+  every <code>T</code>-block in full. This book is designed to be skimmed.</div>
+</div>
+
+<h2 id="assumptions">Foolish Assumptions</h2>
+<p>This book assumes that you:</p>
+<ul class="fl">
+  <li>Have used a computer and at least one web browser.</li>
+  <li>Roughly understand what a <em>web application</em> is — something at a URL like <code>https://example.com</code> that responds when you click things.</li>
+  <li>Know that <em>vulnerabilities</em> are software flaws attackers can exploit (SQL injection, leaked credentials, the Heartbleed bug, etc.).</li>
+  <li>Are comfortable with the terminal, or at least willing to run a few commands when prompted.</li>
+  <li>Are operating against targets you have permission to test — your own infrastructure, a contracted engagement, a CTF range, or a bug-bounty program with you on scope.</li>
+</ul>
+<p>This book does <em>not</em> assume that you:</p>
+<ul class="fl">
+  <li>Have shipped your own scanner.</li>
+  <li>Know what a "ROP gadget" is. (We'll explain — see <a href="#ch13">Chapter 13</a>.)</li>
+  <li>Have ever heard of LoRA fine-tuning. (Also covered — see <a href="#ch14">Chapter 14</a>.)</li>
+  <li>Are fluent in CSS, MCP, or three database vendors at once.</li>
+</ul>
+
+<h2 id="conventions">Conventions Used in This Book</h2>
+<ul class="fl">
+  <li><strong>Bold text</strong> highlights important terms when they're first introduced.</li>
+  <li><em>Italics</em> emphasize a word or denote a technical term being defined.</li>
+  <li><code>Monospace</code> indicates code, file paths, commands you type, or configuration values.</li>
+  <li>Capability blocks — the things engineers call <code>U1</code>, <code>T9</code>, <code>T155</code>, etc. — get a brief plain-English explanation in the chapter that introduces them.</li>
+</ul>
+
+<h2 id="icons">Icons Used in This Book</h2>
+<p>
+  Throughout the book, four icons in the margin point you toward different kinds of
+  information. Skip the parts that don't apply to you; treasure the parts that do.
+</p>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  A useful shortcut, a smarter way to do the thing, or a setting most people miss.
+  These are the gold nuggets — read them when you have a minute and you'll save
+  yourself an hour later.</div>
+</div>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  Something you'll thank yourself later for keeping in mind. Often a relationship
+  between two parts of the system, or a rule that applies even when the situation
+  changes.</div>
+</div>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning</strong>
+  Skip this and you'll either crash a target, leak a secret, get yourself in legal
+  trouble, or burn through your AI budget. The triangle is yellow because it's
+  <em>important</em>; the explanation matters.</div>
+</div>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  Deep nerd content — schema details, internal protocol, "why was it built this
+  way?" Optional reading. If you skip it, the rest of the book still works.</div>
+</div>
+
+<h2 id="organized">How This Book Is Organized</h2>
+<p>This book is six parts plus a "Part of Tens." Here's the lay of the land:</p>
+
+<ul class="fl">
+  <li><strong>Part I — Getting to Know GENESIS.</strong> What it is, what it does, and how to set it up.</li>
+  <li><strong>Part II — Under the Hood.</strong> The architecture in plain English. Three rooms connected by hallways.</li>
+  <li><strong>Part III — The Tier Tour.</strong> Each version (v1.0 through v8.0) gets its own chapter. Read the ones you care about; skip the rest.</li>
+  <li><strong>Part IV — Using GENESIS Day-to-Day.</strong> Running sessions, reading results, tuning settings.</li>
+  <li><strong>Part V — Trust &amp; Safety.</strong> The legal, ethical, and "don't break production" guidance.</li>
+  <li><strong>Part VI — The Part of Tens.</strong> Quick reference lists every <em>For Dummies</em> book ends with.</li>
+</ul>
+
+<h2 id="go-from-here">Where to Go from Here</h2>
+<p>
+  Brand new to GENESIS? Start with <a href="#ch1">Chapter 1</a>. Looking to install
+  it? Jump to <a href="#ch3">Chapter 3</a>. Already running v3.0 and want to know
+  what's coming in v4-v8? <a href="#ch10">Chapter 10</a> onward is for you. Curious
+  about the architecture? <a href="#ch4">Chapter 4</a>. Want to skip straight to
+  the gotchas? <a href="#ch21">Chapter 21</a>.
+</p>
+
+<div class="bubble">
+  <span class="label">Friendly nudge</span>
+  <p>You don't have to read this book in order. We won't tell. The Part of Tens
+  alone (Chapters 21-23) is worth the price of admission.</p>
+</div>
+
+<!-- =================== PART I =================== -->
+<div class="part-divider" id="part1">
+  <p class="part-label">Part</p>
+  <p class="part-num">I</p>
+  <p class="part-title">Getting to Know GENESIS</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Discover what GENESIS actually is — past the marketing — and why it isn't just another scanner.</li>
+      <li>Take a 30,000-foot view of the eight editions, visualised as floors of a building you can walk through.</li>
+      <li>Get the platform installed and running, end to end, without throwing your laptop out the window.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch1">Chapter 1: What the Heck Is GENESIS?</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Meeting your new junior security researcher — who never sleeps, never tires, and never forgets</li>
+    <li>Understanding the difference between a scanner and an autonomous AI security platform</li>
+    <li>Knowing when GENESIS is the right tool — and when it isn't</li>
+  </ul>
+</div>
+
+<p>
+  GENESIS is a program you point at a target — a website, an IP address, a hostname
+  you own — and it tries to find security weaknesses in it. Then it writes them up.
+  In a report. With evidence. Then it goes home.
+</p>
+<p>
+  The clever bit is the <em>brain</em>: GENESIS uses Anthropic's Claude as the
+  reasoning engine, surrounded by a fleet of standard security tools (Nmap, Nuclei,
+  SQLMap, etc.) and a growing collection of custom probes (a binary decompiler, a
+  headless browser, a sandboxed script runner, a 4-replica payload swarm, an attack
+  graph). The brain decides what to do next, reads what comes back, forms a picture
+  of the target, and keeps going until it has a report.
+</p>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>Think of GENESIS as a junior security researcher you can hire for a few hours.
+  You give them a website to assess. They open a laptop, take notes, run some
+  standard tools, read the output, form guesses about where the weak spots might be,
+  test those guesses, and write up what they find. GENESIS does that — except the
+  "laptop" is a fleet of containers, the researcher never gets tired, and they
+  remember every target you've ever scanned.</p>
+</div>
+
+<h3>Wait — isn't that just a scanner?</h3>
+
+<p>No. Scanners run a fixed list of checks. GENESIS does five things scanners don't:</p>
+
+<ul class="fl">
+  <li><strong>Forms hypotheses before testing.</strong> "I think the /admin path is interesting because the response leaks the framework version." Then it designs an experiment to confirm or refute that idea.</li>
+  <li><strong>Writes its own exploits.</strong> When the canned scanners don't fit, the AI authors a custom HTTP request, declares what proof would look like (an "oracle"), and either passes or fails honestly.</li>
+  <li><strong>Reads code it pulled.</strong> If the target leaks <code>.git</code> or a sourcemap, GENESIS pulls it and the AI literally reads the source for hardcoded secrets and weak crypto.</li>
+  <li><strong>Remembers across sessions.</strong> Confirmed findings, dead-end techniques, strategic lessons — all stored and recalled when a similar target comes up next time.</li>
+  <li><strong>Has falsification rules.</strong> The platform won't let the AI claim "confirmed" without evidence. There's a second AI (Claude Haiku) that disputes weak claims.</li>
+</ul>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  GENESIS isn't a magic 0-day finder. It's an autonomous agent that does what a
+  junior security researcher would, with a defined process. It still produces
+  occasional false positives, still misses bugs only humans would notice, and
+  still depends on you giving it a target you're allowed to test.</div>
+</div>
+
+<h3>When is GENESIS the right tool?</h3>
+
+<table>
+<tr><th>You should use GENESIS for…</th><th>Don't use GENESIS for…</th></tr>
+<tr><td>Internal security teams testing their own apps</td><td>Scanning systems you don't own without written permission (illegal in most places)</td></tr>
+<tr><td>Penetration testers under contract</td><td>"Stress testing" a competitor's site (don't)</td></tr>
+<tr><td>Bug-bounty researchers on scope</td><td>Production systems without a change window and rollback plan</td></tr>
+<tr><td>Red-team exercises and CTF training ranges</td><td>Anything where a destructive payload could cause physical harm (industrial control systems, medical devices)</td></tr>
+<tr><td>Pre-launch security checks on staging</td><td>Sole authority on whether to ship — always have a human review the report</td></tr>
+</table>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning</strong>
+  GENESIS does not check authorization. There is no "are you sure?" dialog. If
+  you point it at a target you're not allowed to test, the legal consequences are
+  on you. Read <a href="#ch18">Chapter 18 (Rules of Engagement)</a> before you
+  point this thing anywhere.</div>
+</div>
+
+<h2 id="ch2">Chapter 2: The 30,000-Foot View</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Walking through GENESIS's eight editions as floors of a building</li>
+    <li>Knowing which floors are built and which are still on the architect's drafting table</li>
+    <li>Sizing up the major themes per edition without drowning in capability blocks</li>
+  </ul>
+</div>
+
+<p>
+  GENESIS has shipped (or is planned to ship) in eight editions, each a strict
+  superset of the one before. Picture them as the floors of an eight-storey
+  building. Floors 1-4 are open for business; floors 5-8 are still under
+  construction (planning stage), but the foundations and steel for them are laid.
+</p>
+
+<ul class="floor-list">
+  <li><strong>Floor 8 (v8.0)</strong> Custom Models &amp; Training Flywheel — Tier-10 — every confirmed bug becomes training data, fine-tunes specialists, the platform improves with use.</li>
+  <li><strong>Floor 7 (v7.0)</strong> Reasoning Architecture — Tier-9 — twelve specialised reasoning loops that compress search space so a generic LLM can match much larger systems.</li>
+  <li><strong>Floor 6 (v6.0)</strong> Sophistication &amp; Blackbox 0-Day — Tier-8 — replica spawning, curiosity-driven RL, real-time threat intel, multi-persona adversaries, production-grade engineering.</li>
+  <li><strong>Floor 5 (v5.0)</strong> Zero-Day Discovery — Tier-7 — source-aware reasoning, adversarial agent debate, self-improving tooling, long-horizon Researcher agent.</li>
+  <li><strong>Floor 4 (v4.0)</strong> Novel-Vulnerability Research — Tier-6 — differential testing, coverage feedback, 51 new probes spanning parser quirks, HTTP modern, deserialisation, LLM endpoints, AD lateral movement.</li>
+  <li><strong>Floor 3 (v3.0)</strong> Cross-session reasoning — Tier-5 — Neo4j attack graph, 5 specialist agents, parallel sandbox swarm, 10-tab session viewer.</li>
+  <li><strong>Floor 2 (v2.5)</strong> Frontier capabilities — Tier-3 — fuzzing, symbolic execution, persistent plan tree, agentic browser, model-swap hook.</li>
+  <li><strong>Floor 1 (v2.0)</strong> AI Discovery — Tier-2 — payload forge, artifact pull, Ghidra decompilation, sandbox runner, vision, CVE patch reader, session reflections.</li>
+  <li><strong>Ground floor (v1.0)</strong> Reliability foundation — Tier-1 — evidence rules, loop-breaker, chain suggestions, technique recall, multi-agent messaging.</li>
+</ul>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  The numbering is intentionally weird. v1.0 is Tier-1, v2.0 is Tier-2, but v3.0 is
+  <em>Tier-5</em> because the team renumbered after some of the planned Tier-4 work
+  was either folded into Tier-3 or deferred. Tiers 6 onward map cleanly to v4-v8.
+  If a future edition adds a "Tier-4 leftovers" pack (instrumented browser fuzzing,
+  kernel emulation, mobile pipelines), the numbering may shift again.</div>
+</div>
+
+<h3>Why so many editions?</h3>
+
+<p>Each edition has a clear, single thesis:</p>
+
+<table>
+<tr><th>Edition</th><th>Thesis in one sentence</th></tr>
+<tr><td>v1.0</td><td>Make the AI's process <em>reliable</em>.</td></tr>
+<tr><td>v2.0</td><td>Make the AI's output <em>original</em>.</td></tr>
+<tr><td>v2.5</td><td>Make the AI's reach <em>deeper and longer</em>.</td></tr>
+<tr><td>v3.0</td><td>Make the AI's recall <em>persistent</em>; specialisation depth-first; parallel.</td></tr>
+<tr><td>v4.0</td><td>Find <em>novelty</em> — bugs that don't match a signature.</td></tr>
+<tr><td>v5.0</td><td>Make the AI <em>imagine</em> — hypothesise from first principles.</td></tr>
+<tr><td>v6.0</td><td>Crack <em>black boxes</em> and ship enterprise-deployable.</td></tr>
+<tr><td>v7.0</td><td>Make the AI <em>reason in loops</em> instead of one shot.</td></tr>
+<tr><td>v8.0</td><td>Train the models the platform <em>deserves</em>.</td></tr>
+</table>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  If you're deciding whether to invest in a particular edition, look at the
+  thesis above first. Editions whose thesis doesn't apply to your engagement type
+  can wait. (E.g., if you only ever scan whitebox CI/CD where source is in hand,
+  v6.0's blackbox-first themes are lower priority for you.)</div>
+</div>
+
+<h2 id="ch3">Chapter 3: Getting GENESIS Up and Running</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Reviewing the basic prerequisites (Docker, an Anthropic API key, and a target you're allowed to test)</li>
+    <li>Spinning up the full container fleet via Docker Compose</li>
+    <li>Configuring your API key and running your first sanity scan</li>
+  </ul>
+</div>
+
+<h3>Prerequisites</h3>
+
+<p>You'll need:</p>
+<ul class="fl">
+  <li><strong>Docker + Docker Compose.</strong> GENESIS ships as a fleet of containers. Compose orchestrates them.</li>
+  <li><strong>An Anthropic API key.</strong> Get one at the Anthropic console. Without it, the AI part doesn't run.</li>
+  <li><strong>A target you have permission to test.</strong> A vulnerable training app like DVWA or Juice Shop is great. Or your own dev environment.</li>
+  <li><strong>Disk space.</strong> The full v3.0 fleet (13 containers including Ghidra, AFL++, angr, Chromium, four sandbox replicas) is around 8-10 GB.</li>
+  <li><strong>Memory.</strong> 8 GB minimum, 16 GB comfortable. The Chromium and Ghidra containers are memory-hungry.</li>
+</ul>
+
+<h3>The basic dance</h3>
+
+<p>From the project root, the typical bootstrap sequence is:</p>
+
+<pre>git clone &lt;the repo&gt;
+cd GENESIS
+cp .env.example .env
+# edit .env to set your ANTHROPIC_API_KEY (or do it later in the UI)
+docker compose up -d
+# wait ~60 seconds for Postgres / Mongo / Neo4j / Chroma to come up healthy
+open http://localhost:3000</pre>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  You can leave <code>ANTHROPIC_API_KEY</code> blank in <code>.env</code> and set
+  it instead in the Settings page of the running UI. The UI version uses the same
+  encrypted-at-rest store that the API uses; it's redacted on display so you can't
+  accidentally screenshot it.</div>
+</div>
+
+<h3>What's actually running</h3>
+
+<p>If you run <code>docker compose ps</code> after a successful start, you'll see something like:</p>
+
+<table>
+<tr><th>Container</th><th>What it does</th></tr>
+<tr><td><code>frontend</code></td><td>The React web UI on port 3000</td></tr>
+<tr><td><code>backend</code></td><td>The FastAPI orchestrator on port 8000</td></tr>
+<tr><td><code>mcp_server</code></td><td>The Express tool registry on port 3001</td></tr>
+<tr><td><code>postgres</code></td><td>System of record (sessions, vulnerabilities, settings)</td></tr>
+<tr><td><code>mongo</code></td><td>Agent thoughts, hypothesis journals, raw tool outputs</td></tr>
+<tr><td><code>redis</code></td><td>Pub/sub for the live feed and cross-agent message bus</td></tr>
+<tr><td><code>chroma</code></td><td>Technique recall and session reflections (vector store)</td></tr>
+<tr><td><code>neo4j</code></td><td>Cross-session attack graph (v3.0+)</td></tr>
+<tr><td><code>minio</code></td><td>Artifact share for multi-host workers (v3.0+)</td></tr>
+<tr><td><code>celery_worker</code></td><td>Background job runner</td></tr>
+<tr><td><code>forge_sandbox × 4</code></td><td>Hardened replicas where AI scripts run</td></tr>
+<tr><td><code>ghidra_headless</code></td><td>Decompiles pulled binaries to pseudo-C</td></tr>
+<tr><td><code>chromium_renderer</code></td><td>Headless browser for Vision (T6) and agentic browser (T12)</td></tr>
+<tr><td><code>fuzzer</code></td><td>AFL++ + honggfuzz for memory-safety bug hunting (T9)</td></tr>
+<tr><td><code>symbex</code></td><td>angr for symbolic-execution reachability proofs (T10)</td></tr>
+<tr><td><code>instrumentation</code></td><td>Frida + DynamoRIO for runtime tracing (T25)</td></tr>
+</table>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning</strong>
+  The first time you bring up the fleet, image pulls can take a while
+  (Ghidra alone is ~2.5 GB). Don't kill the compose run — it's not stuck, it's
+  downloading. Subsequent restarts are fast.</div>
+</div>
+
+<h3>Your first scan</h3>
+
+<ol class="fl">
+  <li>Open <code>http://localhost:3000</code>.</li>
+  <li>Settings → enter your Anthropic API key. Click "Test Connection" — should be a green check.</li>
+  <li>Dashboard → "Start New Session". Type a target — for a first scan, point it at <code>http://localhost:8080</code> if you've spun up DVWA or Juice Shop alongside.</li>
+  <li>Pick a profile. <strong>Fast</strong> is good for a first sanity check. <strong>Deep</strong> is the realistic default. (v3.0+ defaults every scan to <strong>Exhaustive</strong> with idle-stop.)</li>
+  <li>Click Start. Watch the live feed. Findings appear in the Findings tab as they're confirmed.</li>
+  <li>When the session ends (or you stop it), download the Markdown report.</li>
+</ol>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  AI calls cost money. A Deep scan against a non-trivial target can run a few
+  dollars of Anthropic API spend. Set a budget alert in the Anthropic console
+  before you start firing scans against everything you can think of.</div>
+</div>
+
+<!-- =================== PART II =================== -->
+<div class="part-divider" id="part2">
+  <p class="part-label">Part</p>
+  <p class="part-num">II</p>
+  <p class="part-title">Under the Hood</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Wander the architecture without getting lost in port numbers — three rooms connected by hallways.</li>
+      <li>Grasp how GENESIS thinks: hypotheses, evidence, oracles, and why the AI can't just say "confirmed" and walk away.</li>
+      <li>See where every piece of data lives — five filing cabinets, each with a job.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch4">Chapter 4: The Architecture, Demystified</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Picturing GENESIS as three rooms — Frontend, Backend, MCP Server — with hallways between them</li>
+    <li>Understanding how a single click in the UI travels all the way to a Nmap scan and back</li>
+    <li>Knowing why the architecture is "polyglot" and why that's not just buzzword bingo</li>
+  </ul>
+</div>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>Imagine three rooms connected by hallways. Room 1 is the lobby (Frontend) where
+  the operator stands. Room 2 is the office (Backend) where the AI brain reads
+  reports and gives instructions. Room 3 is the workshop (MCP Server) where the
+  actual tools — drills, scanners, decompilers — live. The lobby never goes
+  directly to the workshop. Every request from the lobby walks to the office; the
+  office decides what tool the AI wants; the office walks to the workshop; the
+  workshop runs the tool and walks the result back to the office; the office
+  thinks about it and walks an update back to the lobby. The lobby just watches
+  the live feed and clicks buttons.</p>
+</div>
+
+<h3>The three rooms</h3>
+
+<ul class="fl">
+  <li><strong>Frontend (Room 1, port 3000):</strong> A React web app. Pages for Dashboard, Sessions, Vulnerabilities, Tools, Attack Graph. Talks to the Backend via REST and a WebSocket. That's it.</li>
+  <li><strong>Backend (Room 2, port 8000):</strong> A Python FastAPI service. Runs the AI Orchestrator (the loop calling Claude). Owns session lifecycle. Manages the WebSocket. Talks to all the databases.</li>
+  <li><strong>MCP Server (Room 3, port 3001):</strong> A Node.js Express service. Hosts the registry of 100+ scanning tools. The Backend POSTs to <code>/tools/execute</code>; the MCP Server runs the tool (or spawns a subprocess) and returns the result.</li>
+</ul>
+
+<h3>The data flow, step by step</h3>
+
+<ol class="fl">
+  <li><strong>You click "Start New Session"</strong> in the Frontend. The Frontend POSTs to <code>/api/v1/sessions</code> with the target.</li>
+  <li><strong>The Backend creates a session row</strong> in PostgreSQL and kicks off the AI Orchestrator.</li>
+  <li><strong>The Orchestrator builds a prompt</strong> with: the system prompt ("you are an autonomous red-team operator"), the tool catalog, any cross-session memory, and the current state.</li>
+  <li><strong>It calls Claude.</strong> Claude responds with either a tool call ("run nmap on the target") or a hypothesis / vulnerability block.</li>
+  <li><strong>If a tool call:</strong> the Orchestrator HTTP-POSTs <code>/tools/execute</code> on the MCP Server. The MCP Server runs nmap (or whatever), captures the output, returns JSON.</li>
+  <li><strong>The Orchestrator publishes</strong> the tool call and result on a Redis channel <code>session:{your_session_id}</code>.</li>
+  <li><strong>The WebSocketManager</strong> (also in the Backend) is subscribed to that Redis channel. It broadcasts the event to every WebSocket client watching this session.</li>
+  <li><strong>Your Frontend</strong> sees the event arrive on the WebSocket and updates the UI in place — no polling.</li>
+  <li><strong>Repeat steps 3-8</strong> until the AI says "I'm done" (FINAL_REPORT) or the loop-breaker forces a wrap-up.</li>
+</ol>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  Why Redis pub/sub instead of the Backend writing directly to WebSockets? Because
+  in production you want multiple Backend replicas behind a load balancer. The
+  Orchestrator might be on Backend instance A; the operator's WebSocket might be
+  connected to instance B. Redis is the shared memory that lets B see what A is
+  doing. It also makes the design replay-able for v6.0's event sourcing.</div>
+</div>
+
+<h3>Why polyglot persistence?</h3>
+
+<p>
+  GENESIS uses five (eventually more) databases, each chosen because it's the right
+  shape for one specific job. This isn't over-engineering — it's <em>using the right
+  tool for the right thing</em>:
+</p>
+
+<ul class="fl">
+  <li><strong>PostgreSQL</strong> stores the report. Sessions, vulnerabilities, settings, users — relational data with strict schema and foreign keys.</li>
+  <li><strong>MongoDB</strong> stores everything that varies in shape — agent thoughts, hypothesis journals, raw tool outputs. JSON-shaped, sometimes huge, rarely needs joins.</li>
+  <li><strong>Redis</strong> is the postal service. Live-feed events flow over it. The shared findings bus between agents lives in it.</li>
+  <li><strong>ChromaDB</strong> answers "have we seen something like this before?" — vector embeddings for technique recall and session reflections.</li>
+  <li><strong>Neo4j (v3.0+)</strong> answers "what attack chains exist?" — a graph of Targets, Hosts, Services, Findings, and how they connect.</li>
+  <li><strong>MinIO (v3.0+)</strong> stores big files (pulled binaries, fuzz crashes) so any worker on any host can fetch them.</li>
+</ul>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  You can wipe ChromaDB to start GENESIS's "memory" from scratch — useful when
+  testing a clean comparison, or when ChromaDB's embeddings drift away from useful
+  recall.</div>
+</div>
+
+<h2 id="ch5">Chapter 5: How GENESIS Thinks</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Understanding hypothesis-driven testing — the heart of how GENESIS reasons</li>
+    <li>Meeting "oracles" — the secret sauce that lets the AI prove its own claims</li>
+    <li>Seeing the evidence rules and the adversarial critic that prevent the AI from grading its own homework</li>
+  </ul>
+</div>
+
+<h3>The hypothesis loop</h3>
+
+<p>
+  Most scanners work on a "fire and forget" model: try check N, see if it failed,
+  move to check N+1. GENESIS works differently. It has to <em>write down what it
+  thinks is happening</em> before it tests anything. The structure is always:
+</p>
+
+<ul class="fl">
+  <li><strong>Statement:</strong> "I think endpoint /api/orders/:id is IDOR-vulnerable because the auth check looks missing."</li>
+  <li><strong>Evidence for:</strong> Things observed that support the idea.</li>
+  <li><strong>Evidence against:</strong> Things observed that argue against it.</li>
+  <li><strong>Next test:</strong> What it'll do to prove or disprove the idea.</li>
+  <li><strong>Falsification criterion:</strong> The specific result that would <em>kill</em> the hypothesis.</li>
+  <li><strong>Status:</strong> active / confirmed / ruled_out.</li>
+</ul>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>A doctor doesn't randomly run every test on every patient. They form a working
+  diagnosis, design tests that would prove or disprove it, run the test, update the
+  diagnosis. GENESIS does that — and the "diagnosis" (the hypothesis) is written
+  down where you can read it.</p>
+</div>
+
+<h3>What's an oracle?</h3>
+
+<p>
+  When the AI writes a custom HTTP request via the <em>Payload Forge</em> or a
+  custom script via the <em>Sandbox Runner</em>, it has to declare alongside it
+  what success would look like. That declaration is the <strong>oracle</strong>.
+  Examples:
+</p>
+
+<ul class="fl">
+  <li><em>"Expect status 500 and body must contain <code>psycopg</code>"</em> — proves the database threw an error from a SQL injection.</li>
+  <li><em>"Response time greater than 8000 ms"</em> — proves a time-based blind injection.</li>
+  <li><em>"Body must contain this unique token I planted"</em> — proves reflection.</li>
+  <li><em>"Body length must differ by more than 200 bytes between baseline and attack"</em> — proves boolean blind injection.</li>
+</ul>
+
+<p>
+  The platform sends the request, runs the oracle, and reports pass / fail / partial.
+  The AI doesn't get to grade itself.
+</p>
+
+<h3>The evidence gate (U1)</h3>
+
+<p>
+  Before any finding leaves the orchestrator with verification status "confirmed" or
+  "exploited", three rules run in code (not in the AI's prompt):
+</p>
+
+<ol class="fl">
+  <li><strong>Evidence rule.</strong> Concrete evidence must be cited. Empty list → automatic demotion to "unverified".</li>
+  <li><strong>Blind-class rule.</strong> Blind bugs (blind SSRF, blind XXE, time-based SQLi) require an OOB callback hit OR a passing oracle.</li>
+  <li><strong>Critic pass.</strong> A second AI (Claude Haiku, smaller and cheaper) reads the claim and the evidence and votes confirmed / disputed. The critic can downgrade even claims that pass the deterministic rules.</li>
+</ol>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  The evidence gate is in code, not in prompt. The AI cannot talk its way around
+  it. This is the single biggest reason a "confirmed" finding from GENESIS is more
+  trustworthy than a confirmed finding from a one-shot LLM call.</div>
+</div>
+
+<h3>The verification ladder</h3>
+
+<table>
+<tr><th>Status</th><th>Meaning</th></tr>
+<tr><td>Unverified</td><td>The AI suggested this might be a problem but couldn't prove it. Worth a human look.</td></tr>
+<tr><td>Confirmed</td><td>The AI produced concrete evidence — quoted tool output, OOB hit, passing oracle.</td></tr>
+<tr><td>Exploited</td><td>The AI actually demonstrated the bug working against the target.</td></tr>
+<tr><td>Disputed</td><td>The Haiku critic reviewed and decided the evidence doesn't hold up. Treat as false positive.</td></tr>
+</table>
+
+<h2 id="ch6">Chapter 6: Where the Data Lives</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Visiting each of the five filing cabinets GENESIS keeps</li>
+    <li>Knowing what to look in when you want to answer a specific question</li>
+    <li>Discovering the new stores planned for v5, v6, v7, and v8</li>
+  </ul>
+</div>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>Imagine an archivist with five filing cabinets. Each cabinet is for a different
+  kind of document. The archivist knows: "If you want a contract, that's the legal
+  cabinet. Lab notes? Yellow. Phone messages? Pink." Same idea here.</p>
+</div>
+
+<h3>The five cabinets</h3>
+
+<ul class="floor-list">
+  <li><strong>Cabinet 1 — PostgreSQL.</strong> The official record. Sessions, vulnerabilities, settings, users. When the auditor asks "what did GENESIS find on this engagement?", you query PostgreSQL.</li>
+  <li><strong>Cabinet 2 — MongoDB.</strong> The lab notebook. Agent thoughts (every reasoning step). Hypothesis journals. Raw tool outputs. Target Intent Briefs (T1). Plan trees (T11). Pulled artifact metadata (T3).</li>
+  <li><strong>Cabinet 3 — Redis.</strong> The whiteboard. Live-feed channel <code>session:{id}</code>. Cross-agent shared findings list (with TTL). Ephemeral.</li>
+  <li><strong>Cabinet 4 — ChromaDB.</strong> The "have I seen this before?" cabinet. Vector embeddings of past techniques (U4) and post-session strategic reflections (T8).</li>
+  <li><strong>Cabinet 5 — Neo4j (v3.0+).</strong> The attack-graph cabinet. Targets, Hosts, Services, Findings, Credentials, with edges for LISTENS_ON, CHAINS_INTO, AUTHENTICATES_TO, GRANTS.</li>
+</ul>
+
+<h3>What v5+ adds to the archive</h3>
+
+<ul class="fl">
+  <li><strong>Vector store</strong> — semantic recall over the corpus of source / hypotheses / findings.</li>
+  <li><strong>Property database</strong> — formal invariants per target inferred by T83.</li>
+  <li><strong>Tool registry</strong> — self-synthesised tools (T97) get registered here.</li>
+  <li><strong>Provenance store</strong> — the full reasoning trace per finding, for replay (T103).</li>
+  <li><strong>Threat-intel store (v6)</strong> — CVE feeds + advisories ingested by T129.</li>
+  <li><strong>Audit log (v6)</strong> — append-only, every action attributed to a person (T142).</li>
+  <li><strong>Event log (v6)</strong> — replay-able session history (T146).</li>
+  <li><strong>Loop-state store (v7)</strong> — intermediate states per reasoning loop (T160).</li>
+  <li><strong>Training corpus (v8)</strong> — versioned, partitioned tuples that feed LoRA fine-tunes (T167).</li>
+</ul>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  The Mongo collection <code>hypothesis_journals</code> is criminally
+  under-explored. When a finding looks weird, open the journal for that session and
+  read the hypothesis chain backwards from the finding. You'll often see the AI's
+  reasoning in plain prose.</div>
+</div>
+
+<!-- =================== PART III =================== -->
+<div class="part-divider" id="part3">
+  <p class="part-label">Part</p>
+  <p class="part-num">III</p>
+  <p class="part-title">The Tier Tour</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Take one chapter per edition — v1.0 through v8.0 — and learn what each adds and why.</li>
+      <li>See the headline capabilities (we don't list every T-block; that's what the comprehensive manual is for).</li>
+      <li>Skim the "Technical Stuff" sidebars when you want depth; skip them when you don't.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch7">Chapter 7: Tier-1 Foundations (v1.0)</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Meeting the five guardrails that keep GENESIS honest (U1 through U5)</li>
+    <li>Understanding why the reliability foundation came before any AI cleverness</li>
+    <li>Knowing why you'd never want to remove these even if you could</li>
+  </ul>
+</div>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>Tier-1 is like installing guardrails, a notebook, and a telephone in the
+  researcher's office. None of it is the work itself. All of it makes sure the
+  work is honest, doesn't go in circles, doesn't disappear when the researcher
+  logs off, and travels between teammates.</p>
+</div>
+
+<p>Five upgrades, all in v1.0:</p>
+
+<ul class="fl">
+  <li><strong>U1 — Evidence rules &amp; adversarial critic.</strong> A claim of "confirmed" must cite real evidence; the platform demotes empty claims; a second AI (Haiku) disputes weak ones.</li>
+  <li><strong>U2 — Loop-breaker.</strong> If the AI calls the same tool with the same parameters three times in a row, the platform injects a "pivot or wrap up" nudge. Second time, it forces a final report.</li>
+  <li><strong>U3 — Active chain suggestions.</strong> When a finding confirms, a keyword playbook injects a follow-up suggestion. SQLi → dump schema → try <code>--os-shell</code>. SSRF → cloud metadata, internal services. JWT weak secret → mint admin token.</li>
+  <li><strong>U4 — Technique recall.</strong> ChromaDB stores per-technique memory: what worked AND what didn't. Future sessions on similar fingerprints inherit both.</li>
+  <li><strong>U5 — Multi-agent messaging.</strong> A Redis findings bus + a "PRIOR_PHASE_FINDINGS" seed between phases means parallel agents actually share what they discover.</li>
+</ul>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  Without Tier-1, every later edition's "confirmed" claim is just the AI's
+  word. Tier-1 is what makes the report worth reading. It's invisible when it
+  works, painful when it doesn't.</div>
+</div>
+
+<h2 id="ch8">Chapter 8: Tier-2 &amp; Tier-3 — AI Discovery and Frontier (v2.0 / v2.5)</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Watching GENESIS shift from "orchestrator of scanners" to "AI doing original work"</li>
+    <li>Walking through the eight Tier-2 capabilities (T1 through T8)</li>
+    <li>Going deeper into native code with the five Tier-3 capabilities (T9 through T13)</li>
+  </ul>
+</div>
+
+<h3>Tier-2 (v2.0) — when the AI started doing original work</h3>
+
+<p>v2.0 added eight headline capabilities:</p>
+
+<table>
+<tr><th>Block</th><th>What it does, plainly</th></tr>
+<tr><td>T1 — Target Intent Brief</td><td>Before any tool runs, the AI thinks for a few thousand tokens and writes a structured brief about the target. Stack guess, attack surface ideas, payload seeds.</td></tr>
+<tr><td>T2 — AI Payload Forge</td><td>The AI writes the full HTTP request itself — method, URL, headers, body — and declares an oracle saying what proof would look like.</td></tr>
+<tr><td>T3 — Artifact Hunter &amp; Pull</td><td>Probes for exposed <code>.git</code> / sourcemaps / Docker registries / Swagger / leaked <code>.env</code>; pulls the interesting ones into a per-session folder.</td></tr>
+<tr><td>T4 — Binary Decompiler</td><td>Ghidra-headless turns pulled binaries into pseudo-C the AI can read.</td></tr>
+<tr><td>T5 — Sandbox Runner</td><td>The AI writes a short script (Python / Node / Bash) and runs it in a hardened container with no root and no free internet.</td></tr>
+<tr><td>T6 — Vision</td><td>Headless Chromium loads the page, takes a screenshot; the AI literally looks at the picture.</td></tr>
+<tr><td>T7 — CVE Patch Reader</td><td>Pulls the upstream fix commit for a CVE; the AI reads the diff and infers the pre-patch behaviour.</td></tr>
+<tr><td>T8 — Session Reflections</td><td>After the session ends, a cheap model writes a short strategic lesson stored in ChromaDB for similar future targets.</td></tr>
+</table>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  T7 is criminally underused. If your target runs a known library at a specific
+  version, ask the agent to <code>cve_patch_pull</code> on the most recent CVE for
+  that library. The AI can often write a working pre-patch exploit just from the
+  diff.</div>
+</div>
+
+<h3>Tier-3 (v2.5) — frontier capabilities</h3>
+
+<table>
+<tr><th>Block</th><th>What it does, plainly</th></tr>
+<tr><td>T9 — Coverage-guided fuzzer</td><td>AFL++ and honggfuzz hammer pulled binaries with mutated inputs to find memory-corruption crashes.</td></tr>
+<tr><td>T10 — Symbolic execution</td><td>angr proves whether a suspect code path is actually reachable, or returns a definite "no, it's not."</td></tr>
+<tr><td>T11 — Persistent plan-tree</td><td>Mongo-backed root → phases → actions tree that survives context compression. Auto-replans when stuck.</td></tr>
+<tr><td>T12 — Agentic browser</td><td>Multi-step Playwright sessions. Cookies persist. Each step returns a screenshot. The AI literally drives the browser.</td></tr>
+<tr><td>T13 — Model-swap hook</td><td>The provider adapter lets the orchestrator swap between Anthropic API / Azure / Bedrock / a custom endpoint by changing settings.</td></tr>
+</table>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  T13 is the unsung hero of the entire roadmap. It's the on-ramp for plugging in
+  Claude Mythos (when access is granted) without any code changes. Every later
+  edition's value compounds with T13 — better model under the hood, same
+  scaffolding above.</div>
+</div>
+
+<h2 id="ch9">Chapter 9: v3.0 / Tier-5 — Where Originality Begins</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Seeing why v3.0 is the current shipping edition and what makes it materially different from v2.5</li>
+    <li>Understanding the eight headline capabilities (T21 through T28) and what they enable in combination</li>
+    <li>Discovering the 10-tab session viewer that turns the agent's reasoning into a UI</li>
+  </ul>
+</div>
+
+<p>
+  v3.0 is about <strong>persistence, specialisation, and visibility</strong>. The
+  agent now remembers what it learned about every target across every session
+  (Neo4j attack graph), spawns conditional specialists when a surface deserves them,
+  fans payload variants in parallel across a 4-replica sandbox pool, and produces
+  an output surface — ten tabs of evidence-linked context per session — an operator
+  can actually read.
+</p>
+
+<table>
+<tr><th>Block</th><th>What it does, plainly</th></tr>
+<tr><td>T21 — Neo4j attack graph</td><td>Every confirmed finding becomes a node in a graph that lasts forever. Cross-session: prior engagements against the same target stay queryable.</td></tr>
+<tr><td>T22 — 5 specialist agents</td><td>Crypto / Auth / RevEng / ExploitDev / Network specialists activate based on Phase-1 surface signals. They go deeper on a specific axis without re-running generalist work.</td></tr>
+<tr><td>T23 — Multi-host workers + MinIO</td><td>Celery workers run on multiple hosts. Pulled artifacts live in MinIO so any worker can read any artifact.</td></tr>
+<tr><td>T24 — Grammar-aware + differential fuzzing</td><td>15 shipped fuzz grammars (json/xml/http/jwt/dns/tls/pdf/protobuf/etc.). Differential mode runs two binaries against the same corpus and reports divergent outputs.</td></tr>
+<tr><td>T25 — Frida + DynamoRIO instrumentation</td><td>Runtime tracing. Frida injects hooks into running processes. DynamoRIO gives basic-block coverage and syscall traces.</td></tr>
+<tr><td>T26 — Crypto primitive library</td><td>Seven famous crypto attacks one tool call away — padding oracle, Bleichenbacher, ECDSA nonce reuse, length extension, low-e RSA, lattice (Wiener), JWT confusion.</td></tr>
+<tr><td>T27 — Live observability panels</td><td>The 10-tab session viewer (Findings / Chains / Activity / Tools / Sandbox / Iterations / Story / Graph / Evidence / Errors).</td></tr>
+<tr><td>T28 — Sandbox pool + payload_swarm</td><td>Four hardened replicas; payload_swarm fans variants in parallel and ranks them by oracle verdict + behavioural-shape novelty score.</td></tr>
+</table>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  v3.0 also added two big lifestyle changes: <strong>Exhaustive scan mode</strong>
+  with idle-stop (runs until 5 consecutive iterations produce no new findings) and
+  the <strong>Creativity Mandate</strong> in the system prompt that pushes the
+  agent toward second-hop reasoning ("chat input → LLM tool-use → SQL", "upload →
+  AV scanner → log viewer reflection") rather than running a stock-tool checklist.</div>
+</div>
+
+<h2 id="ch10">Chapter 10: v4.0 / Tier-6 — Hunting Bugs Nobody Has Seen</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Grasping why v3.0 finds known-shape bugs well but misses the "wow" CVE-of-the-year class</li>
+    <li>Understanding the four machinery gaps that block novel discovery</li>
+    <li>Skimming the 13 implementation waves (T29 through T79) without trying to memorise all 51 probes</li>
+  </ul>
+</div>
+
+<p>
+  v3.0 is strong on bug classes that have been described publicly. The bugs that
+  win bug bounties and become CVE-of-the-year aren't signature-shaped — they live
+  at the seams between two parsers that disagree, between two states an
+  application should be reachable in only one order, between HTTP/2's new
+  semantics and the back-end's HTTP/1.1 assumptions, or in entirely new surfaces
+  (LLM-backed apps) no scanner is mature enough to address. v4.0 targets these.
+</p>
+
+<div class="bubble">
+  <span class="label">v4.0 thesis in one sentence</span>
+  <p>Most novel vulnerabilities are <em>differential</em> bugs — they live where
+  two implementations of the same idea disagree. v4.0 makes GENESIS a differential-
+  testing platform first, and a probe arsenal second.</p>
+</div>
+
+<h3>The four machinery gaps</h3>
+<ol class="fl">
+  <li><strong>No HTTP-layer coverage feedback.</strong> Binary fuzzing has it; HTTP fuzzing is blind.</li>
+  <li><strong>No HTTP-layer differential testing.</strong> No way to compare "edge" vs "origin" parser behaviour.</li>
+  <li><strong>No state-machine model of the target.</strong> Multi-step business-logic bugs are invisible.</li>
+  <li><strong>Anomaly detection is shape-only.</strong> Misses semantic anomalies (different phrasing, leak hints).</li>
+</ol>
+
+<h3>The 13 waves at a glance</h3>
+<table>
+<tr><th>Wave</th><th>What's added</th><th>T-blocks</th></tr>
+<tr><td>1</td><td>Novelty engine — http_diff_probe + adaptive payload_swarm + semantic anomaly grader</td><td>T29-T31</td></tr>
+<tr><td>2</td><td>Parser-differential probes — URL / JSON / Unicode / multipart / charset</td><td>T32-T36</td></tr>
+<tr><td>3</td><td>HTTP modern — h2 smuggling / method confusion / range / trailers</td><td>T37-T39</td></tr>
+<tr><td>4</td><td>Deserialisation gadget arsenal — Java / .NET / PHP / Python / Ruby / Node</td><td>T40-T45</td></tr>
+<tr><td>5</td><td>Upload pipelines + SSRF expansion</td><td>T46-T50</td></tr>
+<tr><td>6</td><td>State-aware fuzzing — flow recorder, flow fuzzer, single-packet attack</td><td>T51-T53</td></tr>
+<tr><td>7</td><td>Auth depth — SAML XSW, cookie prefixes, CSWSH</td><td>T54-T56</td></tr>
+<tr><td>8</td><td>Browser-side / DOM — DOM clobbering, postMessage, mXSS, CSP bypass, xs-leaks</td><td>T57-T61</td></tr>
+<tr><td>9</td><td>Templates / DB / LDAP depth — SSTI gadgets, LDAP injection, second-order SQLi</td><td>T62-T64</td></tr>
+<tr><td>10</td><td>DoS — ReDoS, decompression bombs</td><td>T65-T66</td></tr>
+<tr><td>11</td><td>LLM / agentic endpoints — prompt injection, indirect injection, RAG poisoning</td><td>T67-T69</td></tr>
+<tr><td>12</td><td>Non-HTTP services — Redis, gRPC, native DB wire, MQTT</td><td>T70-T73</td></tr>
+<tr><td>13</td><td>AD / Kill-Chain — Kerberoast nudges, BloodHound, spray, pivot, exfil, C2</td><td>T74-T79</td></tr>
+</table>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning</strong>
+  Wave 13 includes T79 (full Kill-Chain completion — C2 beacon, staged delivery,
+  persistence). It defaults to <strong>opt-in</strong> for good reason. The dual-
+  use risk is real. Don't enable it without explicit authorization in writing.</div>
+</div>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  Want one example of why differential testing matters? Send
+  <code>{"role":"user","role":"admin"}</code> to a service. JavaScript and Python
+  parsers take the last value (admin). Go's stdlib <code>encoding/json</code>
+  takes the first (user). If your gateway is Go and your back-end is Node, the
+  gateway approves the request as "user" and the back-end runs it as "admin".
+  T33 finds this.</div>
+</div>
+
+<h2 id="ch11">Chapter 11: v5.0 / Tier-7 — From Probing to Imagining</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Understanding the leap from "recognising bugs" to "imagining bug classes from first principles"</li>
+    <li>Touring the eight themes that make up v5.0 (T80 through T120)</li>
+    <li>Meeting the Researcher agent that reasons across days, not minutes</li>
+  </ul>
+</div>
+
+<p>
+  Every prior version of GENESIS has been an exercise in <em>recognising</em> bugs.
+  The system gets better at finding bugs that someone, somewhere, has already named.
+  v5.0 is the version where GENESIS starts <strong>imagining</strong>.
+</p>
+
+<div class="bubble">
+  <span class="label">v5.0 thesis in one sentence</span>
+  <p>The platform that finds 0-days is not the one with the most probes — it is
+  the one that <em>reads source code, reasons over invariants, debates itself
+  adversarially, and builds new tools when the existing ones aren't enough</em>.</p>
+</div>
+
+<h3>The eight themes</h3>
+
+<table>
+<tr><th>Theme</th><th>Headline idea</th><th>T-blocks</th></tr>
+<tr><td>1 — Source-aware reasoning</td><td>AST walker, taint engine, invariant inferer, app-level symbolic exec, JS deobfuscator, causal root cause</td><td>T80-T86</td></tr>
+<tr><td>2 — Adversarial synthesis</td><td>Red/blue dialectic, philosopher agent, hypothesis market, cross-session miner, CVE extrapolator, architectural reasoner</td><td>T87-T92</td></tr>
+<tr><td>3 — Synthetic environments</td><td>Target replicator, destructive harness, invariant violator, model checker (TLA+/Alloy)</td><td>T93-T96</td></tr>
+<tr><td>4 — Self-improving tooling</td><td>Tool synthesizer (promotes one-off scripts to first-class tools), surface watcher daemon, mutation grammar learner</td><td>T97-T101</td></tr>
+<tr><td>5 — Long-horizon</td><td>Researcher agent, provenance recorder, surface diff, persistent recon</td><td>T102-T105</td></tr>
+<tr><td>6 — Binary &amp; memory</td><td>Auto-exploit pipeline, heap shaper, ROP chainer, sanitizer orchestrator</td><td>T106-T109</td></tr>
+<tr><td>7 — New surfaces</td><td>ML model attacker, ML pipeline probe, smart contract probe, blockchain protocol probe, firmware extractor, cellular, post-quantum</td><td>T110-T116</td></tr>
+<tr><td>8 — Researcher output</td><td>Disclosure drafter, fix suggester, impact analyzer, patch verifier</td><td>T117-T120</td></tr>
+</table>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>v3 + v4 give the agent a doctor's textbook and a stethoscope. v5 gives it a
+  microscope, a research-paper library, and a lab partner who argues. The doctor
+  can now diagnose conditions that haven't been named yet, by reasoning from
+  observed symptoms to underlying biology.</p>
+</div>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  v5 introduces five always-on daemons: cross-session pattern miner (T90), CVE
+  extrapolator (T91), surface watcher (T98), mutation-grammar learner (T99), and
+  knowledge-graph compactor (T101). Sessions are no longer the only thing
+  running. The platform is now <em>continuously</em> mining its own past.</div>
+</div>
+
+<h2 id="ch12">Chapter 12: v6.0 / Tier-8 — Going Pro and Cracking Black Boxes</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Understanding the blackbox 0-day problem v3+v4+v5 don't solve</li>
+    <li>Touring the eight themes (A through H) that make v6.0 enterprise-grade</li>
+    <li>Meeting the replica spawner — arguably v6's most powerful single capability</li>
+  </ul>
+</div>
+
+<p>
+  Every v5 theme leans on at least one of: source access, leaked artifacts,
+  identified open-source components, or substantial OSINT. For a target that's
+  closed-source SaaS behind a CDN, with no leaked code and no identifiable
+  framework — even post-v5 GENESIS is operating with one hand tied. v6.0 closes
+  this gap.
+</p>
+
+<h3>The eight themes</h3>
+
+<table>
+<tr><th>Theme</th><th>Headline idea</th><th>T-blocks</th></tr>
+<tr><td>A — Blackbox 0-day</td><td>Behavioral fingerprinter, replica spawner, timing-oracle memory, cross-component diff (reference set)</td><td>T121-T124</td></tr>
+<tr><td>B — Curiosity-driven RL</td><td>Curiosity model, RL probe selector, surprise budget, counterfactual reasoner</td><td>T125-T128</td></tr>
+<tr><td>C — Real-time threat intel</td><td>Threat-intel ingestor (daemon), CVE variant matcher, same-day replay</td><td>T129-T131</td></tr>
+<tr><td>D — Goal-driven planning</td><td>Goal compiler ("compromise admin"), counterfactual planner, multistep planner</td><td>T132-T134</td></tr>
+<tr><td>E — Multi-persona adversaries</td><td>Persona orchestrator (paranoid / ransomware / nation-state / insider / opportunistic), IoT / mobile / OT-ICS / embedded specialists</td><td>T135-T140</td></tr>
+<tr><td>F — Production engineering</td><td>Multi-tenant, RBAC + audit, SOC integration, compliance reporter, budget controls, event sourcing</td><td>T141-T146</td></tr>
+<tr><td>G — Explainable UX</td><td>Explanation panel, agent chorus view, hypothesis tree viewer, mobile companion</td><td>T147-T150</td></tr>
+<tr><td>H — Model ops</td><td>Reward model trainer (daemon), novelty A/B testing, specialist fine-tune, drift detection</td><td>T151-T154</td></tr>
+</table>
+
+<div class="bubble">
+  <span class="label">Why T122 (replica spawner) is the hero block</span>
+  <p>Given a precise fingerprint from T121 ("nginx 1.18.0 + Express 4.17.1 +
+  Mongoose 5.13 on Debian 11, lua-resty-jwt 0.2.3, mod_security 3.0.4 in detection
+  mode"), T122 automatically pulls the exact OSS components at the matched
+  versions, spins them up in a sandbox container, and scaffolds the application.
+  Now there's an exact replica to attack without consequences. v5's source-aware
+  tools aim at the replica. <strong>"No source" becomes "synthesised source."</strong></p>
+</div>
+
+<h3>Honest 0-day yield assessment</h3>
+
+<p>The team published calibrated estimates of novel-0-day yield against an arbitrary IP per edition:</p>
+
+<table>
+<tr><th>Edition</th><th>Yield estimate</th><th>What unlocks the gain</th></tr>
+<tr><td>v3.0 (built)</td><td>~5%</td><td>Baseline — everything signature-shaped</td></tr>
+<tr><td>+ v4.0</td><td>~20%</td><td>Differential testing + parser-quirk probes</td></tr>
+<tr><td>+ v5.0</td><td>~45%</td><td>Source-aware reasoning when artifacts are reachable</td></tr>
+<tr><td>+ v6.0</td><td>~70%</td><td>Replica spawner closes the closed-source gap</td></tr>
+</table>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  These numbers are <em>calibrated estimates</em>, not measurements. The team is
+  honest about that. Real validation requires the 50-CVE corpus harness described
+  in the v6 verification section. Treat them as hypotheses, not facts.</div>
+</div>
+
+<h2 id="ch13">Chapter 13: v7.0 / Tier-9 — Teaching GENESIS to Think in Loops</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Understanding why "more probes" stops being the answer at some point</li>
+    <li>Meeting the AlphaZero analogy that makes reasoning loops click</li>
+    <li>Touring the twelve domain loops (T155 through T166) that compress search space</li>
+  </ul>
+</div>
+
+<p>
+  Across v3 through v6, GENESIS specifies ~120 capability blocks. Counting honestly:
+  ~85% are tools, integrations, UX, and ops. Only ~5% is custom model work, and
+  ~10% is custom reasoning architecture. <strong>That last 15% is exactly what
+  separates Mythos from GENESIS-on-Opus.</strong> v7.0 corrects this by
+  deliberately not adding any new MCP probes — all twelve T-blocks are reasoning
+  loops.
+</p>
+
+<div class="bubble">
+  <span class="label">The AlphaZero analogy</span>
+  <p>AlphaZero plays go better than any human despite its neural network being
+  merely strong-amateur on its own. The trick is the combination: a search
+  structure (Monte Carlo Tree Search) + a network as a value function. The search
+  does most of the heavy lifting; the network does cheap evaluations. Together
+  they exceed what either could do alone. v7's reasoning loops are the search
+  structure; the LLM is the evaluator.</p>
+</div>
+
+<h3>Tool vs reasoning loop — the difference</h3>
+
+<table>
+<tr><th>Tool approach (v5/v6)</th><th>Reasoning loop approach (v7)</th></tr>
+<tr><td>Search binary for ROP gadgets, return ranked list of 47. The model reads the list and asks: "build a chain that calls execve and fits in 200 bytes." All constraint reasoning, gadget composition, and budget arithmetic in one forward pass with no scratch space.</td><td>Loop: gadget search → constraint propagation → register-state simulation → byte-budget check → re-search if over budget → iterate. The model is the controller; the loop holds working memory. Each turn is small and tractable.</td></tr>
+</table>
+
+<h3>The twelve loops at a glance</h3>
+
+<ul class="fl">
+  <li><strong>T155 — ROP composition.</strong> Constraint-aware ROP chain assembly under byte budget.</li>
+  <li><strong>T156 — Code intent (multi-zoom).</strong> Reads code at function → file → module → architectural levels.</li>
+  <li><strong>T157 — Chain composer.</strong> Plans valid orderings of primitive vulnerabilities (KASLR-leak before write, etc.).</li>
+  <li><strong>T158 — Heap layout.</strong> Allocator-aware heap shaping. Predict → execute → observe → refine.</li>
+  <li><strong>T159 — Self-correcting exploit.</strong> Diagnoses why an attempt failed; proposes a corrected one. Most real exploits work on the third or fifth attempt, not the first.</li>
+  <li><strong>T160 — Deliberation framework.</strong> The shared meta-architecture every other loop composes.</li>
+  <li><strong>T161 — Tree-of-thought search.</strong> Branching exploration with explicit backtrack.</li>
+  <li><strong>T162 — Long-context code harness.</strong> Reasoning over 1M+ token codebases via segment-summarise-recurse.</li>
+  <li><strong>T163 — Cross-component invariant tracker.</strong> Tracks invariants spanning multiple files/services; flags inconsistencies as bug candidates.</li>
+  <li><strong>T164 — Causal exploit trace.</strong> Builds causal graph from input bytes to side effects to downstream primitives.</li>
+  <li><strong>T165 — Counterfactual exploration deep.</strong> "If we had a leak primitive, what attacks open up?"</li>
+  <li><strong>T166 — Hypothesis decomposition.</strong> Breaks complex hypotheses into atomic, individually-provable claims.</li>
+</ul>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  Loops are slow. A 12-turn ROP-composition loop costs 12× as many tokens as a
+  single-shot prompt. v8's portfolio router (T177) decides when the depth is
+  worth the cost — and this is exactly why v7 + v8 compound.</div>
+</div>
+
+<h2 id="ch14">Chapter 14: v8.0 / Tier-10 — GENESIS Goes to School</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Understanding why "fine-tune our own specialists" closes a different gap than v7</li>
+    <li>Walking through the training flywheel: confirmed bug → corpus → LoRA → reward model → router</li>
+    <li>Comparing Path A (Mythos via T13) vs Path B (custom flywheel)</li>
+  </ul>
+</div>
+
+<p>
+  v7 builds reasoning loops. v8 trains the models inside them. Where v7 compresses
+  search space so a generic Opus model can match larger systems within a domain,
+  v8 grows the models themselves through a closed-loop training flywheel: every
+  confirmed finding becomes training data, training data fine-tunes specialists,
+  fine-tuned specialists find more findings.
+</p>
+
+<div class="bubble">
+  <span class="label">v8.0 thesis in one sentence</span>
+  <p>Mythos's reasoning depth comes from training on real exploit corpora at
+  scale. We can't replicate that scale. But we can build a flywheel where every
+  confirmed GENESIS finding becomes training data. The flywheel grows the model
+  the platform deserves over time.</p>
+</div>
+
+<h3>The flywheel, in eight steps</h3>
+
+<ol class="fl">
+  <li><strong>Confirmed bug.</strong> Any session produces a confirmed finding with cited evidence.</li>
+  <li><strong>Corpus ingestion (T167).</strong> Daemon ingests it as a structured (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuple.</li>
+  <li><strong>Counterexample mining (T168).</strong> Mines near-miss code that's structurally similar but <em>not</em> vulnerable — contrastive labels.</li>
+  <li><strong>Quality gate (T170).</strong> High-impact tuples reviewed by humans; rest auto-accepted.</li>
+  <li><strong>Specialist fine-tune (T171).</strong> Per-specialist LoRA pipeline triggers when corpus delta exceeds threshold.</li>
+  <li><strong>Reward model update (T172).</strong> Predicts P(exploit_succeeds); used by v7 loops as a ranker.</li>
+  <li><strong>Continual deployment (T174).</strong> Updated specialists ship with drift checks.</li>
+  <li><strong>Better specialists find more bugs.</strong> Loop continues.</li>
+</ol>
+
+<h3>Path A vs Path B</h3>
+
+<table>
+<tr><th>Path</th><th>What it is</th><th>Estimated gap closure</th></tr>
+<tr><td>Path A — Mythos via T13</td><td>When access drops, swap the underlying model. v3-v8 platform amplifies it.</td><td>~95% of Mythos-direct, plus deterministic evidence enforcement</td></tr>
+<tr><td>Path B — Custom flywheel</td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>~30-50% of Mythos-direct on covered domains</td></tr>
+</table>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  Path A and Path B aren't rivals. v8 builds both. Theme α + β are Path B; Theme
+  γ is Path A integration prep. Run them in parallel; whichever path arrives
+  first is the win.</div>
+</div>
+
+<h3>What's a LoRA, anyway?</h3>
+
+<div class="bubble">
+  <span class="label">Plain-English analogy</span>
+  <p>Imagine a general practitioner spending their evenings on a cardiology CME
+  course. Same doctor, refined cardiology depth. They didn't go back to medical
+  school. They added a specialist module on top. That's a LoRA — a few hundred MB
+  of fine-tuning instead of a 200 GB full-model checkpoint. Cheap to train,
+  cheap to deploy, cheap to swap.</p>
+</div>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  T177 (the model portfolio router) is arguably the most important block in v8.
+  Without it, you either burn money calling Opus on everything or starve quality
+  calling distilled small everywhere. The router picks the right model per task.
+  Most cost / quality / latency wins in production come from this single block.</div>
+</div>
+
+<!-- =================== PART IV =================== -->
+<div class="part-divider" id="part4">
+  <p class="part-label">Part</p>
+  <p class="part-num">IV</p>
+  <p class="part-title">Using GENESIS Day-to-Day</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Run your first real session and watch every move the agent makes.</li>
+      <li>Read the report — and trust it — without falling for false positives.</li>
+      <li>Tune profiles, agents, and budgets so the platform fits your workflow.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch15">Chapter 15: Running Your First Session</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Picking the right scan profile for the moment</li>
+    <li>Watching the live feed without getting lost</li>
+    <li>Knowing when to let the agent run and when to stop it</li>
+  </ul>
+</div>
+
+<h3>Picking a profile</h3>
+<table>
+<tr><th>Profile</th><th>Iterations</th><th>When to use</th></tr>
+<tr><td>Fast</td><td>up to 15</td><td>Sanity check after a deploy. "Is the obvious stuff broken?"</td></tr>
+<tr><td>Deep</td><td>up to 50</td><td>Realistic default for assessments.</td></tr>
+<tr><td>Stealth</td><td>up to 30</td><td>Low and slow. Avoid blue-team detection during a red-team exercise.</td></tr>
+<tr><td>Full</td><td>up to 80</td><td>No constraints. Maximum depth. Expensive in time and tokens.</td></tr>
+<tr><td>APT-sim</td><td>up to 60</td><td>Patient attacker simulation: silent recon → targeted → exploit.</td></tr>
+<tr><td>Exhaustive (v3.0+)</td><td>up to 500</td><td>Default v3.0+. Idle-stop ends it when novel ideas run out.</td></tr>
+</table>
+
+<h3>Watching the live feed</h3>
+<p>The Activity tab shows everything chronologically — agent thoughts, tool calls, tool results, hypothesis emissions, vulnerability emissions, plan-tree updates, loop-break events. To stay sane:</p>
+<ul class="fl">
+  <li>Don't try to read every line. The Story tab summarises in plain English.</li>
+  <li>Watch the Findings tab — that's where confirmed bugs land.</li>
+  <li>Watch the Errors tab — anything red usually means a tool failed or auth was misconfigured.</li>
+  <li>Use the Sandbox tab to see the AI's custom scripts (forge_runner, payload_swarm) with code, oracle verdicts, and novelty scores.</li>
+</ul>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  When a finding lands, click the row to open the identification dialog. It tells
+  you which hypothesis drove it, which custom script produced its evidence, and
+  whether it matches a known CVE. Saves you 20 minutes of scrolling logs.</div>
+</div>
+
+<h3>When to stop a session</h3>
+<ul class="fl">
+  <li>The Story tab has gone in circles for &gt;10 iterations on the same idea — loop-breaker should fire, but if it doesn't, hit Stop.</li>
+  <li>You've already got the findings you needed and don't want to spend more API budget.</li>
+  <li>You realize you pointed it at the wrong target.</li>
+</ul>
+
+<h2 id="ch16">Chapter 16: Reading the Results (Without Getting Fooled)</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Decoding the four verification statuses</li>
+    <li>Reading the identification dialog and the evidence trail</li>
+    <li>Exporting the Markdown report your dev team will actually read</li>
+  </ul>
+</div>
+
+<h3>The verification ladder, applied</h3>
+<ul class="fl">
+  <li><strong>Unverified.</strong> The AI suspects this. No proof. <em>Always</em> have a human verify.</li>
+  <li><strong>Confirmed.</strong> Concrete evidence cited. Worth filing in your tracker.</li>
+  <li><strong>Exploited.</strong> The AI demonstrated the bug working. File it as a P1.</li>
+  <li><strong>Disputed.</strong> The Haiku critic killed it. Treat as false positive but glance at the evidence anyway — sometimes the critic is overzealous.</li>
+</ul>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning</strong>
+  "Confirmed" doesn't mean "exploitable in production." It means evidence
+  exists. A confirmed SQLi might require a specific user role you don't have, or
+  a feature flag that's off in prod. Read the evidence and the affected service
+  field carefully.</div>
+</div>
+
+<h3>Exporting the report</h3>
+<p>From the Sessions page or the Session Viewer's action row, click the 📥 download icon. You get a Markdown file: <code>genesis-{target}-{short-id}.md</code>. Sections include:</p>
+<ol class="fl">
+  <li>Header — target, session id, status, phase, iterations, agent mode, profile, timestamps.</li>
+  <li>Executive summary — finding counts by severity, distinct MITRE techniques.</li>
+  <li>Findings — one per finding, ordered by severity, with evidence, exploit/PoC, remediation.</li>
+  <li>Attack chains — ordered steps with severity tags.</li>
+  <li>Hypothesis trail (confirmed) — structured reasoning + evidence_for citations.</li>
+  <li>Tool-call histogram.</li>
+</ol>
+
+<h2 id="ch17">Chapter 17: Tuning Settings &amp; Profiles</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Configuring the LLM provider (and swapping between Anthropic / Azure / Bedrock / custom)</li>
+    <li>Adjusting tool timeouts, MCP keys, and per-tenant budgets</li>
+    <li>Knowing which Settings tabs you'll use weekly vs once-a-quarter</li>
+  </ul>
+</div>
+
+<h3>The six Settings tabs</h3>
+<table>
+<tr><th>Tab</th><th>What lives here</th><th>How often you'll touch it</th></tr>
+<tr><td>LLM</td><td>API key, model selection, provider (T13 hook)</td><td>Once on setup; again when swapping providers</td></tr>
+<tr><td>MCP Server</td><td>MCP endpoint URL, tool timeouts, MCP API key</td><td>Once on setup</td></tr>
+<tr><td>Tools</td><td>List of ~70 (v3.0) registered MCP tools — read-only inventory</td><td>For curiosity</td></tr>
+<tr><td>Agents</td><td>The 9-agent roster (4 generalists + 5 conditional specialists) and per-agent allowed tools</td><td>For curiosity (source of truth is the orchestrator code)</td></tr>
+<tr><td>Database</td><td>Postgres / Mongo / Chroma / Neo4j connection strings</td><td>Once on setup</td></tr>
+<tr><td>Containers</td><td>Live status of every GENESIS container with health, MCP-surface chips, restart buttons</td><td>When something looks broken</td></tr>
+</table>
+
+<div class="icon-box tip">
+  <div class="glyph">T</div>
+  <div class="body"><strong>Tip</strong>
+  When you swap from Anthropic API to Azure-hosted Anthropic via T13, the URL is
+  the most common gotcha — Azure expects the base endpoint <em>without</em> the
+  <code>/v1/messages</code> suffix. The "Test Connection" button surfaces this in
+  about 2 seconds.</div>
+</div>
+
+<!-- =================== PART V =================== -->
+<div class="part-divider" id="part5">
+  <p class="part-label">Part</p>
+  <p class="part-num">V</p>
+  <p class="part-title">Trust &amp; Safety</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Stay legal and ethical — rules of engagement that matter even at 2am.</li>
+      <li>Verify findings without getting fooled by confident-sounding hallucinations.</li>
+      <li>Know GENESIS's limits and when human judgement is non-negotiable.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch18">Chapter 18: The Rules of Engagement</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Knowing what authorisation you actually need before pointing GENESIS at anything</li>
+    <li>Setting up an isolated lab network you can break safely</li>
+    <li>Handling sensitive data and API keys without leaking them</li>
+  </ul>
+</div>
+
+<div class="icon-box warning">
+  <div class="glyph"><span>!</span></div>
+  <div class="body"><strong>Warning — read this before doing anything else</strong>
+  GENESIS has no authorisation check built in. There is no "are you sure?" prompt
+  before it scans. Running an automated security scanner against a target you
+  don't own and aren't authorised to test is illegal in most jurisdictions. The
+  legal consequences are on you, not on the platform.</div>
+</div>
+
+<h3>The minimum authorisation checklist</h3>
+<ul class="fl">
+  <li><strong>Internal targets:</strong> written authorisation from the owner, ideally in a ticket or email you can produce later.</li>
+  <li><strong>Penetration test engagements:</strong> a signed Statement of Work covering the in-scope IP ranges and time window.</li>
+  <li><strong>Bug bounty:</strong> the program's policy in writing, the assets in scope, and your researcher account.</li>
+  <li><strong>Training ranges / CTFs:</strong> usually self-evident from the URL, but screenshot the rules anyway.</li>
+</ul>
+
+<h3>Lab network setup</h3>
+<p>The compose file ships a network called <code>vuln-lab</code>. Use it. Don't aim GENESIS at production without:</p>
+<ul class="fl">
+  <li>A change window agreed in writing.</li>
+  <li>A rollback plan (database backup, snapshot, ability to redeploy from CI).</li>
+  <li>The owner's explicit written consent for the specific session.</li>
+  <li>A communication channel for "stop now" if things go sideways.</li>
+</ul>
+
+<h3>API key hygiene</h3>
+<ul class="fl">
+  <li>Never commit your Anthropic API key to git. The platform stores it encrypted at rest and redacted in the UI.</li>
+  <li>Use a dedicated key for GENESIS so you can revoke it independently.</li>
+  <li>Set a budget alert on the Anthropic console.</li>
+  <li>For shared deployments (v6.0+), use the per-tenant LLM-token budget control (T145).</li>
+</ul>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  In v6.0+, T139 (OT/ICS specialist) ships with a default-deny actuator policy.
+  T79 (Kill-Chain completion / C2) is opt-in only. T135's "ransomware operator"
+  and "nation-state APT" personas should run only against replicas (T93/T122).
+  These aren't optional preferences — they're the difference between research and
+  malpractice.</div>
+</div>
+
+<h2 id="ch19">Chapter 19: Verifying Findings Without Getting Fooled</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Walking through a confirmed finding the way an auditor would</li>
+    <li>Spotting the three telltale signs of a hallucinated bug claim</li>
+    <li>Using the identification dialog and the Mongo journals as your audit trail</li>
+  </ul>
+</div>
+
+<h3>The auditor's walk-through</h3>
+<ol class="fl">
+  <li>Open the finding in the Findings tab.</li>
+  <li>Click the row → identification dialog. Note the driving hypothesis.</li>
+  <li>Read the cited evidence. Does it actually support the claim, or is it tangentially related?</li>
+  <li>Find the tool call that produced the evidence. Re-run it manually if you can.</li>
+  <li>If a passing oracle is cited, read the oracle predicate. Could it pass for a benign reason?</li>
+  <li>Cross-check the affected service / endpoint against your asset inventory. Is this even your system?</li>
+</ol>
+
+<h3>The three telltale signs of a hallucinated finding</h3>
+<ul class="fl">
+  <li><strong>Evidence cites a tool that wasn't actually invoked.</strong> The Tools tab is the source of truth — if the cited tool doesn't appear there for this session, the AI made it up. (U1 should catch this; if it doesn't, file a bug against GENESIS itself.)</li>
+  <li><strong>Oracle predicate is vague.</strong> "Response looks suspicious" is not an oracle. "Body length differs by &gt;200 bytes" is.</li>
+  <li><strong>Hypothesis statement contradicts evidence_against.</strong> Sometimes the AI lists evidence that should kill its own hypothesis and confirms it anyway. The Haiku critic should catch this; if you see it slip through, dispute the finding manually.</li>
+</ul>
+
+<div class="icon-box tech">
+  <div class="glyph">TS</div>
+  <div class="body"><strong>Technical Stuff</strong>
+  Every finding has a <code>driving_hypothesis_id</code>. You can pull the full
+  hypothesis chain from MongoDB's <code>hypothesis_journals</code> collection
+  (filter by <code>session_id</code>). Reading the chain backwards from the
+  finding is faster than reading the Activity tab forwards.</div>
+</div>
+
+<h2 id="ch20">Chapter 20: When to Doubt GENESIS</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Knowing the things GENESIS just can't do (yet)</li>
+    <li>Recognising the smell of a confidently wrong AI answer</li>
+    <li>Calibrating your trust per finding type</li>
+  </ul>
+</div>
+
+<h3>Things GENESIS can't do (in v3.0)</h3>
+<ul class="fl">
+  <li>Kernel, firmware, hypervisor analysis. v5 T114 + Tier-4 T15 close this.</li>
+  <li>Browser-engine zero-day — would need instrumented harnesses (Tier-4 T14).</li>
+  <li>First-class mobile (APK / IPA) analysis. v6 T138 closes this.</li>
+  <li>Memory-corruption weaponisation on hardened targets. v5 T106-T109 + v7 T155 work toward it; never trivial.</li>
+  <li>Anything model-gated — novel-bug intuition on unseen surfaces is bounded by the underlying model's reasoning depth. Path A (Mythos via T13) is the only way to lift it above Opus.</li>
+</ul>
+
+<h3>The smell of a confidently wrong answer</h3>
+<ul class="fl">
+  <li>The hypothesis is plausible but the evidence is just one tool output that the AI is over-interpreting.</li>
+  <li>The finding cites a CVE that doesn't apply to the version actually deployed.</li>
+  <li>The exploit / PoC is a generic curl command without target-specific values filled in.</li>
+  <li>The remediation is suspiciously generic ("apply the latest security patches"). Real GENESIS remediations are specific.</li>
+</ul>
+
+<div class="icon-box remember">
+  <div class="glyph">R</div>
+  <div class="body"><strong>Remember</strong>
+  GENESIS is a starting point, not the final word. Use the report to <em>focus</em>
+  human review, not to <em>replace</em> it. The platform's value is multiplying
+  what one researcher can cover, not eliminating the researcher.</div>
+</div>
+
+<!-- =================== PART VI =================== -->
+<div class="part-divider" id="part6">
+  <p class="part-label">Part</p>
+  <p class="part-num">VI</p>
+  <p class="part-title">The Part of Tens</p>
+  <div class="part-chapters">
+    <strong>In this part…</strong>
+    <ul>
+      <li>Ten common mistakes operators make — and how to dodge them.</li>
+      <li>Ten capabilities you should try first to feel GENESIS's range.</li>
+      <li>Ten resources for going deeper when this book runs out of pages.</li>
+    </ul>
+  </div>
+</div>
+
+<h2 id="ch21">Chapter 21: Ten Common Mistakes Operators Make</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>The mistakes the team has watched operators make most often</li>
+    <li>Why each one happens — and the one-line fix</li>
+  </ul>
+</div>
+
+<ol class="fl">
+  <li><strong>Pointing GENESIS at production without authorisation.</strong> The platform won't stop you. Get written consent. Always.</li>
+  <li><strong>Setting profile to Fast and being disappointed.</strong> Fast is a sanity check, not an assessment. Use Deep or Exhaustive for real engagements.</li>
+  <li><strong>Skipping the "Test Connection" button.</strong> Half of "Iteration 0 stuck" issues are a misconfigured API key or wrong Azure URL. Test first.</li>
+  <li><strong>Treating "unverified" findings as confirmed.</strong> Unverified means the AI couldn't prove it. File for human review, don't ship to a developer as a P1.</li>
+  <li><strong>Not setting an Anthropic budget alert.</strong> A Full or Exhaustive scan against a non-trivial target can run real money. Cap it.</li>
+  <li><strong>Ignoring the Story tab.</strong> Operators get lost in Activity and miss that the Story tab gives them a plain-English narrative.</li>
+  <li><strong>Wiping ChromaDB to "clean up".</strong> You just deleted the platform's cross-session memory. There's no undo.</li>
+  <li><strong>Running multi-agent against a target with very limited scope.</strong> Specialists fire when surface signals match. If your scope is one endpoint, solo (or just the four generalists) is fine.</li>
+  <li><strong>Killing a session that's actually doing useful work.</strong> If the loop-breaker hasn't fired and the Findings tab is still incrementing, give it more iterations.</li>
+  <li><strong>Disabling evidence rules (U1) "to see what the AI says."</strong> You can't, technically, but operators sometimes turn down confidence thresholds and then trust the resulting noise. Don't.</li>
+</ol>
+
+<h2 id="ch22">Chapter 22: Ten Capabilities You Should Try First</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>The capability blocks that produce the most "wow" per session</li>
+    <li>What to point each one at to feel it work</li>
+  </ul>
+</div>
+
+<ol class="fl">
+  <li><strong>T1 Target Intent Brief.</strong> Run a session and read the brief Mongo wrote before any tool fired. The structured framing alone is impressive.</li>
+  <li><strong>T2 AI Payload Forge.</strong> Watch the AI hand-write an HTTP request with an oracle. The Sandbox tab's payload viewer is where the magic shows.</li>
+  <li><strong>T3 + T4 Artifact Hunter + Decompiler.</strong> Point GENESIS at a target with an exposed <code>.git</code>. Watch it pull, decompile, and reason about the code.</li>
+  <li><strong>T6 Vision.</strong> Run against a JS-heavy SPA. The screenshot attached to the next agent turn turns invisible UI into something the AI can comment on.</li>
+  <li><strong>T11 Persistent plan-tree.</strong> Watch a Deep scan run. After ~6 iterations, look at the <code>plan_tree_seeded</code> events on the live feed.</li>
+  <li><strong>T21 Neo4j attack graph.</strong> Open the Graph tab. Click a Finding node — it jumps to the row in Findings. Cross-session memory becomes visible.</li>
+  <li><strong>T26 Crypto primitive library.</strong> Run a session against a target with a JWT in its session cookie. Watch <code>crypto_jwt_confusion</code> attempt alg-none, hs-rs swap, weak secret, and kid injection in turn.</li>
+  <li><strong>T28 payload_swarm.</strong> Use the Sandbox tab's filter "payload_swarm only". The novelty-scored variant ranking is the platform at its most original.</li>
+  <li><strong>T13 Model-swap hook.</strong> Try Anthropic API today, swap to Bedrock tomorrow. Same scaffolding, different engine. (T13 is shipping.)</li>
+  <li><strong>The Sessions page report export.</strong> Run any session, download the Markdown report, share it with a developer. The format alone changes the conversation.</li>
+</ol>
+
+<h2 id="ch23">Chapter 23: Ten Resources for Going Deeper</h2>
+
+<div class="in-this-chapter">
+  <span class="label">In this chapter</span>
+  <ul>
+    <li>Where to look when this book runs out of pages</li>
+    <li>The one comprehensive technical reference you'll actually need</li>
+  </ul>
+</div>
+
+<ol class="fl">
+  <li><strong>The comprehensive manual.</strong> <code>GENESIS_Manual_Comprehensive.html</code> in the project root. Same content, denser format, every T-block in full.</li>
+  <li><strong>The build guide.</strong> <code>GENESIS_BUILD_FROM_SCRATCH.md</code> — step-by-step bootstrap from a clean machine.</li>
+  <li><strong>The test guide.</strong> <code>GENESIS_TEST_GUIDE.html</code> — testing procedures and validation checklist.</li>
+  <li><strong>The exec summary.</strong> <code>GENESIS_EXEC_SUMMARY.html</code> — for the leadership conversation.</li>
+  <li><strong>The presentation deck.</strong> <code>GENESIS_Presentation.html</code> + <code>presentation_notes.html</code>.</li>
+  <li><strong>The version-specific roadmaps.</strong> <code>v4_updates.html</code> through <code>v8.html</code> — the original planning documents this book and the comprehensive manual integrate.</li>
+  <li><strong>The Anthropic Claude documentation.</strong> Especially the Tool Use guide and the Extended Thinking guide.</li>
+  <li><strong>The MCP specification.</strong> Model Context Protocol — the integration layer between the orchestrator and the tool registry.</li>
+  <li><strong>The Cypher cheat sheet for Neo4j</strong> — useful when you want to query the attack graph directly via <code>graph_query</code>.</li>
+  <li><strong>The Anthropic Cookbook.</strong> For tool-use patterns, prompt-caching tricks, and oracle-design ideas.</li>
+</ol>
+
+<h2 id="index">Index</h2>
+
+<p>
+  An alphabetical mini-index of important terms with anchored links to the chapter
+  that introduces them. Treat this as a reading-order shortcut, not an exhaustive
+  index.
+</p>
+
+<table>
+<tr><th>Term</th><th>Chapter</th></tr>
+<tr><td>Adversarial critic (Haiku)</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>Agent modes (solo / multi)</td><td><a href="#ch15">15</a></td></tr>
+<tr><td>AlphaZero analogy</td><td><a href="#ch13">13</a></td></tr>
+<tr><td>Architecture, three rooms</td><td><a href="#ch4">4</a></td></tr>
+<tr><td>Artifact Hunter (T3)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Attack chain</td><td><a href="#ch7">7</a></td></tr>
+<tr><td>Audit log (v6)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Blackbox 0-day (v6)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>ChromaDB</td><td><a href="#ch6">6</a></td></tr>
+<tr><td>Coverage-guided fuzzer (T9)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Creativity Mandate</td><td><a href="#ch9">9</a></td></tr>
+<tr><td>Cross-session memory (U4 / T8)</td><td><a href="#ch7">7</a></td></tr>
+<tr><td>Curiosity model (T125)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Deserialisation gadgets (T40-T45)</td><td><a href="#ch10">10</a></td></tr>
+<tr><td>Differential testing (T29 / T124)</td><td><a href="#ch10">10</a></td></tr>
+<tr><td>Evidence rule (U1)</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>Exhaustive scan mode</td><td><a href="#ch9">9</a></td></tr>
+<tr><td>Falsification criterion</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>Findings tab</td><td><a href="#ch15">15</a></td></tr>
+<tr><td>Fuzzing</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Goal compiler (T132)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Hypothesis market (T89)</td><td><a href="#ch11">11</a></td></tr>
+<tr><td>Hypothesis-driven testing</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>Identification dialog</td><td><a href="#ch15">15</a></td></tr>
+<tr><td>Loop-breaker (U2)</td><td><a href="#ch7">7</a></td></tr>
+<tr><td>LoRA fine-tuning (T171)</td><td><a href="#ch14">14</a></td></tr>
+<tr><td>MCP Server</td><td><a href="#ch4">4</a></td></tr>
+<tr><td>Model-swap hook (T13)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>MongoDB</td><td><a href="#ch6">6</a></td></tr>
+<tr><td>Multi-tenant (T141)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Neo4j attack graph (T21)</td><td><a href="#ch9">9</a></td></tr>
+<tr><td>Oracle</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>OOB callback</td><td><a href="#ch5">5</a></td></tr>
+<tr><td>Path A vs Path B</td><td><a href="#ch14">14</a></td></tr>
+<tr><td>Payload Forge (T2)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Payload swarm (T28)</td><td><a href="#ch9">9</a></td></tr>
+<tr><td>Persona orchestrator (T135)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Plan tree (T11)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>PostgreSQL</td><td><a href="#ch6">6</a></td></tr>
+<tr><td>Prompt injection probes (T67-T69)</td><td><a href="#ch10">10</a></td></tr>
+<tr><td>Reasoning loops (v7)</td><td><a href="#ch13">13</a></td></tr>
+<tr><td>Redis pub/sub</td><td><a href="#ch4">4</a></td></tr>
+<tr><td>Replica spawner (T122)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Reward model (T172)</td><td><a href="#ch14">14</a></td></tr>
+<tr><td>RBAC + audit (T142)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Sandbox runner (T5)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Session reflections (T8)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>SOC integration (T143)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Source-aware reasoning (T80-T86)</td><td><a href="#ch11">11</a></td></tr>
+<tr><td>Specialist agents (T22)</td><td><a href="#ch9">9</a></td></tr>
+<tr><td>Symbolic execution (T10)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Target Intent Brief (T1)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>Technique recall (U4)</td><td><a href="#ch7">7</a></td></tr>
+<tr><td>Threat-intel ingestor (T129)</td><td><a href="#ch12">12</a></td></tr>
+<tr><td>Tool synthesizer (T97)</td><td><a href="#ch11">11</a></td></tr>
+<tr><td>Training corpus (T167)</td><td><a href="#ch14">14</a></td></tr>
+<tr><td>Verification status</td><td><a href="#ch16">16</a></td></tr>
+<tr><td>Vision (T6)</td><td><a href="#ch8">8</a></td></tr>
+<tr><td>WebSocketManager</td><td><a href="#ch4">4</a></td></tr>
+</table>
+
+<p style="margin-top: 40px; padding-top: 20px; border-top: 4px solid var(--dummies-yellow); font-size: 14px; color: #555;">
+  This book covers GENESIS v1.0 through v8.0. Editions v1.0-v3.0 are built and
+  shipping; v4.0-v8.0 are planned roadmaps. For the comprehensive technical
+  reference, see <code>GENESIS_Manual_Comprehensive.html</code>. For the
+  build-from-source walkthrough, see <code>GENESIS_BUILD_FROM_SCRATCH.md</code>.
+  Authored by Hemanth Dadi.
+</p>
+
+</main>
+</div>
+
+<div class="footer-note">
+  GENESIS for Dummies® · A Reference for Vuln Hunters of All Stripes · By Hemanth Dadi<br>
+  Companion volume: <code>GENESIS_Manual_Comprehensive.html</code> — same material, denser, every T-block in full.
+</div>
+
+</body>
+</html>

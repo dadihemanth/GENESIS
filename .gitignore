@@ -1,0 +1,103 @@
+# Environment / secrets — NEVER commit real credentials
+.env
+.env.local
+.env.*.local
+
+# Claude Code local settings (may contain API keys)
+.claude/settings.local.json
+
+# ─── Node / JavaScript ───────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.npm/
+.yarn/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+mcp-server/dist/
+mcp-server/build/
+
+# Source maps (generated at build time)
+*.map
+
+# NYC / Istanbul coverage
+.nyc_output/
+coverage/
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+backend/venv/
+backend/.venv/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+*.whl
+
+# pytest / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# mypy / type checkers
+.mypy_cache/
+.dmypy.json
+.pytype/
+
+# Alembic compiled migrations cache
+*.pyc
+
+# ─── Docker ──────────────────────────────────────────────────────────────────
+# Keep docker-compose.yml and Dockerfiles (they're source)
+# Exclude any local override files
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ─── Logs & temp files ───────────────────────────────────────────────────────
+*.log
+*.tmp
+*.temp
+logs/
+tmp/
+
+# ─── OS / editor ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── Compiled / binary artifacts ─────────────────────────────────────────────
+*.so
+*.dll
+*.dylib
+
+# ─── Database files ──────────────────────────────────────────────────────────
+*.sqlite3
+*.db
+
+claude_mythos_capabilities.txt
+Coverage Cyber killchain.txt
+
