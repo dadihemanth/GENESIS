@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -21,6 +22,25 @@ from app.schemas.session import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+async def _cleanup_session_docker_resources(session_id: uuid.UUID, reason: str) -> None:
+    """Best-effort lifecycle cleanup; failures must not block session state changes."""
+    try:
+        from app.services.session_container_cleanup import cleanup_session_containers
+
+        cleanup = await cleanup_session_containers(str(session_id), reason=reason)
+        await publish_session_message(
+            str(session_id),
+            {
+                "type": "session_update",
+                "data": {"container_cleanup": cleanup},
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("session docker cleanup failed for %s (%s): %s", session_id, reason, exc)
 
 
 @router.post("", response_model=SessionRead, status_code=201)
@@ -145,6 +165,8 @@ async def pause_session(
             "timestamp": datetime.now(timezone.utc).isoformat(),
         },
     )
+
+    await _cleanup_session_docker_resources(session_id, "session_paused")
 
     return session
 
@@ -537,6 +559,8 @@ async def stop_session(
         },
     )
 
+    await _cleanup_session_docker_resources(session_id, "session_stopped")
+
     return session
 
 
@@ -773,6 +797,7 @@ async def download_session_report(
     """
     from fastapi.responses import Response
     from app.models.vulnerability import Vulnerability
+    from app.services.finding_explainer import build_plain_language_finding
 
     sid = str(session_id)
 
@@ -904,24 +929,35 @@ async def download_session_report(
         if technique_tag:
             md.append(f"| Technique tag | `{_md_escape(technique_tag)}` |")
         md.append("")
+        plain = build_plain_language_finding(v, meta)
+        md.append("**Description.** " + plain["description"])
+        md.append("")
+        md.append("**Why it matters.** " + plain["why_it_matters"])
+        md.append("")
+        md.append("**Proof.** " + plain["proof"])
+        md.append("")
+        md.append("**Solution.** " + plain["solution"])
+        md.append("")
+        md.append("**Validation note.** " + plain["validation_note"])
+        md.append("")
+        md.append("**Technical evidence appendix:**")
+        md.append("")
         if v.description:
-            md.append("**Description.** " + str(v.description))
-            md.append("")
+            md.append("- Raw technical description: " + str(v.description)[:800])
         if evidence_for:
-            md.append("**Cited evidence:**")
-            md.append("")
             for e in evidence_for:
                 md.append(f"- {str(e)[:600]}")
-            md.append("")
+        if v.verification_output:
+            md.append("- Verification output: " + str(v.verification_output)[:800])
+        if not (v.description or evidence_for or v.verification_output):
+            md.append("- No additional technical evidence was attached to the compact report.")
+        md.append("")
         if v.exploit_code:
-            md.append("**Exploit / PoC.**")
+            md.append("**Technical appendix: exploit / PoC.**")
             md.append(_md_codeblock(v.exploit_code, ""))
             md.append("")
-        if v.remediation:
-            md.append("**Remediation.** " + str(v.remediation))
-            md.append("")
         if v.patch_code:
-            md.append("**Suggested patch.**")
+            md.append("**Technical appendix: suggested patch.**")
             md.append(_md_codeblock(v.patch_code, ""))
             md.append("")
 
@@ -972,4 +1008,31 @@ async def download_session_report(
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
-    return {"items": items, "total": total, "page": page, "size": size}
+
+@router.get("/{session_id}/report.html")
+async def download_session_html_report(
+    session_id: uuid.UUID,
+    audience: str = Query(default="combined", pattern="^(combined|executive|technical)$"),
+    include_raw: bool = Query(default=True),
+    max_evidence_chars: int = Query(default=1200, ge=200, le=10000),
+    db: AsyncSession = Depends(get_db),
+):
+    """Render a self-contained HTML report for executive and technical readers."""
+    from fastapi.responses import Response
+    from app.services.html_report import render_session_html_report
+
+    try:
+        filename, body = await render_session_html_report(
+            session_id,
+            db,
+            audience=audience,
+            include_raw=include_raw,
+            max_evidence_chars=max_evidence_chars,
+        )
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return Response(
+        content=body,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

@@ -781,7 +781,7 @@ hr {
   <div class="cover-subtitle">Autonomous AI-Powered Security Assessment Platform</div>
   <div class="cover-meta">
     <div class="cover-meta-item"><strong>Version</strong>${version}</div>
-    <div class="cover-meta-item"><strong>Engine</strong>MYTHOS v2.0</div>
+    <div class="cover-meta-item"><strong>Engine</strong>GENESIS v2.0</div>
     <div class="cover-meta-item"><strong>Tools</strong>47 Integrated</div>
     <div class="cover-meta-item"><strong>Model</strong>Claude Sonnet 4.6</div>
     <div class="cover-meta-item"><strong>Classification</strong>Restricted</div>

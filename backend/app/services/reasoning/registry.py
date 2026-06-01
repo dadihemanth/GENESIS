@@ -27,17 +27,19 @@ logger = logging.getLogger(__name__)
 
 _BUDGETS: Dict[str, LoopBudget] = {
     # Phase 1+2 — code/hypothesis reasoning (no sandbox dependency)
-    "code_intent":       LoopBudget(max_tokens=8_000,  max_ticks=6),
-    "invariant_tracker": LoopBudget(max_tokens=8_000,  max_ticks=8),
-    "causal_trace":      LoopBudget(max_tokens=6_000,  max_ticks=6),
-    "counterfactual":    LoopBudget(max_tokens=8_000,  max_ticks=6),
-    "hypothesis_decomp": LoopBudget(max_tokens=4_000,  max_ticks=5),
-    "long_context_code": LoopBudget(max_tokens=20_000, max_ticks=15),
+    "code_intent":         LoopBudget(max_tokens=8_000,  max_ticks=6),
+    "invariant_tracker":   LoopBudget(max_tokens=8_000,  max_ticks=8),
+    "causal_trace":        LoopBudget(max_tokens=6_000,  max_ticks=6),
+    "counterfactual":      LoopBudget(max_tokens=8_000,  max_ticks=6),
+    "hypothesis_decomp":   LoopBudget(max_tokens=4_000,  max_ticks=5),
+    "long_context_code":   LoopBudget(max_tokens=20_000, max_ticks=15),
+    # validation milestone 3 — cross-file pattern inconsistency (one tick: query + compare)
+    "cross_file_compare":  LoopBudget(max_tokens=6_000,  max_ticks=3),
     # Phase 3 — exploit loops (call MCP tools, reuse forge_sandbox/replay_sessions)
-    "rop_composition":   LoopBudget(max_tokens=15_000, max_ticks=12),
-    "chain_composer":    LoopBudget(max_tokens=6_000,  max_ticks=8),
-    "heap_layout":       LoopBudget(max_tokens=12_000, max_ticks=10),
-    "self_correcting":   LoopBudget(max_tokens=10_000, max_ticks=8),
+    "rop_composition":     LoopBudget(max_tokens=15_000, max_ticks=12),
+    "chain_composer":      LoopBudget(max_tokens=6_000,  max_ticks=8),
+    "heap_layout":         LoopBudget(max_tokens=12_000, max_ticks=10),
+    "self_correcting":     LoopBudget(max_tokens=10_000, max_ticks=8),
 }
 
 LOOP_TYPES: Tuple[str, ...] = tuple(_BUDGETS.keys())
@@ -59,6 +61,7 @@ def _build_class_map() -> Dict[str, Type[DeliberationLoop]]:
     from app.services.reasoning.counterfactual import CounterfactualLoop
     from app.services.reasoning.hypothesis_decomp import HypothesisDecompLoop
     from app.services.reasoning.long_context_code import LongContextCodeLoop
+    from app.services.reasoning.cross_file_compare import CrossFileCompareLoop
     # Phase-3 exploit loops
     from app.services.reasoning.rop_composition import ROPCompositionLoop
     from app.services.reasoning.chain_composer import ChainComposerLoop
@@ -73,6 +76,7 @@ def _build_class_map() -> Dict[str, Type[DeliberationLoop]]:
         "counterfactual":    CounterfactualLoop,
         "hypothesis_decomp": HypothesisDecompLoop,
         "long_context_code": LongContextCodeLoop,
+        "cross_file_compare": CrossFileCompareLoop,
         # Phase 3
         "rop_composition":   ROPCompositionLoop,
         "chain_composer":    ChainComposerLoop,

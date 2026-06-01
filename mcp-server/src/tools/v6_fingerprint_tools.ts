@@ -244,6 +244,7 @@ const spawnReplicaDef: ToolDefinition = {
   parameters: [
     { name: 'stack_pin', type: 'string', required: true, description: 'Stack pin from behavioral_fingerprint' },
     { name: 'observed_routes', type: 'array', required: false, description: 'List of observed target routes to scaffold', default: [] },
+    { name: 'session_id', type: 'string', required: false, description: 'Optional GENESIS session ID for lifecycle cleanup labels' },
   ],
 };
 
@@ -253,6 +254,7 @@ export const spawnReplicaTool = {
     return replicaPost('/spawn', {
       stack_pin: params.stack_pin as string,
       observed_routes: (params.observed_routes as string[]) || [],
+      session_id: (params.session_id as string) || '',
     });
   },
 };

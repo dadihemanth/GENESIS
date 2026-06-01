@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>GENESIS — Comprehensive User Manual (v1.0 → v8.0)</title>
+<title>GENESIS — Comprehensive User Manual (v1.0 → v9.0)</title>
 <style>
   :root {
     --ink:#1a1f2e; --muted:#5a6478; --faint:#e8ecf4;
@@ -167,16 +167,18 @@
 <body>
 
 <header class="top">
-  <span class="tag">Comprehensive Manual · v1.0 (Tier-1) → v8.0 (Tier-10) · all editions · v4.0 now shipping</span>
+  <span class="tag">Comprehensive Manual · v1.0 → v9.0 · v8 validated hybrid · v9 training flywheel</span>
   <h1>GENESIS — Comprehensive User Manual</h1>
   <p>
     A single source of truth for the autonomous security platform GENESIS, integrating every
-    edition from v1.0 (Tier-1 reliability foundation) through v8.0 (Tier-10 custom models and
-    training flywheel). The manual covers the architecture top to bottom — frontend, backend,
+    edition from v1.0 (Tier-1 reliability foundation) through v9.0. The current v8 chapter
+    documents the validated_dynamic hybrid scanner work; the former v8 custom-model roadmap
+    now lives under v9. The manual covers the architecture top to bottom — frontend, backend,
     MCP server, polyglot persistence, AI orchestrator internals, hypothesis-driven loops,
-    real-time WebSocket streaming — and walks every capability block from U1 through T178 with
-    its purpose, why-it-matters, attack-path example, and analogy. Where prior documents lived
-    in separate files (the base manual + v4 / v5 / v6 / v7 / v8 update notes), this edition
+    real-time WebSocket streaming, candidate validation, endpoint/source surface
+    graphs, proof runs, benchmark scorecards, and reasoning loops. It walks every capability block
+    from U1 through T190 with its purpose, why-it-matters, attack-path example, and analogy. Where prior documents lived
+    in separate files (the base manual + v4 / v5 / v6 / v7 / v8 / v9 update notes), this edition
     folds them together into one continuous reference.
   </p>
   <div class="credit">Authored &amp; engineered by <strong>Hemanth Dadi</strong></div>
@@ -195,6 +197,7 @@
   <a href="#loop">The autonomous loop</a>
   <a href="#hypothesis">Hypothesis-driven testing</a>
   <a href="#profiles">Scan profiles</a>
+  <a href="#validated-dynamic">validated_dynamic scanner</a>
   <a href="#agent-modes">Agent modes</a>
 
   <h4>Architecture (deep dive)</h4>
@@ -206,6 +209,7 @@
   <a href="#arch-orch">AI Orchestrator internals</a>
   <a href="#arch-hyp">Hypothesis JSON contract</a>
   <a href="#arch-vuln">VULNERABILITY emission</a>
+  <a href="#arch-candidate">Candidate/proof contracts</a>
   <a href="#arch-db">Polyglot persistence</a>
   <a href="#arch-rt">Real-time channel</a>
   <a href="#arch-auth">Auth model</a>
@@ -250,7 +254,7 @@
   <a href="#v3-t28">T28 · Sandbox swarm</a>
   <a href="#v3-exhaustive">Exhaustive mode</a>
   <a href="#v3-creativity">Creativity mandate</a>
-  <a href="#v3-ui">10-tab session viewer</a>
+  <a href="#v3-ui">Session viewer tabs</a>
 
   <h4>Tier-6 (v4.0)</h4>
   <a href="#v4-why">Why v4.0</a>
@@ -302,6 +306,7 @@
   <a href="#v7-tvl">Tool vs reasoning loop</a>
   <a href="#v7-alpha">AlphaZero analogy</a>
   <a href="#v7-arch">v7 architecture</a>
+  <a href="#cross-file-compare">cross_file_compare</a>
   <a href="#t155">T155 · ROP composition</a>
   <a href="#t156">T156 · Code intent</a>
   <a href="#t157">T157 · Chain composer</a>
@@ -317,18 +322,25 @@
 
   <h4>Tier-10 (v8.0)</h4>
   <a href="#v8-why">Why v8.0</a>
-  <a href="#v8-flywheel">The training flywheel</a>
-  <a href="#v8-paths">Path A vs Path B</a>
-  <a href="#v8-arch">v8 architecture</a>
-  <a href="#v8-alpha">Theme α · Corpus (T167-T170)</a>
-  <a href="#v8-beta">Theme β · Fine-tunes (T171-T174)</a>
-  <a href="#v8-gamma">Theme γ · Mythos (T175-T178)</a>
+  <a href="#v8-pipeline">validated_dynamic pipeline</a>
+  <a href="#v8-hybrid-graph">Hybrid surface graph</a>
+  <a href="#v8-proof-gate">Proof &amp; promotion gate</a>
+  <a href="#v8-benchmarks">Benchmark scorecards</a>
+
+  <h4>Tier-11 (v9.0)</h4>
+  <a href="#v9-why">Why v9.0</a>
+  <a href="#v9-flywheel">The training flywheel</a>
+  <a href="#v9-paths">Path A vs Path B</a>
+  <a href="#v9-arch">v9 architecture</a>
+  <a href="#v9-alpha">Theme α · Corpus (T179-T182)</a>
+  <a href="#v9-beta">Theme β · Fine-tunes (T183-T186)</a>
+  <a href="#v9-gamma">Theme γ · Advanced Model Integration (T187-T190)</a>
 
   <h4>Comparisons &amp; future</h4>
   <a href="#changelog">Cumulative changelog</a>
   <a href="#stores">Knowledge stores added</a>
-  <a href="#mythos">GENESIS vs Claude Mythos</a>
-  <a href="#whats-next">What's next (Tier-11)</a>
+  <a href="#genesis-vs-claude">GENESIS vs Claude</a>
+  <a href="#whats-next">What's next (Tier-12)</a>
 
   <h4>Trust &amp; safety</h4>
   <a href="#evidence">Verification</a>
@@ -358,9 +370,10 @@
   script runner, a pattern library from past sessions, a Neo4j attack graph, a
   4-replica payload sandbox, specialist sub-agents, the v4.0 novel-vulnerability
   research arsenal (differential testing, coverage feedback, 51 new probes — now
-  shipping), and (planned in v5-v8) deeper source-aware reasoning, adversarial
-  hypothesis synthesis, and reasoning loops that compress search space so a generic
-  LLM can match much larger systems within each domain.
+  shipping), and the current validated <code>validated_dynamic</code> mode:
+  a hybrid endpoint/runtime plus repo/source pipeline that can store candidates,
+  validate them independently, deduplicate by root cause, prove them with deterministic
+  oracles, and keep those artifacts as an optional validation lab without delaying normal findings.
 </p>
 
 <div class="analogy">
@@ -377,15 +390,14 @@
 
 <h2 id="version-history">Version history (editions)</h2>
 <p>
-  GENESIS has been planned across eight meaningful editions, each a strict superset of
-  the one before. v1.0 through <strong>v4.0 are now built and shipping</strong>;
-  v5.0 through v8.0 are <strong>planned roadmaps</strong> documented here so the
-  manual reads as one continuous reference. v4.0 (Tier-6) just deployed — the
-  novel-vulnerability research platform is live, including the differential-testing
-  novelty engine, parser-quirk probes, HTTP-modern probes, the deserialisation
-  gadget arsenal, state-aware fuzzing, browser-side / DOM probes, the LLM probe
-  pack, non-HTTP service probes, and the AD / Kill-Chain wave (T29-T79). The table
-  below maps each edition to its theme and headline contributions.
+  GENESIS is tracked across nine numbered editions and eleven implementation tiers, each a strict superset of
+  the one before. The current branch now includes more than the old v4 shipping line:
+  source ingest, provenance, goals, adversarial reasoning, loop-state persistence,
+  costs/routing views, judge/supervisor scaffolding, and the new validated
+  <code>validated_dynamic</code> scanner path are wired into the product. The roadmap
+  sections below still preserve the original T-block narrative, but the status column
+  now distinguishes <strong>built</strong>, <strong>partially built</strong>, and
+  <strong>roadmap</strong> rather than treating everything after v4 as future-only.
 </p>
 <table>
 <thead><tr><th>Edition</th><th>Codename</th><th>Status</th><th>Theme</th></tr></thead>
@@ -395,10 +407,11 @@
 <tr><td><strong>v2.5</strong></td><td>Tier-3 (T9–T13)</td><td class="cov-built">Built</td><td>Go deeper into native code; longer in horizon; engine pluggable.</td></tr>
 <tr><td><strong>v3.0</strong></td><td>Tier-5 (T21–T28)</td><td class="cov-built">Built</td><td>Cross-session reasoning, specialist depth, parallel novelty hunting, operator UI.</td></tr>
 <tr><td><strong>v4.0</strong></td><td>Tier-6 (T29–T79)</td><td class="cov-built">Built</td><td>Novel-vulnerability research platform — differential testing, coverage feedback, 51 new probes. <strong>Now shipping.</strong></td></tr>
-<tr><td><strong>v5.0</strong></td><td>Tier-7 (T80–T120)</td><td class="cov-planned">Planned</td><td>Zero-day discovery via source-aware reasoning, adversarial synthesis, self-improving tooling, long-horizon Researcher.</td></tr>
-<tr><td><strong>v6.0</strong></td><td>Tier-8 (T121–T154)</td><td class="cov-planned">Planned</td><td>Sophistication + blackbox 0-day — replica spawning, curiosity-driven RL, real-time threat intel, multi-persona, production engineering.</td></tr>
-<tr><td><strong>v7.0</strong></td><td>Tier-9 (T155–T166)</td><td class="cov-planned">Planned</td><td>Reasoning loops — twelve domain-specific deliberation harnesses that compress search space.</td></tr>
-<tr><td><strong>v8.0</strong></td><td>Tier-10 (T167–T178)</td><td class="cov-planned">Planned</td><td>Custom models &amp; training flywheel — corpus → LoRA → reward model → distillation → router.</td></tr>
+<tr><td><strong>v5.0</strong></td><td>Tier-7 (T80–T120)</td><td class="cov-partial">Partially built</td><td>Source-aware reasoning, repo ingest, provenance, source candidates, invariants, commit signals, and source/API routes are live; several research-grade tools remain roadmap.</td></tr>
+<tr><td><strong>v6.0</strong></td><td>Tier-8 (T121–T154)</td><td class="cov-partial">Partially built</td><td>Goals, replay/replica hooks, compliance/integration/audit surfaces, budgets, containers, and production views are wired; full blackbox-RL automation remains roadmap.</td></tr>
+<tr><td><strong>v7.0</strong></td><td>Tier-9 (T155–T166)</td><td class="cov-built">Built core</td><td>Reasoning loop registry, loop-state store, adversarial red/blue, costs, routing, coverage matrix, and 11 active deliberation loop types including cross-file comparison.</td></tr>
+<tr><td><strong>v8.0</strong></td><td>Tier-10 (T167–T178)</td><td class="cov-built">Built</td><td>Validated hybrid scanner: candidate → validation verdicts → semantic/root-cause dedup → proof runs → promotion gate, with endpoint/source surface graph and benchmark scorecards.</td></tr>
+<tr><td><strong>v9.0</strong></td><td>Tier-11 (T179–T190)</td><td class="cov-partial">Roadmap / scaffolded</td><td>Custom models &amp; training flywheel — corpus → LoRA → reward model → distillation → router. Formerly documented as v8.</td></tr>
 </tbody>
 </table>
 
@@ -408,8 +421,9 @@
   v1.0 made the AI's <em>process</em> reliable. v2.0 made the AI's <em>output</em>
   original. v2.5 made the AI's <em>reach</em> deeper. v3.0 made its <em>recall</em>
   persistent and its <em>specialisation</em> depth-first. v4.0 makes it find
-  <em>novelty</em>. v5.0 makes it <em>imagine</em>. v6.0 makes it <em>blackbox-ready
-  and enterprise-deployable</em>. v7.0 makes it <em>reason in loops</em>. v8.0 makes
+  <em>novelty</em>. v5.0 adds source/repo grounding. v6.0 adds production and
+  goal-driven scaffolding. v7.0 makes it <em>reason in loops</em>. v8.0 ties
+  those pieces into a GENESIS multi-stage validation and proof harness. v9.0 makes
   the platform's models <em>improve with every bug it finds</em>.
 </p>
 </div>
@@ -477,18 +491,79 @@
 </p>
 
 <h2 id="profiles">Scan profiles</h2>
-<p>When you start a session you pick a profile. These control how long and how aggressive the session is.</p>
+<p>When you start a session you pick a profile. The Dashboard currently exposes the three production choices: <code>exhaustive</code>, <code>deep_research</code>, and <code>validated_dynamic</code>. The backend still accepts several legacy profiles for API compatibility.</p>
 <table>
 <thead><tr><th>Profile</th><th>Iterations</th><th>Behavior</th></tr></thead>
 <tbody>
-<tr><td><strong>Fast</strong></td><td>up to 15</td><td>Quick sweep. Useful for a sanity check.</td></tr>
-<tr><td><strong>Deep</strong></td><td>up to 50</td><td>Full coverage. Default for real assessments.</td></tr>
-<tr><td><strong>Stealth</strong></td><td>up to 30</td><td>Low and slow. Minimizes fingerprint footprint.</td></tr>
-<tr><td><strong>Full</strong></td><td>up to 80</td><td>No constraints. Maximum depth. Expensive in time and tokens.</td></tr>
-<tr><td><strong>APT sim</strong></td><td>up to 60</td><td>Simulates a patient attacker: silent recon, then targeted, then exploit.</td></tr>
-<tr><td><strong>Exhaustive (v3.0+)</strong></td><td>up to 500</td><td>Idle-stop terminates when the agent runs out of novel ideas. The default in v3.0+.</td></tr>
+<tr><td><strong>Exhaustive</strong></td><td>unbounded with idle-stop</td><td>Default broad scan. Multi-agent rounds continue until coverage and novelty gates stop producing new hypotheses.</td></tr>
+<tr><td><strong>Deep Research</strong></td><td>long-horizon floor</td><td>Six-hour-plus audit profile with more rounds, stronger coverage gates, and mandatory re-verification. Best when depth matters more than cost.</td></tr>
+<tr><td><strong>Validated Dynamic</strong></td><td>unbounded with optional validation lab</td><td>Validated mode. Agents emphasize hybrid source/runtime mapping, optional candidates, proof artifacts, scorecards, and critic-reviewed findings.</td></tr>
+<tr><td><strong>Fast / Deep / Stealth / Full / APT sim</strong></td><td>legacy API profiles</td><td>Still present in backend scan-profile definitions for compatibility and scripted use, but not the primary Dashboard path.</td></tr>
 </tbody>
 </table>
+
+<h2 id="validated-dynamic">validated_dynamic — v8 scanner operational view</h2>
+<p>
+  <code>validated_dynamic</code> is the latest scanner path. It keeps GENESIS strong
+  on live endpoints, but adds multi-stage validation and source/repo reasoning
+  whenever source, binaries, sourcemaps, OpenAPI, artifacts, or commit history are
+  available. The important shift is that scanner agents no longer write directly to
+  final findings in this mode. They write candidates, and the platform decides what
+  survives.
+</p>
+
+<div class="panel teal">
+  <div class="title">Pipeline contract</div>
+  <p><strong>Prepare</strong> builds a target brief, endpoint inventory, source/artifact
+  inventory, and <code>TargetSurfaceGraph</code>. <strong>Scan</strong> stores
+  <code>CANDIDATE_FINDING</code> and <code>SOURCE_CANDIDATE_FINDING</code> records.
+  <strong>Validate</strong> runs endpoint, source, and counter-validator verdicts.
+  <strong>Dedup</strong> clusters by endpoint, attack class, source sink, root cause,
+  payload behavior, proof oracle, and likely patch shape. <strong>Prove</strong>
+  normalizes deterministic evidence into <code>ProofRun</code>. <strong>Report</strong>
+  promotes only candidates that pass the gate.</p>
+</div>
+
+<table>
+<thead><tr><th>Object</th><th>What it records</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td><code>CandidateFinding</code></td><td>Title, attack class, affected surface, hypothesis, evidence, reachability claim, proof plan, confidence, source agent.</td><td>Preserves leads without polluting final vulnerability rows.</td></tr>
+<tr><td><code>SOURCE_CANDIDATE_FINDING</code></td><td>Candidate plus <code>source_context</code>, file path, symbol, sink, source input, taint path, invariant, commit signal, and mapped endpoint.</td><td>Lets source evidence and live endpoint evidence reinforce each other.</td></tr>
+<tr><td><code>ValidationVerdict</code></td><td>Validator, support/refute/needs-proof/disputed, reasoning, missing evidence, and target proof action.</td><td>Turns debate and refutation into stored, inspectable state.</td></tr>
+<tr><td><code>ProofRun</code></td><td>Proof tool, oracle, inputs, result, artifacts, pass/fail reason, live/static proof class.</td><td>Normalizes proof from request forge, browser/OOB tools, fuzzing, symbolic execution, and static/source tools.</td></tr>
+<tr><td><code>FindingCluster</code></td><td>Canonical candidate, duplicates, merged evidence, root-cause summary.</td><td>Prevents duplicate final findings when several agents or endpoints hit the same root cause.</td></tr>
+<tr><td><code>TargetSurfaceGraph</code></td><td>Endpoint nodes, source nodes, artifact nodes, endpoint↔source links, high-risk commits, mapping rate.</td><td>Makes the hybrid view explicit: what was observed live, what exists in code, and how confidently the two line up.</td></tr>
+</tbody>
+</table>
+
+<h3>Endpoint-first vs source-first behavior</h3>
+<p>
+  Traditional GENESIS starts from observable behavior: crawl, probe, generate payloads,
+  use browser/OOB proof, and build exploit-chain context. Repo-first scanning starts from code:
+  language-aware indices, commit-derived attack surfaces, cross-file invariants,
+  auditor/debater/prover stages, and patch-style dedup. The hybrid mode intentionally
+  correlates both views. Endpoint-only scans still work; source or artifact evidence
+  raises priority when it maps to live reachability.
+</p>
+
+<h3>Promotion rules</h3>
+<ul class="feature-list">
+  <li>Medium, high, and critical candidates need a passing proof before becoming confirmed findings.</li>
+  <li>Source-backed candidates with <code>live_replay_required=true</code> need a live proof, not only static/source evidence.</li>
+  <li>Source-only bugs without a reachable endpoint remain <code>source_verified_unreachable</code> or <code>source_verified_needs_replay</code>, not confirmed vulnerabilities.</li>
+  <li>Refute or disputed verdicts block promotion. The counter-validator can block weak candidates, but its generic support does not promote by itself.</li>
+  <li>Later failed/static proof attempts do not demote candidates that are already proven, promoted, or source-verified.</li>
+</ul>
+
+<h3>Validated UI and API</h3>
+<p>
+  The Session Viewer has a <strong>Validated</strong> tab with candidates, endpoint/source
+  surface links, validator matrix, proof ladder, clusters, and benchmark scorecards.
+  The REST surface lives under <code>/api/v1/validated</code>: candidates, verdicts,
+  proof runs, clusters, surface graph, and benchmark reports. The benchmark lane tracks
+  candidate count, duplicate rate, proof coverage, endpoint/source/hybrid candidate
+  counts, mapping rate, and optional ground-truth recall.
+</p>
 
 <h2 id="agent-modes">Agent modes</h2>
 <ul class="feature-list">
@@ -633,7 +708,7 @@
   <li>
     <strong>Orchestrator startup.</strong> Backend kicks off
     <code>backend/app/services/ai_orchestrator.py</code> for that session.
-    System prompt: "GENESIS MYTHOS" — autonomous red-team operator with hypothesis-
+    System prompt: "GENESIS" — autonomous red-team operator with hypothesis-
     driven reasoning, oracle requirements, evidence rules, scan-profile constraints.
   </li>
   <li>
@@ -642,6 +717,15 @@
     reporting</em>. Claude's tool-use loop fires the Anthropic Messages API with the
     full tool catalog; the response either contains a tool call (executed below) or a
     <code>{"HYPOTHESIS": …}</code> / <code>{"VULNERABILITY": …}</code> block.
+  </li>
+  <li>
+    <strong>validated_dynamic branch.</strong> When the session profile is
+    <code>validated_dynamic</code>, raw <code>VULNERABILITY</code> blocks are preserved
+    as candidate findings instead of final report rows. Source-aware agents can also
+    emit <code>SOURCE_CANDIDATE_FINDING</code>. The validated scanner service stores
+    candidates, creates baseline endpoint/source/counter verdicts, rebuilds clusters,
+    rebuilds the endpoint/source <code>TargetSurfaceGraph</code>, records proof runs,
+    and promotes only candidates that satisfy the validation/proof gate.
   </li>
   <li>
     <strong>Tool execution via MCP.</strong> Orchestrator calls
@@ -669,20 +753,24 @@
     with severity, CVSS, exploit code, remediation. Cross-session memory of confirmed
     findings → Neo4j (Target / Host / Service / Finding nodes; CHAINS_INTO edges).
     Strategic post-session reflections → ChromaDB. Artifacts (pulled binaries, fuzz
-    crashes, capture files) → MinIO from v3.0 onward.
+    crashes, capture files) → MinIO from v3.0 onward. validated_dynamic state lives in
+    MongoDB collections for <code>candidate_findings</code>, <code>validation_verdicts</code>,
+    <code>proof_runs</code>, <code>finding_clusters</code>, <code>benchmark_reports</code>,
+    <code>source_ingest_summaries</code>, and <code>target_surface_graphs</code>.
   </li>
 </ol>
 
 <h2 id="arch-orch">AI Orchestrator internals</h2>
 <p>
   <code>backend/app/services/ai_orchestrator.py</code> is the core of GENESIS — the
-  Claude tool-use loop that drives every session. It owns five concerns:
+  Claude tool-use loop that drives every session. It owns six concerns:
 </p>
 <ol>
-  <li><strong>Prompt assembly.</strong> System prompt = MYTHOS preamble + tool catalog (per-agent allowed set) + recent messages window. Cross-session memory (U4 technique recall + T8 reflections) and v3.0 plan-tree summaries (T11) are injected as user turns.</li>
+  <li><strong>Prompt assembly.</strong> System prompt = GENESIS preamble + tool catalog (per-agent allowed set) + recent messages window. Cross-session memory (U4 technique recall + T8 reflections) and v3.0 plan-tree summaries (T11) are injected as user turns.</li>
   <li><strong>Tool dispatch.</strong> For each Claude <code>tool_use</code> block, the orchestrator routes to <code>MCPClient</code> with mapped tool name and validated parameters, awaits the response (with per-tool timeout), and feeds the result back as a <code>tool_result</code> on the next turn.</li>
   <li><strong>Hypothesis + vulnerability extraction.</strong> Every text block is scanned for the JSON contracts below; matched blocks are persisted, broadcast on Redis, and tracked in the per-session hypothesis journal (Mongo).</li>
-  <li><strong>Evidence gating.</strong> U1 evidence rule + blind-class rule + Haiku critic run before any finding leaves the orchestrator. A "confirmed" claim with empty evidence list is automatically demoted to "unverified". The Haiku critic can also dispute a passing claim.</li>
+  <li><strong>Candidate extraction in validated mode.</strong> In <code>validated_dynamic</code>, <code>CANDIDATE_FINDING</code>, <code>SOURCE_CANDIDATE_FINDING</code>, and raw <code>VULNERABILITY</code> blocks are routed through <code>validated_scanner.py</code> before they can become report findings.</li>
+  <li><strong>Evidence gating.</strong> U1 evidence rule + blind-class rule + critic run before any finding leaves the orchestrator. A "confirmed" claim with empty evidence list is automatically demoted to "unverified". In <code>validated_dynamic</code>, medium/high/critical claims also need a passing proof oracle before confirmation.</li>
   <li><strong>Loop discipline.</strong> Ring-buffer loop-breaker (U2), idle-stop guard (v3.0 exhaustive mode), creativity nudge after 6 stock-tool iterations, and FINAL_REPORT detection all live here.</li>
 </ol>
 
@@ -713,6 +801,11 @@
   back-stops it with a session-end Hypothesis → Finding bridge that auto-derives any
   missing rows from confirmed hypotheses.
 </p>
+<p>
+  In <code>validated_dynamic</code>, a raw <code>VULNERABILITY</code> block is treated as
+  a candidate until the validation/proof gate promotes it. That avoids turning an
+  agent's confident-but-untested claim into a final report row.
+</p>
 <pre><code>{
   "VULNERABILITY": {
     "title": "IDOR on /api/orders/:id",
@@ -732,25 +825,90 @@
   }
 }</code></pre>
 
+<h2 id="arch-candidate">Candidate/proof contracts</h2>
+<p>
+  The validated scanner adds two explicit pre-report contracts. Endpoint/runtime agents
+  emit <code>CANDIDATE_FINDING</code>; source, artifact, binary, OpenAPI, taint, and
+  commit-history agents emit <code>SOURCE_CANDIDATE_FINDING</code>. Both normalize into
+  <code>candidate_findings</code> and share validation, dedup, proof, and promotion logic.
+</p>
+<pre><code>{
+  "CANDIDATE_FINDING": {
+    "title": "Possible IDOR on /api/orders/:id",
+    "attack_class": "idor",
+    "affected_surface": "https://target/api/orders/:id",
+    "hypothesis": "Order id is trusted without object-level authorization",
+    "evidence": ["GET id=100 and id=101 both returned 200 with different user ids"],
+    "reachability_claim": "Authenticated user input controls the order id path segment",
+    "proposed_proof": {
+      "tool": "ai_request_forge",
+      "oracle": "same session can read an order owned by another user"
+    },
+    "confidence": 0.72,
+    "severity": "high",
+    "endpoint": "/api/orders/:id"
+  }
+}</code></pre>
+
+<pre><code>{
+  "SOURCE_CANDIDATE_FINDING": {
+    "title": "SQL query uses request parameter without binding",
+    "attack_class": "sqli",
+    "source_context": {
+      "repo": "target",
+      "file_path": "routes/orders.ts",
+      "symbol": "getOrder",
+      "language": "typescript",
+      "line_range": "40-75"
+    },
+    "reachability_context": {
+      "endpoint": "/api/orders/:id",
+      "method": "GET",
+      "auth_required": true,
+      "params": ["id"],
+      "taint_path": "req.params.id -> db.query",
+      "confidence": 0.8
+    },
+    "sink": "db.query",
+    "source_input": "req.params.id",
+    "proof_plan": {
+      "preferred_tool": "ai_request_forge",
+      "oracle": "boolean or error delta on crafted id",
+      "live_replay_required": true,
+      "fallback_tools": ["payload_swarm", "taint_engine"]
+    },
+    "confidence": 0.76,
+    "severity": "high"
+  }
+}</code></pre>
+
+<p>
+  <code>ProofRun</code> records the tool, oracle, inputs, result, artifacts, pass/fail
+  reason, and proof class. Live proof tools include <code>ai_request_forge</code>,
+  <code>forge_runner</code>, <code>browser_session</code>, <code>oob_check</code>,
+  <code>payload_swarm</code>, and <code>curl_probe</code>. Static/source proof tools
+  include <code>semgrep_scan</code>, <code>ast_walker</code>, <code>taint_engine</code>,
+  <code>symbolic_exec</code>, <code>fuzz_binary</code>, <code>instrument_trace</code>,
+  <code>code_read</code>, <code>binary_decompile</code>, and <code>bandit_scan</code>.
+</p>
+
 <h2 id="arch-db">Polyglot persistence — what lives where and why</h2>
 <table>
 <thead><tr><th>Store</th><th>Why this store</th><th>Top collections / tables</th></tr></thead>
 <tbody>
 <tr><td>PostgreSQL</td><td>Strong schema for the report — sessions, severity-graded findings, settings need referential integrity.</td><td><code>research_sessions</code>, <code>vulnerabilities</code>, <code>app_settings</code>, <code>users</code></td></tr>
-<tr><td>MongoDB</td><td>Variable-shape JSON — agent thoughts and tool outputs change shape per tool, can be large, and rarely need joins.</td><td><code>agent_thoughts</code>, <code>tool_outputs</code>, <code>hypothesis_journals</code>, <code>target_briefs</code> (T1), <code>artifacts</code> (T3), <code>plan_trees</code> (T11), <code>session_reflections</code> staging</td></tr>
+<tr><td>MongoDB</td><td>Variable-shape JSON — agent thoughts, tool outputs, candidates, verdicts, proof runs, benchmarks, and surface graphs change shape per tool and rarely need joins.</td><td><code>agent_thoughts</code>, <code>tool_outputs</code>, <code>hypothesis_journals</code>, <code>target_briefs</code>, <code>artifacts</code>, <code>plan_trees</code>, <code>candidate_findings</code>, <code>validation_verdicts</code>, <code>proof_runs</code>, <code>finding_clusters</code>, <code>benchmark_reports</code>, <code>target_surface_graphs</code></td></tr>
 <tr><td>Redis</td><td>Microsecond pub/sub for the live feed; Redis lists for the cross-agent shared-findings bus (U5) with TTL.</td><td>channel <code>session:{id}</code>; list <code>genesis:session:{id}:shared_findings</code></td></tr>
 <tr><td>ChromaDB</td><td>Embedding similarity — past techniques (U4), session reflections (T8), and pattern recall against new fingerprints.</td><td><code>attack_techniques</code>, <code>attack_patterns</code>, <code>session_reflections</code></td></tr>
 <tr><td>Neo4j (v3.0+)</td><td>Graph-native queries are required for cross-session attack-chain reasoning. T21 schema covers Target → Host → Service → Finding with CHAINS_INTO edges.</td><td>nodes Target / Host / Service / Finding / Credential / Token / Privilege</td></tr>
 <tr><td>MinIO (v3.0+)</td><td>Object store shared across multi-host Celery workers — pulled binaries, fuzz crashes, captures must be readable by any worker.</td><td>per-session bucket prefix</td></tr>
-<tr><td>Vector store (v5.0)</td><td>Semantic recall over the corpus of source / hypotheses / findings.</td><td>planned</td></tr>
-<tr><td>Property DB (v5.0)</td><td>Formal invariants per target inferred by T83.</td><td>planned</td></tr>
-<tr><td>Tool registry (v5.0)</td><td>Self-synthesised tools registered by T97 — name, schema, validation outcome.</td><td>planned</td></tr>
-<tr><td>Provenance store (v5.0)</td><td>Full reasoning trace per finding for replay / training.</td><td>planned</td></tr>
-<tr><td>Threat-intel store (v6.0)</td><td>CVE feeds + advisories ingested by T129.</td><td>planned</td></tr>
-<tr><td>Audit log (v6.0)</td><td>Append-only RBAC-attributed action log (T142).</td><td>planned</td></tr>
-<tr><td>Event log (v6.0)</td><td>Replay-able session history (T146).</td><td>planned</td></tr>
-<tr><td>Loop-state store (v7.0)</td><td>Intermediate states per reasoning loop (T160) for debug / replay / v8 training data.</td><td>planned</td></tr>
-<tr><td>Training corpus (v8.0)</td><td>Versioned, partitioned (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuples (T167).</td><td>planned</td></tr>
+<tr><td>Source corpus (v5.0)</td><td>Indexed source chunks, repo ingest summaries, and source candidate context.</td><td>live in source routes + Chroma/Mongo helpers</td></tr>
+<tr><td>Provenance store (v5.0)</td><td>Full reasoning trace per finding for replay / training.</td><td>route and service surface wired</td></tr>
+<tr><td>Threat-intel / replay / goal stores (v6.0)</td><td>CVE feeds, replay sessions, operator goals, and goal progress.</td><td>Mongo collections and routes wired</td></tr>
+<tr><td>Audit / budget / integration stores (v6.0)</td><td>RBAC-attributed activity, token budgets, compliance and SOC integration configuration.</td><td>routes wired</td></tr>
+<tr><td>Loop-state store (v7.0)</td><td>Intermediate states per reasoning loop (T160) for debug / replay / v9 training data.</td><td>live</td></tr>
+<tr><td>Judge / supervisor stores (v8.0)</td><td>SessionJudge verdicts and SessionSupervisor directives.</td><td>scaffolded and indexed</td></tr>
+<tr><td>Training corpus + model registry (v9.0)</td><td>Versioned tuples and model portfolio metadata for future training flywheel.</td><td>roadmap</td></tr>
 </tbody>
 </table>
 
@@ -785,9 +943,10 @@
   <code>payload_swarm</code>, <code>forge_runner</code>, <code>fuzz_binary</code>,
   <code>symbolic_exec</code>, <code>instrument_trace</code>, <code>browser_session</code>,
   <code>render_and_see</code>, <code>cve_patch_pull</code>, <code>artifact_hunter</code>,
-  <code>artifact_pull</code>). v4 adds 51 new probes (T29-T79); v5 adds 41 (T80-T120);
-  v6 adds 34 (T121-T154); v7 does <em>not</em> add tools — it adds reasoning loops
-  above the existing tool layer.
+  <code>artifact_pull</code>). v4 adds 51 new probes (T29-T79); source/repo and
+  native-analysis services add enrichment around the tool layer; <code>validated_dynamic</code>
+  reuses these tools as proof backends. v7 does <em>not</em> add MCP probes — it adds
+  reasoning loops above the existing tool layer.
 </p>
 
 <h2 id="tier1-overview">Tier-1 (v1.0) — what shipped first</h2>
@@ -1048,7 +1207,7 @@
   The orchestrator's call to <code>api.anthropic.com</code> is abstracted behind a
   provider adapter. Switchable via settings between Anthropic API (default), Azure-
   hosted Anthropic, Amazon Bedrock, and a custom Anthropic-compatible endpoint with
-  a configurable URL and optional auth header. Designed to plug in a future Mythos
+  a configurable URL and optional auth header. Designed to plug in a future advanced model
   endpoint when access is granted — no code changes, no redeploy.
 </p>
 </div>
@@ -1178,7 +1337,8 @@
   as a sanity net. The real stop signal is one of three: agent emits
   <code>{"SESSION_COMPLETE": true}</code>, agent emits <code>FINAL_REPORT</code>, or
   five consecutive iterations with zero new tool call / hypothesis / finding (after
-  a 15-iteration warm-up). The Dashboard's Scan Profile selector was removed.
+  a warm-up). The Dashboard selector is back in the current branch and now exposes
+  <code>exhaustive</code>, <code>deep_research</code>, and <code>validated_dynamic</code>.
 </p>
 
 <h3 id="v3-creativity">Creativity mandate (the novelty directive)</h3>
@@ -1190,7 +1350,7 @@
   <li><strong>Creativity nudge</strong> fires once per session if 6+ iterations have run without a custom script.</li>
 </ul>
 
-<h3 id="v3-ui">UI redesign — 10-tab session viewer</h3>
+<h3 id="v3-ui">UI redesign — session viewer tabs</h3>
 <ol>
   <li><strong>Findings</strong> — confirmed VULNERABILITY rows, severity-coloured.</li>
   <li><strong>Chains</strong> — multi-step attack chains ordered by severity.</li>
@@ -2289,8 +2449,9 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
   Across v3 + v4 + v5 + v6, GENESIS specifies ~120 capability blocks. Counting
   honestly: ~85% of those are tools, integrations, UX, ops; ~10% are custom
   reasoning architecture; only ~5% is custom model work. That last 5% is exactly
-  what separates Mythos from GENESIS-on-Opus. v7.0 corrects this by deliberately
-  not adding any new MCP probes — all twelve T-blocks are reasoning loops.
+  what separates advanced models from GENESIS-on-Opus. v7.0 corrects this by deliberately
+  not adding any new MCP probes. The current branch exposes 11 active loop types in
+  the registry; Tree-of-Thought remains a framework helper composed by other loops.
 </p>
 
 <div class="panel emerald">
@@ -2347,6 +2508,7 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
    │   ├── Self-correcting exploit (T159)                              │
    │   ├── Long-context code reasoning (T162, 1M+ tokens)              │
    │   ├── Cross-component invariant tracking (T163)                   │
+   │   ├── Cross-file pattern comparison (GENESIS hybrid)                │
    │   ├── Causal exploit trace (T164)                                 │
    │   └── Counterfactual exploration (T165, deep)                     │
    └──────────┬─────────────────┬───────────────────────┬─────────────┘
@@ -2354,13 +2516,13 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
    Tool layer (~120 probes)  Sandbox + replicas   Loop-state store (NEW)
                                                    persisted intermediate
                                                    states for replay /
-                                                   v8 training
+                                                   v9 training
 </div>
 
 <div class="capability-card">
   <span class="tier-chip emerald">T155</span>
   <h3 id="t155">rop_composition_loop</h3>
-  <p>Constraint-aware ROP-chain composition. Iterative: gadget search → constraint satisfaction → register-state simulation → byte-budget arithmetic → re-search if over budget → final assembly. Mythos's FreeBSD NFS exploit compressed a 1000-byte ROP chain into 200 bytes via 6 sequential RPC requests; the loop externalises that working memory so a generic Opus model can do the same.</p>
+  <p>Constraint-aware ROP-chain composition. Iterative: gadget search → constraint satisfaction → register-state simulation → byte-budget arithmetic → re-search if over budget → final assembly. GENESIS's FreeBSD NFS exploit compressed a 1000-byte ROP chain into 200 bytes via 6 sequential RPC requests; the loop externalises that working memory so a generic Opus model can do the same.</p>
   <div class="attack-path"><div class="title">Concrete walk-through</div><p>Goal: <code>execve("/bin/sh", 0, 0)</code> in &lt; 200 bytes. T1: search → 47 candidates. T2: model scores → 12 promising. T3: simulate → 8 valid. T4: byte budget — shortest 312 bytes, over budget. T5: model proposes multi-write strategy. T6: re-search write primitives. T7: assemble multi-write chain at 184 bytes. Done.</p></div>
 </div>
 
@@ -2415,6 +2577,13 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
 </div>
 
 <div class="capability-card">
+  <span class="tier-chip emerald">Validated</span>
+  <h3 id="cross-file-compare">cross_file_compare_loop</h3>
+  <p>One-tick bounded source validator used by the hybrid scanner. It compares a source-backed candidate's primary snippet against analogous snippets elsewhere and asks whether the candidate is an inconsistency, a false lead, or a needs-proof hypothesis. It accepts malformed snippet input safely, falls back to a heuristic path when no LLM adapter is available, and returns structured support/refute/needs_proof output.</p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>A source candidate says a handler frees an object before using it. The loop compares nearby handlers that deep-copy or validate before release, surfaces the missing ownership step, and hands the gap back to the validator/proof stages rather than promoting it directly.</p></div>
+</div>
+
+<div class="capability-card">
   <span class="tier-chip emerald">T164</span>
   <h3 id="t164">causal_exploit_trace_builder</h3>
   <p>For every confirmed exploit, builds a causal graph: which input bytes led to which side effects, which side effects enabled which downstream primitives. Foundation for both explanation and self-correction (T159 input).</p>
@@ -2432,56 +2601,189 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
   <p>Breaks complex hypotheses into atomic claims. "There's a privesc bug here" decomposes into: "X is reachable from unauthenticated context", "X writes to Y", "Y is a privileged resource", "the write doesn't sanitise the privilege check". Each atomic claim becomes a target for individual experimentation.</p>
 </div>
 
-<h2 id="v8-why">Tier-10 (v8.0) — Custom Models &amp; Training Flywheel</h2>
+<h2 id="v8-why">Tier-10 (v8.0) — Validated Dynamic Hybrid Scanner</h2>
 <p>
-  v7 builds reasoning loops; v8 trains the models inside them. Where v7 compresses
-  search space so Opus can match larger systems within a domain, v8 grows the models
+  v8 is the validated scanner release. It is not a source-only, kernel-scale
+  auditing system; instead it applies the strongest engineering idea: a staged
+  validation harness around the model. GENESIS keeps its endpoint
+  and runtime strengths, then correlates them with repo/source/artifact context
+  whenever that context is available.
+</p>
+
+<div class="panel teal">
+  <div class="title">v8 thesis</div>
+  <p>The scanner should not ask "which model said this is vulnerable?" It should ask:
+  what candidate was generated, what independent validators supported or refuted it,
+  what duplicate/root-cause cluster it belongs to, and what deterministic proof
+  survived replay. The durable advantage is the validation system around the model.</p>
+</div>
+
+<h3 id="v8-pipeline">validated_dynamic pipeline</h3>
+<div class="arch-diagram">
+        ┌──────────────────────────────────────┐
+        │ Prepare                              │
+        │ target brief · endpoints · source    │
+        │ artifacts · commits · surface graph  │
+        └─────────────────┬────────────────────┘
+                          ▼
+        ┌──────────────────────────────────────┐
+        │ Scan                                 │
+        │ CANDIDATE_FINDING                    │
+        │ SOURCE_CANDIDATE_FINDING             │
+        └─────────────────┬────────────────────┘
+                          ▼
+        ┌──────────────────────────────────────┐
+        │ Validate                             │
+        │ endpoint_validator                   │
+        │ source_validator                     │
+        │ counter_validator                    │
+        └─────────────────┬────────────────────┘
+                          ▼
+        ┌──────────────────────────────────────┐
+        │ Dedup                                │
+        │ root cause · patch shape · proof     │
+        │ behavior · endpoint/source mapping   │
+        └─────────────────┬────────────────────┘
+                          ▼
+        ┌──────────────────────────────────────┐
+        │ Prove                                │
+        │ live proof · static proof · replay   │
+        │ normalized ProofRun records          │
+        └─────────────────┬────────────────────┘
+                          ▼
+        ┌──────────────────────────────────────┐
+        │ Report                               │
+        │ findings + optional proof artifacts  │
+        └──────────────────────────────────────┘
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T167</span>
+  <h3>Optional candidate scanner state</h3>
+  <p>Agents in <code>validated_dynamic</code> can emit candidates alongside normal findings. Endpoint/runtime agents emit <code>CANDIDATE_FINDING</code>; repo/source/artifact agents emit <code>SOURCE_CANDIDATE_FINDING</code>. Raw <code>VULNERABILITY</code> blocks now flow through GENESIS evidence checks and critic review unless strict validation is explicitly enabled.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T168</span>
+  <h3>Independent validator matrix</h3>
+  <p>Every candidate gets baseline validation from endpoint, source, and counter validators. Endpoint validation checks live reachability and evidence. Source validation checks file/symbol/sink/taint/invariant evidence. Counter validation records missing proof conditions and blocks weak candidates when a refutation exists.</p>
+</div>
+
+<h3 id="v8-hybrid-graph">Hybrid surface graph</h3>
+<div class="capability-card">
+  <span class="tier-chip teal">T169</span>
+  <h3>TargetSurfaceGraph</h3>
+  <p>The prepare stage builds a unified graph from discovered endpoints, source entry points, artifacts, sourcemaps, OpenAPI/swagger, binaries, commit signals, and prior findings. It stores endpoint↔source links with method, auth state, params, handler symbol, file path, taint path, confidence, and candidate id.</p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>A crawler sees <code>GET /api/orders/:id</code>. Source ingest finds <code>routes/orders.ts::getOrder</code>. Taint analysis links <code>req.params.id</code> to <code>db.query</code>. The graph records a hybrid link; candidate priority rises because live endpoint evidence and source evidence agree.</p></div>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T170</span>
+  <h3>Source-grounded candidate generation</h3>
+  <p>Source candidates carry <code>source_context</code>, <code>reachability_context</code>, <code>sink</code>, <code>source_input</code>, <code>taint_path</code>, <code>invariant</code>, <code>commit_signal</code>, and <code>proof_plan</code>. If no repo/source exists, v8 still runs endpoint-only and treats artifact hunting as a first-class prepare task.</p>
+</div>
+
+<h3 id="v8-proof-gate">Proof &amp; promotion gate</h3>
+<div class="capability-card">
+  <span class="tier-chip teal">T171</span>
+  <h3>ProofRun normalization</h3>
+  <p>Proof attempts from <code>ai_request_forge</code>, <code>forge_runner</code>, <code>browser_session</code>, <code>oob_check</code>, <code>payload_swarm</code>, <code>curl_probe</code>, <code>semgrep_scan</code>, <code>taint_engine</code>, <code>symbolic_exec</code>, <code>fuzz_binary</code>, and <code>instrument_trace</code> normalize into one <code>ProofRun</code> schema with oracle, inputs, result, artifacts, pass/fail reason, and live/static proof class.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T172</span>
+  <h3>Promotion policy</h3>
+  <p>Every candidate requires a passing proof run or auditable operator validation before it becomes a final finding. Source-backed candidates with <code>live_replay_required=true</code> need a live endpoint proof before confirmation. Refute/disputed verdicts block promotion. Counter-validator support alone is not enough to promote a candidate. Later failed or static-only proof attempts do not demote already proven, promoted, or source-verified candidates.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T173</span>
+  <h3>Root-cause and patch-style dedup</h3>
+  <p>Dedup groups candidates by endpoint, attack class, source sink, file/symbol, commit signal, payload behavior, proof oracle, and likely remediation shape. Two candidates are duplicates when the same code/config patch would fix both, even if they were discovered through different endpoints or agents.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T174</span>
+  <h3>Cross-file comparison loop</h3>
+  <p><code>cross_file_compare</code> gives the hybrid scanner a bounded validation question: does this source-backed candidate differ from analogous code elsewhere? It can run with an LLM adapter or a heuristic fallback, and it returns structured support/refute/needs-proof output without directly promoting a finding.</p>
+</div>
+
+<h3 id="v8-benchmarks">Benchmark scorecards</h3>
+<div class="capability-card">
+  <span class="tier-chip teal">T175</span>
+  <h3>Validated benchmark reports</h3>
+  <p>Benchmark reports track candidate count, cluster count, duplicate rate, proof coverage, passed proof count, endpoint/source/hybrid candidate counts, surface-link count, endpoint↔source mapping rate, optional ground-truth recall, and confirmed-vulnerability count.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T176</span>
+  <h3>Validated UI/API surface</h3>
+  <p>The Session Viewer's Validation Lab tab displays candidates, surface links, validation verdicts, proof runs, clusters, and scorecards. The REST API lives under <code>/api/v1/validated</code> for candidates, verdicts, proof runs, clusters, surface graph, and benchmark reports.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T177</span>
+  <h3>Hybrid source/live replay status model</h3>
+  <p>Source-only candidates without live reachability stay visible as <code>source_verified_unreachable</code> or <code>source_verified_needs_replay</code>. They are valuable engineering signals, but they do not become confirmed impact until reachability or deterministic live proof exists.</p>
+</div>
+
+<div class="capability-card">
+  <span class="tier-chip teal">T178</span>
+  <h3>Regression-tested validation logic</h3>
+  <p>The smoke suite checks that the profile is registered, candidate extraction is wired, validator roles exist, proof tools are normalized, counter-validator support cannot promote by itself, source-verified states are protected from fallback failures, and the cross-file compare loop normalizes malformed snippet input.</p>
+</div>
+
+<h2 id="v9-why">Tier-11 (v9.0) — Custom Models &amp; Training Flywheel</h2>
+<p>
+  v7 builds reasoning loops; v8 validates and proves findings; v9 trains the models
+  inside those systems. Where v7 compresses search space and v8 cleans the promotion
+  path, v9 grows the models
   themselves through a closed-loop training flywheel: every confirmed finding becomes
   training data, training data fine-tunes specialists, fine-tuned specialists find
   more findings.
 </p>
 
 <div class="panel amber">
-  <div class="title">v8 thesis</div>
-  <p>Mythos's reasoning depth comes from training on real exploit corpora at scale.
+  <div class="title">v9 thesis</div>
+  <p>GENESIS's reasoning depth comes from training on real exploit corpora at scale.
   We can't replicate that scale. But we can build a flywheel where every confirmed
   GENESIS finding becomes training data, every fine-tune produces a slightly better
   specialist, and every better specialist produces more confirmed findings. The
   flywheel grows the model the platform deserves over time.</p>
 </div>
 
-<h3 id="v8-flywheel">The training flywheel</h3>
+<h3 id="v9-flywheel">The training flywheel</h3>
 <ol>
   <li><strong>Confirmed bug.</strong> Any session produces a confirmed finding with cited evidence.</li>
-  <li><strong>Corpus ingestion (T167).</strong> Daemon ingests it into a structured (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuple.</li>
-  <li><strong>Counterexample mining (T168).</strong> For the same target_class, mines near-miss code that is <em>not</em> vulnerable — contrastive labels.</li>
-  <li><strong>Quality gate (T170).</strong> High-impact tuples reviewed by humans; rest auto-accepted.</li>
-  <li><strong>Specialist fine-tune (T171).</strong> Per-specialist LoRA pipeline triggers when corpus delta exceeds threshold.</li>
-  <li><strong>Reward-model update (T172).</strong> Reward model re-trained on success/failure labels.</li>
-  <li><strong>Continual deployment (T174).</strong> Updated specialists ship with drift-checks; v6 T154 monitors health.</li>
+  <li><strong>Corpus ingestion (T179).</strong> Daemon ingests it into a structured (target_class, vulnerability_pattern, exploit_attempt, outcome, citations) tuple.</li>
+  <li><strong>Counterexample mining (T180).</strong> For the same target_class, mines near-miss code that is <em>not</em> vulnerable — contrastive labels.</li>
+  <li><strong>Quality gate (T182).</strong> High-impact tuples reviewed by humans; rest auto-accepted.</li>
+  <li><strong>Specialist fine-tune (T183).</strong> Per-specialist LoRA pipeline triggers when corpus delta exceeds threshold.</li>
+  <li><strong>Reward-model update (T184).</strong> Reward model re-trained on success/failure labels.</li>
+  <li><strong>Continual deployment (T186).</strong> Updated specialists ship with drift-checks; v6 T154 monitors health.</li>
   <li><strong>Better specialists find more bugs.</strong> Loop continues.</li>
 </ol>
 
-<h3 id="v8-paths">Path A vs Path B</h3>
+<h3 id="v9-paths">Path A vs Path B</h3>
 <table>
 <thead><tr><th>Path</th><th>What it is</th><th>Status</th><th>Estimated gap closure</th></tr></thead>
 <tbody>
-<tr><td><strong>Path A — Mythos via T13</strong></td><td>When access granted, swap the underlying model. v3-v8 platform amplifies it.</td><td>Hook live since v2.5; T175-T177 prepare end-to-end</td><td>~95% of Mythos-direct + deterministic evidence enforcement</td></tr>
-<tr><td><strong>Path B — Custom flywheel</strong></td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>Themes α + β + partial γ</td><td>~30-50% of Mythos-direct on covered domains</td></tr>
+<tr><td><strong>Path A — Advanced model via T13</strong></td><td>When access granted, swap the underlying model. v3-v9 platform amplifies it.</td><td>Hook live since v2.5; T187-T189 prepare end-to-end</td><td>~95% of direct + deterministic evidence enforcement</td></tr>
+<tr><td><strong>Path B — Custom flywheel</strong></td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>Themes α + β + partial γ</td><td>~30-50% of direct on covered domains</td></tr>
 </tbody>
 </table>
 
-<h3 id="v8-arch">v8 architecture</h3>
+<h3 id="v9-arch">v9 architecture</h3>
 <div class="arch-diagram">
        ┌──────────────────────────────────────┐
        │  Confirmed finding (any GENESIS run) │
        └─────────────────┬────────────────────┘
                          ▼
        ┌──────────────────────────────────────┐
-       │  Corpus Curator (T167) — daemon      │
-       │  + Counterexample Miner (T168)       │
-       │  + Synthetic Generator (T169)        │
-       │  + Quality Gate (T170, HITL queue)   │
+       │  Corpus Curator (T179) — daemon      │
+       │  + Counterexample Miner (T180)       │
+       │  + Synthetic Generator (T181)        │
+       │  + Quality Gate (T182, HITL queue)   │
        └─────────────────┬────────────────────┘
                          ▼
        ┌──────────────────────────────────────┐
@@ -2494,7 +2796,7 @@ Integrations: Jira / ServiceNow / Slack / Teams / PagerDuty / Splunk SOAR /
    ┌─────────────────────┼─────────────────────┐
    ▼                     ▼                     ▼
 LoRA Pipeline      Reward Model         Distillation
-(T171)             (T172)               (T173)
+(T183)             (T184)               (T185)
 per specialist     P(exploit works)     small fast models
    │                     │                     │
    └─────────────────────┴─────────────────────┘
@@ -2505,96 +2807,96 @@ per specialist     P(exploit works)     small fast models
        │   ├─ Specialist LoRAs (crypto/auth/…) │
        │   ├─ Distilled smalls (haiku-class)   │
        │   ├─ Reward model                     │
-       │   └─ Mythos when available            │
+       │   └─ Claude when available             │
        └─────────────────┬─────────────────────┘
                          ▼
        ┌──────────────────────────────────────┐
-       │  Model Portfolio Router (T177)       │
+       │  Model Portfolio Router (T189)       │
        │  picks per task by depth / latency / │
        │  cost / domain match                 │
        └──────────────────────────────────────┘
 </div>
 
-<h3 id="v8-alpha">Theme α — Training-data flywheel (T167–T170)</h3>
+<h3 id="v9-alpha">Theme α — Training-data flywheel (T179–T182)</h3>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T167</span>
+  <span class="tier-chip amber">T179</span>
   <h3>exploit_corpus_curator (always-on daemon)</h3>
   <p>Ingests every confirmed GENESIS finding, every successful forge_runner script, every public CVE patch + PoC, every adversarial-debate convergence, every invariant-violation. Normalises into structured tuples. Stored in the new versioned, partitioned Training Corpus.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T168</span>
+  <span class="tier-chip amber">T180</span>
   <h3>counterexample_miner</h3>
   <p>For every confirmed-vulnerable code pattern, mines near-miss code that is structurally similar but <em>not</em> vulnerable. Provides contrastive labels — the difference between brittle and useful fine-tunes.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T169</span>
+  <span class="tier-chip amber">T181</span>
   <h3>synthetic_data_generator</h3>
   <p>Uses v6's replica spawner (T122) to programmatically inject known bug patterns into clean code, generating labelled training data at scale. Bug patterns: SQLi sinks, missing auth checks, race conditions, integer overflows, deserialisation sinks.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T170</span>
+  <span class="tier-chip amber">T182</span>
   <h3>corpus_quality_gate</h3>
   <p>HITL review queue for high-impact training examples. Examples with high uncertainty, novelty, or importance get queued for human verification. Rest auto-accepted on lower bar. <strong>Mandatory immune system</strong> — a single mislabelled "this is exploitable" example poisons every subsequent fine-tune.</p>
 </div>
 
-<h3 id="v8-beta">Theme β — Specialist fine-tuning (T171–T174)</h3>
+<h3 id="v9-beta">Theme β — Specialist fine-tuning (T183–T186)</h3>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T171</span>
+  <span class="tier-chip amber">T183</span>
   <h3>per_specialist_lora_pipeline</h3>
   <p>Per-specialist LoRA fine-tuning on partition-specific corpus. Crypto / auth / kernel / web / IoT / mobile / OT / embedded specialists each tune on their domain. LoRA adapters are ~300MB each vs 200GB for a full model — cheap to train, deploy, swap.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T172</span>
+  <span class="tier-chip amber">T184</span>
   <h3>reward_model_exploit_success</h3>
   <p>Small classifier predicting P(exploit_succeeds | target, vulnerability_candidate, exploit_attempt). Used by v7's loops as a ranker — higher P gets sandbox time first. Inspired by AlphaZero's value network.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T173</span>
+  <span class="tier-chip amber">T185</span>
   <h3>distillation_pipeline</h3>
   <p>Distils specialist behaviour into smaller, faster models. Crypto-Opus-LoRA → crypto-haiku-distilled. High-throughput screening at low cost — big models for deep reasoning, small models for breadth.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T174</span>
+  <span class="tier-chip amber">T186</span>
   <h3>continual_learning_loop</h3>
-  <p>Combines T154 drift-detection + T167 corpus + T171 fine-tunes into a closed continual-learning system. Confirmed bugs flow into corpus daily; specialist re-tunes weekly; drift-controlled rollout; auto-rollback on drift signal.</p>
+  <p>Combines T154 drift-detection + T179 corpus + T183 fine-tunes into a closed continual-learning system. Confirmed bugs flow into corpus daily; specialist re-tunes weekly; drift-controlled rollout; auto-rollback on drift signal.</p>
 </div>
 
-<h3 id="v8-gamma">Theme γ — Mythos integration &amp; portfolio routing (T175–T178)</h3>
+<h3 id="v9-gamma">Theme γ — Advanced model integration &amp; portfolio routing (T187–T190)</h3>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T175</span>
+  <span class="tier-chip amber">T187</span>
   <h3>t13_conformance_test_suite</h3>
-  <p>Validates that every existing agent / specialist / loop produces structurally identical outputs when the underlying model swaps from Opus to Mythos to a custom fine-tune. Battery of contract tests run on every PR.</p>
+  <p>Validates that every existing agent / specialist / loop produces structurally identical outputs when the underlying model swaps from Opus to an advanced model to a custom fine-tune. Battery of contract tests run on every PR.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T176</span>
-  <h3>mythos_ab_harness</h3>
-  <p>Runs identical engagement scenarios with (a) raw Mythos API calls and (b) GENESIS-orchestrated Mythos. Measures bug yield, time-to-first-bug, exploit quality, false-positive rate, cost. The killer demo: empirical data that GENESIS-on-Mythos &gt; raw Mythos because of evidence enforcement and tool amplification.</p>
+  <span class="tier-chip amber">T188</span>
+  <h3>genesis_ab_harness</h3>
+  <p>Runs identical engagement scenarios with (a) raw API calls and (b) GENESIS-orchestrated Claude. Measures bug yield, time-to-first-bug, exploit quality, false-positive rate, cost. The killer demo: empirical data that GENESIS-on-Claude &gt; raw Claude because of evidence enforcement and tool amplification.</p>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T177</span>
+  <span class="tier-chip amber">T189</span>
   <h3>model_portfolio_router</h3>
-  <p>Routes per-task to the right backend in the registry. Decision factors: required reasoning depth (deep → Opus or Mythos; shallow → distilled small), latency budget, cost ceiling, task domain. <strong>The most important block in v8.</strong></p>
-  <div class="attack-path"><div class="title">Concrete walk-through</div><p>A session contains: surface scan (1000 calls — distilled small); fingerprinting (50 — distilled small); hypothesis formation (200 — Opus); ROP-composition loop (12 — Mythos when available else Opus); evidence summarisation (5 — distilled medium). Total cost 1/8th of "everything Opus" with quality matching on calls that need it.</p></div>
+  <p>Routes per-task to the right backend in the registry. Decision factors: required reasoning depth (deep → Opus or advanced model; shallow → distilled small), latency budget, cost ceiling, task domain. <strong>The most important block in v9.</strong></p>
+  <div class="attack-path"><div class="title">Concrete walk-through</div><p>A session contains: surface scan (1000 calls — distilled small); fingerprinting (50 — distilled small); hypothesis formation (200 — Opus); ROP-composition loop (12 — Claude when available else Opus); evidence summarisation (5 — distilled medium). Total cost 1/8th of "everything Opus" with quality matching on calls that need it.</p></div>
 </div>
 
 <div class="capability-card">
-  <span class="tier-chip amber">T178</span>
+  <span class="tier-chip amber">T190</span>
   <h3>closed_loop_improvement</h3>
-  <p>The flywheel itself — wires T167 corpus + T171 fine-tune + T172 reward-model + T173 distillation + T174 continual-learning + T177 router into a single self-improving system. After 6-12 months the corpus contains a private offensive-security training set no other security platform has access to. <strong>The moat.</strong></p>
+  <p>The flywheel itself — wires T179 corpus + T183 fine-tune + T184 reward-model + T185 distillation + T186 continual-learning + T189 router into a single self-improving system. After 6-12 months the corpus contains a private offensive-security training set no other security platform has access to. <strong>The moat.</strong></p>
 </div>
 
-<h2 id="changelog">Cumulative changelog — v1.0 → v8.0</h2>
+<h2 id="changelog">Cumulative changelog — v1.0 → v9.0</h2>
 <table>
 <thead><tr><th>Edition</th><th>Headline</th><th>Capability blocks</th><th>Status</th></tr></thead>
 <tbody>
@@ -2603,10 +2905,11 @@ per specialist     P(exploit works)     small fast models
 <tr><td>v2.5 Tier-3</td><td>Frontier capabilities</td><td>T9-T13 (5 blocks)</td><td class="cov-built">Built</td></tr>
 <tr><td>v3.0 Tier-5</td><td>Cross-session reasoning, specialist depth, parallel novelty, operator UI</td><td>T21-T28 + UI redesign (8+ blocks)</td><td class="cov-built">Built</td></tr>
 <tr><td>v4.0 Tier-6</td><td>Novel-vulnerability research platform — differential testing + 51 new probes</td><td>T29-T79 (51 blocks)</td><td class="cov-built">Built</td></tr>
-<tr><td>v5.0 Tier-7</td><td>Zero-day discovery — source-aware reasoning, adversarial synthesis, self-improving tooling, long-horizon</td><td>T80-T120 (41 blocks)</td><td class="cov-planned">Planned</td></tr>
-<tr><td>v6.0 Tier-8</td><td>Sophistication + blackbox 0-day — replica spawner, curiosity RL, threat intel, multi-persona, production engineering</td><td>T121-T154 (34 blocks)</td><td class="cov-planned">Planned</td></tr>
-<tr><td>v7.0 Tier-9</td><td>Reasoning architecture — twelve domain-specific deliberation loops</td><td>T155-T166 (12 blocks)</td><td class="cov-planned">Planned</td></tr>
-<tr><td>v8.0 Tier-10</td><td>Custom models &amp; training flywheel</td><td>T167-T178 (12 blocks)</td><td class="cov-planned">Planned</td></tr>
+<tr><td>v5.0 Tier-7</td><td>Zero-day discovery — source-aware reasoning, repo/source ingestion, provenance, invariants</td><td>T80-T120 (partial)</td><td class="cov-partial">Partially built</td></tr>
+<tr><td>v6.0 Tier-8</td><td>Sophistication + production scaffolding — goals, replay hooks, budgets, audit, compliance</td><td>T121-T154 (partial)</td><td class="cov-partial">Partially built</td></tr>
+<tr><td>v7.0 Tier-9</td><td>Reasoning architecture — 11 active deliberation loop types, adversarial reasoning, costs/routing</td><td>T155-T166 + live loops</td><td class="cov-built">Built core</td></tr>
+<tr><td>v8.0 Tier-10</td><td>Validated hybrid scanner: candidate validation, source/runtime graph, proof runs, benchmark scorecards</td><td>T167-T178</td><td class="cov-built">Built</td></tr>
+<tr><td>v9.0 Tier-11</td><td>Custom models &amp; training flywheel</td><td>T179-T190</td><td class="cov-partial">Roadmap / scaffolded</td></tr>
 </tbody>
 </table>
 
@@ -2618,17 +2921,18 @@ per specialist     P(exploit works)     small fast models
 <tr><td>Mongo <code>target_briefs</code>, <code>artifacts</code>; Chroma <code>session_reflections</code></td><td>v2.0</td><td>T1 brief, T3 artifact metadata, T8 strategic reflections.</td></tr>
 <tr><td>Mongo <code>plan_trees</code></td><td>v2.5</td><td>T11 persistent plan tree.</td></tr>
 <tr><td>Neo4j attack graph + MinIO artifact store</td><td>v3.0</td><td>T21 cross-session graph; T23 artifact share for multi-host workers.</td></tr>
-<tr><td>Vector store, Property DB, Tool registry, Provenance store</td><td>v5.0</td><td>Semantic recall; formal invariants; T97 self-synthesised tools; T103 reasoning trace.</td></tr>
-<tr><td>Threat-intel store, Audit log, Event log</td><td>v6.0</td><td>T129/T130 CVE feeds; T142 immutable RBAC log; T146 replay-able session history.</td></tr>
-<tr><td>Loop-state store</td><td>v7.0</td><td>T160 intermediate states for replay / debug / v8 training data.</td></tr>
-<tr><td>Training corpus + Model registry</td><td>v8.0</td><td>T167 versioned tuples; multi-backend registry feeding T177 router.</td></tr>
+<tr><td>Source corpus + provenance store</td><td>v5.0</td><td>Repo/source ingest summaries, source chunks, source candidates, and finding provenance.</td></tr>
+<tr><td>Threat-intel, replay, goal, audit, budget, integration stores</td><td>v6.0</td><td>CVE/replay scaffolding, goal progress, audit/compliance and operator control surfaces.</td></tr>
+<tr><td>Loop-state, adversarial reasoning, LLM usage, target memory</td><td>v7.0</td><td>Reasoning loop replay/debug, red/blue transcripts, cost accounting, routing visibility.</td></tr>
+<tr><td>Judge verdicts + supervisor directives</td><td>v8.0</td><td>Session quality gates and next-agent directives.</td></tr>
+<tr><td>Candidate/proof/surface graph stores</td><td>v8.0</td><td><code>candidate_findings</code>, <code>validation_verdicts</code>, <code>proof_runs</code>, <code>finding_clusters</code>, <code>benchmark_reports</code>, <code>source_ingest_summaries</code>, <code>target_surface_graphs</code>.</td></tr>
 </tbody>
 </table>
 
-<h2 id="mythos">GENESIS vs Claude Mythos</h2>
+<h2 id="genesis-vs-claude">GENESIS vs Claude</h2>
 <p>
-  Anthropic publicly announced <strong>Claude Mythos Preview</strong> in March-April
-  2026 as a frontier cyber-capable model. Mythos has demonstrated autonomous
+  Anthropic announced <strong>Claude Frontier Preview</strong> in March-April
+  2026 as a frontier cyber-capable model. It has demonstrated autonomous
   zero-day discovery at scale, end-to-end exploit synthesis (the FreeBSD NFS
   17-year RCE), 73% on expert-CTF benchmarks no prior model could complete, and
   first-of-class long-horizon network attack (32-step takeover). It is gated
@@ -2637,16 +2941,15 @@ per specialist     P(exploit works)     small fast models
 
 <div class="panel">
   <div class="title">Short version</div>
-  <p>GENESIS v3.0 is <strong>not Mythos-class</strong>. The ceiling on raw reasoning
+  <p>GENESIS is <strong>not frontier-class by model alone</strong>. The ceiling on raw reasoning
   depth is the model. <strong>The T13 model-swap hook is already live</strong>, so
-  when Mythos becomes reachable it is a settings change to plug it in. Path B
-  (v7 reasoning loops + v8 fine-tuning) closes ~30-50% of the gap on covered
-  domains while waiting for access. Path A (Mythos via T13) closes ~95% of the
-  gap when access materialises.</p>
+  when a frontier model becomes reachable it is a settings change to plug it in.
+  The current advantage is the system around the model: tools, proof oracles,
+  reasoning loops, multi-agent review, and the validated_dynamic promotion gate.</p>
 </div>
 
 <table>
-<thead><tr><th>Axis</th><th>v4.0 today</th><th>+ v5-v6 (planned)</th><th>+ v7-v8 (planned)</th><th>Mythos-via-T13</th></tr></thead>
+<thead><tr><th>Axis</th><th>Current default</th><th>validated_dynamic hybrid</th><th>Future model/flywheel upside</th><th>Frontier model via T13</th></tr></thead>
 <tbody>
 <tr><td>Modern web-app assessment</td><td>~80%</td><td>~92%</td><td>~95%</td><td>~98%</td></tr>
 <tr><td>Native-code exploitation (user-mode)</td><td>~45%</td><td>~60%</td><td>~75%</td><td>~90%</td></tr>
@@ -2658,11 +2961,12 @@ per specialist     P(exploit works)     small fast models
 </tbody>
 </table>
 
-<h2 id="whats-next">What's next — beyond v8.0 (Tier-11 candidates)</h2>
+<h2 id="whats-next">What's next — beyond v9.0 (Tier-12 candidates)</h2>
 <ul class="feature-list">
+  <li><strong>Validated benchmark lab</strong> — expand pinned vulnerable and patched variants so benchmark reports can compare endpoint-only, repo-only, and hybrid recall with false-positive controls.</li>
   <li><strong>Tier-4 leftovers</strong> — instrumented browser/OS fuzz harnesses (T14), kernel + firmware emulation (T15), mobile pipelines (T16), taint + ROP synthesis (T17), campaign / multi-target mode (T18), HITL mid-session (T19), live plan-tree editor (T20).</li>
-  <li><strong>Mythos integration polish</strong> once access drops — T175-T178 are scaffolded but the empirical A/B numbers come from real engagement data.</li>
-  <li><strong>Industry-collaboration corpus</strong> — federate the v8 training corpus across consenting customers without leaking findings (federated learning / differential-privacy fine-tunes).</li>
+  <li><strong>Advanced model integration polish</strong> once access drops — T187-T190 are scaffolded but the empirical A/B numbers come from real engagement data.</li>
+  <li><strong>Industry-collaboration corpus</strong> — federate the v9 training corpus across consenting customers without leaking findings (federated learning / differential-privacy fine-tunes).</li>
 </ul>
 
 <h2 id="evidence">How findings are verified</h2>
@@ -2672,15 +2976,18 @@ per specialist     P(exploit works)     small fast models
   <li><strong>Blind-class rule (U1).</strong> OOB callback or passing oracle required.</li>
   <li><strong>Critic pass (U1).</strong> Haiku reads claim + evidence and votes.</li>
   <li><strong>Hypothesis confirmation rule (v3.0).</strong> ≥0.7 confidence on a target-side hypothesis must emit a matching VULNERABILITY block.</li>
+  <li><strong>Optional Validation Lab.</strong> Candidate findings can be reviewed by evidence-oriented validators, deduped by root cause, proved with proof runs, and promoted when the operator wants extra evidence records.</li>
+  <li><strong>Hybrid source replay rule.</strong> Source-backed candidates that require live replay stay <code>source_verified_needs_replay</code> or <code>source_verified_unreachable</code> until a live endpoint proof passes.</li>
 </ol>
 
 <h2 id="limits">What GENESIS can't do</h2>
 <ul class="feature-list">
   <li><strong>No destructive actions.</strong> Run on targets you can restore.</li>
   <li><strong>Not a replacement for a human auditor.</strong> Use the report as a starting point.</li>
-  <li><strong>No kernel, firmware, or hypervisor analysis</strong> in v3.0. v5.0 T114 + T139/T140 + Tier-4 T15 close this.</li>
-  <li><strong>No browser-engine zero-day</strong> in v3.0; would need instrumented harnesses.</li>
-  <li><strong>Memory-corruption exploitation is partial.</strong> v3 T9/T10 find crashes and prove reachability; v5 T106-T109 + v7 T155/T158 + v8 T172 are needed for autonomous weaponisation on hardened targets.</li>
+  <li><strong>Not a source-only kernel-auditing platform.</strong> validated_dynamic uses multi-stage validation discipline, but GENESIS remains strongest on authorized web/infra/runtime targets with source enrichment.</li>
+  <li><strong>Browser-engine, kernel, firmware, and hypervisor zero-day remain specialized work.</strong> GENESIS has source, binary, fuzzing, symbolic-execution, and native-prover hooks, but not a complete OS-vendor-scale proving plugin library.</li>
+  <li><strong>Source-only evidence is not enough for confirmed impact.</strong> In validated mode, source-backed candidates requiring live replay stay source-verified until endpoint reachability or deterministic proof is established.</li>
+  <li><strong>Memory-corruption exploitation is partial.</strong> Fuzzing, symbolic execution, instrumentation, heap/ROP loops, and native proving can support research, but autonomous weaponisation on hardened targets still needs human review.</li>
   <li><strong>Frontier-model ceiling.</strong> No amount of scaffolding lifts a model above its reasoning ceiling. T13 is the path to raise that ceiling.</li>
 </ul>
 
@@ -2716,11 +3023,11 @@ per specialist     P(exploit works)     small fast models
 
 <h2 id="ui-tour">UI tour</h2>
 <h3>Dashboard</h3>
-<p>Lists all sessions — recent first. Shows target, profile, status, vulnerability counts, start time. Click a session to open the viewer.</p>
+<p>Lists all sessions — recent first. Shows target, profile, status, vulnerability counts, start time. New sessions choose among <code>exhaustive</code>, <code>deep_research</code>, and <code>validated_dynamic</code>.</p>
 <h3>Sessions page</h3>
 <p>Paginated table of every session ever run. Status filter + Refresh. Each row has 📥 Download report (Markdown) and ↗️ Open buttons.</p>
-<h3>Session viewer (10 tabs)</h3>
-<p>Findings, Chains, Activity, Tools, Sandbox, Iterations, Story, Graph, Evidence, Errors. Click a Finding row → identification dialog with driving hypothesis, custom-script badge, oracle verdict.</p>
+<h3>Session viewer (21 tabs)</h3>
+<p>Findings, Chains, Activity, Tools, Sandbox, Iterations, Story, Graph, Evidence, Errors, Goal, Compliance, Hypotheses, Chorus, Loops, Adversarial, Costs, Routing, Coverage, Novel, and Validation Lab. Click a Finding row → identification dialog with driving hypothesis, custom-script badge, oracle verdict. The Validation Lab tab shows candidates, endpoint/source surface links, validator verdicts, proof runs, clusters, and benchmark scorecards.</p>
 <h3>Settings</h3>
 <p>Six tabs: LLM · MCP Server · Tools · Agents · Database · Storage · Containers. API key management with redaction; Test Connection; model selection; container fleet status.</p>
 <h3>Intelligence Library</h3>
@@ -2764,7 +3071,13 @@ per specialist     P(exploit works)     small fast models
 <h4>Reasoning loop dead-ends after N turns (v7.0)</h4>
 <p>Loop-state store keeps the trail. Inspect via the Loops tab in the Session Viewer; common causes are budget exhaustion or constraint propagation pruning all branches.</p>
 
-<h4>Specialist drift detected (v6.0/v8.0)</h4>
+<h4>validated_dynamic produced candidates but no confirmed findings</h4>
+<p>Open Findings first, then use the Validation Lab to inspect candidate leads, validator verdicts, and proof runs. Candidates need proof or auditable operator validation only for candidate promotion; normal <code>VULNERABILITY</code> blocks should still appear in Findings after evidence checks and critic review. <code>source_verified_unreachable</code> means source evidence exists but no reachable endpoint proof was established.</p>
+
+<h4>Surface graph has few endpoint/source links</h4>
+<p>Endpoint-only scans still work, but hybrid mapping improves when you ingest source, artifacts, sourcemaps, OpenAPI/swagger, binaries, or commit metadata. Rebuild the surface graph from the Validation Lab tab or call <code>/api/v1/validated/sessions/{id}/surface-graph?rebuild=true</code>.</p>
+
+<h4>Specialist drift detected (v6.0/v9.0)</h4>
 <p>T154 fired — the specialist's predictions deviated from baseline. T174 auto-rollback to the last green checkpoint, then alerts MLOps. Check the model registry for active version vs deployed version.</p>
 
 <h2 id="glossary">Glossary</h2>
@@ -2774,6 +3087,7 @@ per specialist     P(exploit works)     small fast models
 <tr><td>Agent</td><td>One Claude instance running a session or sub-role.</td></tr>
 <tr><td>Artifact</td><td>Any file GENESIS pulled off the target — binary, source, config.</td></tr>
 <tr><td>Attack chain</td><td>A sequence of related bugs: weakness A leads to B leads to compromise.</td></tr>
+<tr><td>CandidateFinding</td><td>A pre-promotion vulnerability hypothesis stored by validated_dynamic before it becomes a final report finding.</td></tr>
 <tr><td>CVE</td><td>A publicly disclosed software vulnerability with an ID.</td></tr>
 <tr><td>Deliberation framework</td><td>v7 T160 — shared infrastructure underneath every reasoning loop.</td></tr>
 <tr><td>Decompile</td><td>Turning compiled machine code back into readable source-ish.</td></tr>
@@ -2786,36 +3100,39 @@ per specialist     P(exploit works)     small fast models
 <tr><td>Hypothesis market</td><td>v5 T89 — confidence-staked allocation of sandbox time.</td></tr>
 <tr><td>Iteration</td><td>One cycle of the AI's loop — think, act, read the result.</td></tr>
 <tr><td>LLM</td><td>Large language model — the AI brain (Claude).</td></tr>
-<tr><td>LoRA</td><td>Low-Rank Adaptation — a small adapter on top of a frozen base model. v8 trains one per specialist.</td></tr>
+<tr><td>LoRA</td><td>Low-Rank Adaptation — a small adapter on top of a frozen base model. v9 trains one per specialist.</td></tr>
 <tr><td>MCP</td><td>Model Context Protocol — the service that exposes tools the AI can call.</td></tr>
 <tr><td>Model-swap hook</td><td>v2.5 T13 — provider adapter that lets the orchestrator talk to any backend.</td></tr>
 <tr><td>Oracle</td><td>A structured predicate the AI writes alongside an attack, saying what proof looks like.</td></tr>
 <tr><td>OOB</td><td>Out-of-band: a unique URL planted in a payload; firing the URL proves the bug.</td></tr>
 <tr><td>Persona</td><td>v6 T135 — paranoid / ransomware / nation-state / insider / opportunistic adversary frame.</td></tr>
 <tr><td>Plan tree</td><td>v2.5 T11 — Mongo-backed root → phases → actions tree that survives context compression.</td></tr>
-<tr><td>Profile</td><td>How thorough / aggressive a scan is. Fast / Deep / Stealth / Full / APT-sim / Exhaustive.</td></tr>
+<tr><td>Profile</td><td>How thorough / aggressive a scan is. Dashboard profiles are Exhaustive, Deep Research, and validated_dynamic; legacy API profiles remain accepted.</td></tr>
+<tr><td>ProofRun</td><td>Normalized proof attempt for a candidate, including tool, oracle, inputs, result, artifacts, pass/fail reason, and live/static proof class.</td></tr>
 <tr><td>Reasoning loop</td><td>v7 — structured multi-turn deliberation harness over a domain (ROP composition, code intent, etc.).</td></tr>
 <tr><td>Reflection</td><td>v2.0 T8 — post-session strategic note stored for future similar-target sessions.</td></tr>
 <tr><td>Replica spawner</td><td>v6 T122 — auto-builds an OSS clone of the target for fearless testing.</td></tr>
-<tr><td>Reward model</td><td>v8 T172 — a classifier predicting P(exploit_succeeds) used to rank sandbox queue.</td></tr>
+<tr><td>Reward model</td><td>v9 T184 — a classifier predicting P(exploit_succeeds) used to rank sandbox queue.</td></tr>
 <tr><td>Sandbox</td><td>The isolated container where AI-written scripts run — no root, no free internet.</td></tr>
 <tr><td>Session</td><td>One run of GENESIS against one target.</td></tr>
 <tr><td>Symbolic execution</td><td>Treats inputs as math variables to decide reachability. GENESIS uses angr (T10).</td></tr>
+<tr><td>TargetSurfaceGraph</td><td>validated_dynamic graph linking live endpoints, source files/symbols, artifacts, candidate ids, taint paths, and confidence.</td></tr>
 <tr><td>Tier-1 / 2 / 3 / 5 / 6</td><td>Built editions: v1.0 / v2.0 / v2.5 / v3.0 / v4.0.</td></tr>
-<tr><td>Tier-7 / 8 / 9 / 10</td><td>Planned editions: v5.0 / v6.0 / v7.0 / v8.0.</td></tr>
-<tr><td>Training corpus</td><td>v8 T167 — versioned, partitioned tuples of (target_class, vulnerability_pattern, exploit_attempt, outcome, citations).</td></tr>
+<tr><td>Tier-7 / 8 / 9 / 10 / 11</td><td>Partially built / scaffolded editions: v5.0 / v6.0 / v7.0, built v8.0 validated hybrid scanner, and v9.0 custom-model roadmap.</td></tr>
+<tr><td>ValidationVerdict</td><td>Stored endpoint/source/counter-validator decision: support, refute, disputed, or needs-proof.</td></tr>
+<tr><td>validated_dynamic</td><td>Validated hybrid scanner mode that promotes only validated, deduplicated, proof-backed candidates.</td></tr>
+<tr><td>Training corpus</td><td>v9 T179 — versioned, partitioned tuples of (target_class, vulnerability_pattern, exploit_attempt, outcome, citations).</td></tr>
 <tr><td>Vision</td><td>Claude's ability to see images — GENESIS feeds it browser screenshots (T6, T12).</td></tr>
 </tbody>
 </table>
 
 <p class="mini" style="margin-top:48px;border-top:1px solid var(--rule);padding-top:20px;">
   This comprehensive manual integrates GENESIS v1.0 (Tier-1, U1-U5), v2.0 (Tier-2,
-  T1-T8), v2.5 (Tier-3, T9-T13), v3.0 (Tier-5, T21-T28), and v4.0 (Tier-6, T29-T79)
-  — all built and shipping — alongside the planned roadmaps for v5.0 (Tier-7,
-  T80-T120), v6.0 (Tier-8, T121-T154), v7.0 (Tier-9, T155-T166), and v8.0 (Tier-10,
-  T167-T178).
-  Architecture, data flow, and the hypothesis JSON contract reflect the actual
-  shipping code in the GENESIS monorepo. For the build-from-source walkthrough see
+  T1-T8), v2.5 (Tier-3, T9-T13), v3.0 (Tier-5, T21-T28), v4.0 (Tier-6, T29-T79),
+  the partially built v5/v6 surfaces, the v7 reasoning-loop layer, the v8
+  <code>validated_dynamic</code> validated hybrid scanner, and the v9 custom-model roadmap.
+  Architecture, data flow, hypothesis/candidate contracts, and proof-promotion rules
+  reflect the current GENESIS monorepo. For the build-from-source walkthrough see
   <code>GENESIS_BUILD_FROM_SCRATCH.md</code>; for friendlier framing see the
   companion <code>GENESIS_for_Dummies.html</code>.
 </p>

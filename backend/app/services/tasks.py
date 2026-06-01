@@ -228,4 +228,69 @@ def run_research_session(self, session_id: str, target_ip: str) -> dict:
         # Best-effort: ensure the DB row reflects the failure even if the
         # orchestrator never got far enough to call _set_session_failed.
         _mark_session_failed(session_id, f"{type(exc).__name__}: {str(exc)[:500]}")
+        try:
+            from app.services.session_container_cleanup import cleanup_session_containers
+            asyncio.run(cleanup_session_containers(session_id, reason="session_failed"))
+        except Exception as cleanup_exc:  # noqa: BLE001
+            logger.debug("Celery failure cleanup failed for %s: %s", session_id, cleanup_exc)
         return {"session_id": session_id, "status": "failed", "error": str(exc)}
+
+
+@celery_app.task(
+    bind=True,
+    name="app.services.tasks.complete_validation_session",
+    queue="research",
+    max_retries=0,
+)
+def complete_validation_session(
+    self,
+    job_id: str,
+    session_id: str,
+    candidate_ids: list[str] | None = None,
+    max_candidates: int = 50,
+    force_reproof: bool = False,
+) -> dict:
+    """Run proof/promotion only for existing candidates in a session.
+
+    This intentionally does not resume discovery. Stopped sessions stay stopped;
+    the job only completes validation evidence for already-recorded candidates.
+    """
+    from app.services.validation_completion import run_validation_completion_job
+
+    logger.info(
+        "Validation completion task started: session_id=%s job_id=%s max=%s",
+        session_id, job_id, max_candidates,
+    )
+    _reset_async_singletons()
+    try:
+        async def _run_and_cleanup() -> dict:
+            try:
+                return await run_validation_completion_job(
+                    job_id=job_id,
+                    session_id=session_id,
+                    candidate_ids=candidate_ids or [],
+                    max_candidates=max_candidates,
+                    force_reproof=force_reproof,
+                )
+            finally:
+                from app.services.session_container_cleanup import cleanup_session_containers
+                await cleanup_session_containers(session_id, reason="validation_completed")
+
+        result = asyncio.run(_run_and_cleanup())
+        logger.info(
+            "Validation completion task finished: session_id=%s job_id=%s status=%s",
+            session_id, job_id, result.get("status"),
+        )
+        return result
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(
+            "Validation completion task crashed: session_id=%s job_id=%s error=%s",
+            session_id, job_id, exc,
+        )
+        _record_celery_error(session_id, exc)
+        return {
+            "session_id": session_id,
+            "job_id": job_id,
+            "status": "failed",
+            "error": str(exc),
+        }

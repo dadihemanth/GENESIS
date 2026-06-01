@@ -49,7 +49,7 @@ async function head(url: string, timeoutMs: number): Promise<{ status: number; l
     const resp = await fetch(url, {
       method: 'GET',
       signal: c.signal,
-      headers: { 'User-Agent': 'Mozilla/5.0 (GENESIS/MYTHOS artifact_hunter)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (GENESIS artifact_hunter)' },
       redirect: 'manual',
     });
     clearTimeout(timer);

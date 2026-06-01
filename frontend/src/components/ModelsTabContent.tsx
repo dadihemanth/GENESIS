@@ -65,6 +65,26 @@ const ROLES: { name: RoleName; description: string; warn?: string }[] = [
     name: 'philosopher',
     description: 'Bug-class hypothesis generator. Also drives the new insider-threat and nation-state APT personas.',
   },
+  {
+    name: 'validator',
+    description: 'Optional Validation Lab reviewer for candidate evidence before manual proof follow-up.',
+  },
+  {
+    name: 'endpoint_validator',
+    description: 'Checks live endpoint reachability, auth/session assumptions, and dynamic proof needs.',
+  },
+  {
+    name: 'source_validator',
+    description: 'Checks source, taint, invariant, and cross-file evidence for hybrid candidates.',
+  },
+  {
+    name: 'counter_validator',
+    description: 'Refutes weak candidates and records missing proof conditions.',
+  },
+  {
+    name: 'proof_planner',
+    description: 'Turns candidate leads into concrete safe proof-tool parameters for optional Complete Validation.',
+  },
 ];
 
 const PROVIDER_OPTIONS: { value: ModelProfileProvider; label: string }[] = [

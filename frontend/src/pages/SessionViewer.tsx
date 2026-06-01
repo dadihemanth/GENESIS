@@ -29,6 +29,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import DownloadIcon from '@mui/icons-material/Download';
+import ArticleIcon from '@mui/icons-material/Article';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
 import TerminalIcon from '@mui/icons-material/Terminal';
@@ -81,11 +82,13 @@ import CostsPanel from '../components/CostsPanel';
 import RoutingPanel from '../components/RoutingPanel';
 import CoverageMatrixPanel from '../components/CoverageMatrixPanel';
 import NovelVulnerabilitiesPanel from '../components/NovelVulnerabilitiesPanel';
+import ValidatedScannerPanel from '../components/ValidatedScannerPanel';
 import GavelIcon from '@mui/icons-material/Gavel';
 import PaidIcon from '@mui/icons-material/Paid';
 import RouteIcon from '@mui/icons-material/Route';
 import GridViewIcon from '@mui/icons-material/GridView';
 import StarIcon from '@mui/icons-material/Star';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 import type { ReasoningLoopTick } from '../services/api';
 import type {
   Session, AgentThought, ToolOutput, Vulnerability, DeepThought,
@@ -357,6 +360,7 @@ const SessionViewer: React.FC = () => {
   // explains how it was identified (driving hypothesis + custom-script trail).
   const [detailVulnId, setDetailVulnId] = useState<string | null>(null);
   const [reportDownloading, setReportDownloading] = useState(false);
+  const [htmlReportDownloading, setHtmlReportDownloading] = useState(false);
   const [explanationEvents, setExplanationEvents] = useState<ExplanationEvent[]>([]);
   const [complianceFramework, setComplianceFramework] = useState<string>('pci_dss');
   // v7.0 — live reasoning-loop state
@@ -725,6 +729,28 @@ const SessionViewer: React.FC = () => {
     }
   }, [id]);
 
+  const downloadHtmlReport = useCallback(async () => {
+    if (!id) return;
+    setHtmlReportDownloading(true);
+    try {
+      const { filename, body } = await sessionsApi.downloadHtmlReport(id);
+      const blob = new Blob([body], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setSnackbar({ open: true, message: `Downloaded ${filename}`, severity: 'success' });
+    } catch (err) {
+      setSnackbar({ open: true, message: err instanceof Error ? err.message : 'HTML download failed', severity: 'error' });
+    } finally {
+      setHtmlReportDownloading(false);
+    }
+  }, [id]);
+
   const severityCounts = {
     critical: liveVulns.filter(v => v.severity === 'critical').length,
     high: liveVulns.filter(v => v.severity === 'high').length,
@@ -879,6 +905,11 @@ const SessionViewer: React.FC = () => {
             Stop
           </Button>
         )}
+        {(isRunning || isPaused) && (
+          <Typography sx={{ color: '#8a93a6', fontSize: '0.66rem', maxWidth: 300, lineHeight: 1.25 }}>
+            Pause resumes discovery. Stop freezes discovery; use the Validation Lab only when you want extra proof runs or scorecards for candidate leads.
+          </Typography>
+        )}
         <Button
           size="small"
           variant="outlined"
@@ -887,7 +918,17 @@ const SessionViewer: React.FC = () => {
           disabled={reportDownloading}
           sx={{ fontSize: '0.75rem', py: 0.5, color: '#4e5ced', borderColor: 'rgba(78,92,237,0.4)' }}
         >
-          Download report
+          Markdown
+        </Button>
+        <Button
+          size="small"
+          variant="outlined"
+          startIcon={htmlReportDownloading ? <CircularProgress size={12} color="inherit" /> : <ArticleIcon fontSize="small" />}
+          onClick={downloadHtmlReport}
+          disabled={htmlReportDownloading}
+          sx={{ fontSize: '0.75rem', py: 0.5, color: '#137a4e', borderColor: 'rgba(19,122,78,0.4)' }}
+        >
+          HTML Report
         </Button>
       </Box>
 
@@ -1087,6 +1128,7 @@ const SessionViewer: React.FC = () => {
             <Tab icon={<GridViewIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Coverage" />
             {/* v7.x — Sandbox-verified PoC findings only */}
             <Tab icon={<StarIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Novel" />
+            <Tab icon={<FactCheckIcon sx={{ fontSize: 16 }} />} iconPosition="start" label="Validation Lab" />
           </Tabs>
 
           {/* Findings tab */}
@@ -1202,6 +1244,12 @@ const SessionViewer: React.FC = () => {
                       <Typography sx={{ fontSize: '0.72rem', color: '#8a93a6', fontFamily: 'monospace', mb: 0.5 }}>
                         {vuln.affected_service}{vuln.port ? `:${vuln.port}` : ''}
                       </Typography>
+                      {(vuln.plain_language?.description || vuln.description) && (
+                        <Typography sx={{ fontSize: '0.74rem', color: '#5a6478', lineHeight: 1.45, mb: 0.75 }}>
+                          {(vuln.plain_language?.description || vuln.description).slice(0, 260)}
+                          {(vuln.plain_language?.description || vuln.description).length > 260 ? '...' : ''}
+                        </Typography>
+                      )}
                       {/* MITRE techniques */}
                       {vuln.mitre_techniques && vuln.mitre_techniques.length > 0 && (
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
@@ -1692,6 +1740,13 @@ const SessionViewer: React.FC = () => {
               <NovelVulnerabilitiesPanel sessionId={id} />
             </Box>
           )}
+
+          {/* optional validation-lab candidate/debate/proof artifacts */}
+          {rightTab === 20 && id && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0, overflow: 'hidden' }}>
+              <ValidatedScannerPanel sessionId={id} sessionStatus={session?.status} />
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -1739,7 +1794,7 @@ const SessionViewer: React.FC = () => {
         <DialogTitle sx={{ color: '#4caf50' }}>Assessment Complete</DialogTitle>
         <DialogContent>
           <Typography sx={{ color: '#5a6478', mb: 2 }}>
-            MYTHOS autonomous assessment for{' '}
+            GENESIS autonomous assessment for{' '}
             <strong style={{ color: '#4e5ced' }}>{session.target_ip}</strong> has completed.
           </Typography>
           <Box sx={{ display: 'flex', gap: 3 }}>

@@ -251,7 +251,7 @@ export const aiRequestForgeTool = {
     }
 
     let headers: Record<string, string> = {
-      'User-Agent': 'Mozilla/5.0 (GENESIS/MYTHOS)',
+      'User-Agent': 'Mozilla/5.0 (GENESIS)',
     };
     const parsedHeaders = parseJsonParam<Record<string, string>>(params.headers, {});
     Object.assign(headers, parsedHeaders);

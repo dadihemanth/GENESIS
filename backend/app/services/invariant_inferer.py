@@ -70,10 +70,16 @@ async def infer_invariants(
     session_id: str,
     target_ip: str = "",
     target_id: str = "",
+    plugin_domain: str = "",
 ) -> List[Dict[str, Any]]:
     """Infer invariants for the given session's ingested source corpus.
 
     Returns a list of invariant dicts and persists them to ChromaDB + MongoDB.
+
+    validation milestone 4: also loads domain-specific plugin invariants from
+    app/plugins/invariants/*.yaml, merging them with inferred ones. Pass
+    `plugin_domain` (e.g. "windows_kernel_driver") to filter to a specific
+    domain. Empty string loads all available plugins.
     """
     try:
         corpus_collection = await get_source_corpus_collection()
@@ -100,7 +106,28 @@ async def infer_invariants(
                 inv["target_id"] = target_id or session_id
             all_invariants.extend(extracted)
 
-    # Deduplicate by (invariant_type, file_path)
+    # validation milestone 4 — merge domain invariant plugins.
+    # Plugin invariants represent expert-injected domain knowledge (kernel
+    # conventions, protocol invariants, lock ordering rules) that LLMs cannot
+    # reliably derive on their own. They are merged BEFORE dedup so they can
+    # be consolidated with any overlapping inferred invariants.
+    try:
+        from app.plugins.invariants.loader import load_plugin_invariants
+        plugin_invs = load_plugin_invariants(domain_filter=plugin_domain)
+        for inv in plugin_invs:
+            inv["session_id"] = session_id
+            inv["target_ip"] = target_ip
+            inv["target_id"] = target_id or session_id
+        if plugin_invs:
+            logger.info(
+                "invariant_inferer: session=%s loaded %d plugin invariants (domain=%r)",
+                session_id, len(plugin_invs), plugin_domain or "all",
+            )
+        all_invariants.extend(plugin_invs)
+    except Exception as exc:
+        logger.debug("invariant_inferer: plugin load failed (non-fatal): %s", exc)
+
+    # Deduplicate by (invariant_type, file_path) — plugins use "*" as file_path
     seen: set = set()
     unique_invariants: List[Dict[str, Any]] = []
     for inv in all_invariants:
@@ -118,9 +145,11 @@ async def infer_invariants(
     # Persist to MongoDB for structured query access
     await _store_invariants_mongo(session_id, target_ip, target_id, unique_invariants)
 
+    inferred_count = sum(1 for i in unique_invariants if i.get("source") != "plugin")
+    plugin_count = sum(1 for i in unique_invariants if i.get("source") == "plugin")
     logger.info(
-        "invariant_inferer: session=%s found=%d invariants",
-        session_id, len(unique_invariants),
+        "invariant_inferer: session=%s inferred=%d plugin=%d total=%d",
+        session_id, inferred_count, plugin_count, len(unique_invariants),
     )
     return unique_invariants
 

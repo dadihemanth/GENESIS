@@ -1117,7 +1117,7 @@ open http://localhost:3000</pre>
   <div class="glyph">TS</div>
   <div class="body"><strong>Technical Stuff</strong>
   T13 is the unsung hero of the entire roadmap. It's the on-ramp for plugging in
-  Claude Mythos (when access is granted) without any code changes. Every later
+  Claude (when access is granted) without any code changes. Every later
   edition's value compounds with T13 — better model under the hood, same
   scaffolding above.</div>
 </div>
@@ -1369,7 +1369,7 @@ open http://localhost:3000</pre>
   Across v3 through v6, GENESIS specifies ~120 capability blocks. Counting honestly:
   ~85% are tools, integrations, UX, and ops. Only ~5% is custom model work, and
   ~10% is custom reasoning architecture. <strong>That last 15% is exactly what
-  separates Mythos from GENESIS-on-Opus.</strong> v7.0 corrects this by
+  separates advanced models from GENESIS-on-Opus.</strong> v7.0 corrects this by
   deliberately not adding any new MCP probes — all twelve T-blocks are reasoning
   loops.
 </p>
@@ -1423,7 +1423,7 @@ open http://localhost:3000</pre>
   <ul>
     <li>Understanding why "fine-tune our own specialists" closes a different gap than v7</li>
     <li>Walking through the training flywheel: confirmed bug → corpus → LoRA → reward model → router</li>
-    <li>Comparing Path A (Mythos via T13) vs Path B (custom flywheel)</li>
+    <li>Comparing Path A (advanced model via T13) vs Path B (custom flywheel)</li>
   </ul>
 </div>
 
@@ -1437,7 +1437,7 @@ open http://localhost:3000</pre>
 
 <div class="bubble">
   <span class="label">v8.0 thesis in one sentence</span>
-  <p>Mythos's reasoning depth comes from training on real exploit corpora at
+  <p>GENESIS's reasoning depth comes from training on real exploit corpora at
   scale. We can't replicate that scale. But we can build a flywheel where every
   confirmed GENESIS finding becomes training data. The flywheel grows the model
   the platform deserves over time.</p>
@@ -1460,8 +1460,8 @@ open http://localhost:3000</pre>
 
 <table>
 <tr><th>Path</th><th>What it is</th><th>Estimated gap closure</th></tr>
-<tr><td>Path A — Mythos via T13</td><td>When access drops, swap the underlying model. v3-v8 platform amplifies it.</td><td>~95% of Mythos-direct, plus deterministic evidence enforcement</td></tr>
-<tr><td>Path B — Custom flywheel</td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>~30-50% of Mythos-direct on covered domains</td></tr>
+<tr><td>Path A — Advanced model via T13</td><td>When access drops, swap the underlying model. v3-v8 platform amplifies it.</td><td>~95% of direct, plus deterministic evidence enforcement</td></tr>
+<tr><td>Path B — Custom flywheel</td><td>Train our own specialists. Build training corpus. Distil and route.</td><td>~30-50% of direct on covered domains</td></tr>
 </table>
 
 <div class="icon-box remember">
@@ -1747,7 +1747,7 @@ open http://localhost:3000</pre>
   <li>Browser-engine zero-day — would need instrumented harnesses (Tier-4 T14).</li>
   <li>First-class mobile (APK / IPA) analysis. v6 T138 closes this.</li>
   <li>Memory-corruption weaponisation on hardened targets. v5 T106-T109 + v7 T155 work toward it; never trivial.</li>
-  <li>Anything model-gated — novel-bug intuition on unseen surfaces is bounded by the underlying model's reasoning depth. Path A (Mythos via T13) is the only way to lift it above Opus.</li>
+  <li>Anything model-gated — novel-bug intuition on unseen surfaces is bounded by the underlying model's reasoning depth. Path A (advanced model via T13) is the only way to lift it above Opus.</li>
 </ul>
 
 <h3>The smell of a confidently wrong answer</h3>

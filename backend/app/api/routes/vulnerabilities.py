@@ -16,8 +16,53 @@ from app.database.postgres import get_db
 from app.models.session import ResearchSession
 from app.models.vulnerability import Vulnerability
 from app.schemas.vulnerability import VulnerabilityList, VulnerabilityRead, VulnerabilitySearchResult
+from app.services.finding_explainer import build_plain_language_finding
 
 router = APIRouter()
+
+
+def _vulnerability_read(
+    vuln: Vulnerability,
+    metadata: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    item = VulnerabilityRead.model_validate(vuln).model_dump()
+    item["plain_language"] = build_plain_language_finding(vuln, metadata or {})
+    return item
+
+
+async def _metadata_by_vulnerability(session_id: uuid.UUID | str) -> Dict[str, Dict[str, Any]]:
+    metadata_by_vuln: Dict[str, Dict[str, Any]] = {}
+    try:
+        from app.database.mongodb import get_vulnerability_metadata_collection
+
+        async for doc in get_vulnerability_metadata_collection().find(
+            {"session_id": str(session_id)},
+        ):
+            vid = doc.get("vuln_id")
+            if vid:
+                metadata_by_vuln[str(vid)] = doc
+    except Exception:
+        pass
+    return metadata_by_vuln
+
+
+async def _metadata_for_vulnerabilities(vulns: List[Vulnerability]) -> Dict[str, Dict[str, Any]]:
+    vuln_ids = [str(v.id) for v in vulns if getattr(v, "id", None)]
+    if not vuln_ids:
+        return {}
+    metadata_by_vuln: Dict[str, Dict[str, Any]] = {}
+    try:
+        from app.database.mongodb import get_vulnerability_metadata_collection
+
+        async for doc in get_vulnerability_metadata_collection().find(
+            {"vuln_id": {"$in": vuln_ids}},
+        ):
+            vid = doc.get("vuln_id")
+            if vid:
+                metadata_by_vuln[str(vid)] = doc
+    except Exception:
+        pass
+    return metadata_by_vuln
 
 
 @router.get("", response_model=VulnerabilityList)
@@ -50,8 +95,16 @@ async def list_vulnerabilities(
     query = query.offset((page - 1) * size).limit(size)
     result = await db.execute(query)
     vulns = result.scalars().all()
+    metadata_by_vuln = await _metadata_for_vulnerabilities(list(vulns))
 
-    return {"items": vulns, "total": total, "filters": filters}
+    return {
+        "items": [
+            _vulnerability_read(v, metadata_by_vuln.get(str(v.id), {}))
+            for v in vulns
+        ],
+        "total": total,
+        "filters": filters,
+    }
 
 
 @router.get("/search", response_model=VulnerabilitySearchResult)
@@ -151,14 +204,15 @@ async def list_novel_vulnerabilities(
 async def get_vulnerability(
     vuln_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-) -> Vulnerability:
+) -> Dict[str, Any]:
     result = await db.execute(
         select(Vulnerability).where(Vulnerability.id == vuln_id)
     )
     vuln = result.scalar_one_or_none()
     if vuln is None:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
-    return vuln
+    meta_by_vuln = await _metadata_by_vulnerability(vuln.session_id)
+    return _vulnerability_read(vuln, meta_by_vuln.get(str(vuln.id), {}))
 
 
 @router.get("/{vuln_id}/evidence")
@@ -413,6 +467,7 @@ async def get_vulnerability_identification(
         "severity": vuln.severity,
         "verification_status": vuln.verification_status,
         "confidence": vuln.confidence,
+        "plain_language": build_plain_language_finding(vuln, meta),
         "cve_ids": cve_ids,
         "is_zero_day": vuln.is_zero_day,
         "is_known": is_known,

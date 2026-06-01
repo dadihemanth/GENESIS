@@ -222,6 +222,107 @@ def get_adversarial_reasoning_collection() -> AsyncIOMotorCollection:
     return _get_db()["adversarial_reasoning"]
 
 
+def get_judge_verdicts_collection() -> AsyncIOMotorCollection:
+    """v8 — SessionJudge verdict documents, one per judge evaluation round.
+
+    Schema:
+      {_id: "jv-<hex12>", session_id, round_idx (-1=terminal),
+       overall_score, coverage_pct, killchain_phase_scores,
+       goals_met, goals_not_met, hypothesis_resolution_rate,
+       finding_quality_summary, gap_list, coverage_gate_passed,
+       verdict ("pass"|"needs_work"|"critical_gaps"), created_at}
+    """
+    return _get_db()["judge_verdicts"]
+
+
+def get_supervisor_directives_collection() -> AsyncIOMotorCollection:
+    """v8 — SessionSupervisor directive documents, one per dispatched directive.
+
+    Schema:
+      {_id: "dir-<hex12>", session_id, round_triggered_by, verdict_id,
+       agent_type, phase, attack_class, instruction, priority,
+       created_at, consumed_at, consumed_by_iteration}
+    """
+    return _get_db()["supervisor_directives"]
+
+
+def get_candidate_findings_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic — scanner candidate findings.
+
+    Candidate findings are pre-promotion vulnerability claims emitted by
+    agents during the multi-stage pipeline. They preserve leads, evidence, and
+    proposed proof actions without creating final Vulnerability rows until the
+    validation/proof gate promotes them.
+    """
+    return _get_db()["candidate_findings"]
+
+
+def get_validation_verdicts_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic — independent validator/debater verdicts."""
+    return _get_db()["validation_verdicts"]
+
+
+def get_proof_runs_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic — normalized deterministic proof attempts."""
+    return _get_db()["proof_runs"]
+
+
+def get_validation_proof_jobs_collection() -> AsyncIOMotorCollection:
+    """Validation Lab background proof/promotion jobs."""
+    return _get_db()["validation_proof_jobs"]
+
+
+def get_finding_clusters_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic — semantic/dedup clusters of candidate findings."""
+    return _get_db()["finding_clusters"]
+
+
+def get_benchmark_reports_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic — benchmark/scorecard reports for scanner runs."""
+    return _get_db()["benchmark_reports"]
+
+
+def get_source_ingest_summaries_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic hybrid — source/repo ingest summaries per session."""
+    return _get_db()["source_ingest_summaries"]
+
+
+def get_target_surface_graph_collection() -> AsyncIOMotorCollection:
+    """validated_dynamic hybrid — endpoint/source/artifact surface graph."""
+    return _get_db()["target_surface_graphs"]
+
+
+def get_security_commits_collection() -> AsyncIOMotorCollection:
+    """validation milestone 2 — security-sensitive git commits analyzed per session.
+
+    One document per commit per session with: commit_hash, author_email, date,
+    subject, risk_score, security_keywords_hit[], files_changed[],
+    functions_changed[]. Produced by commit_analyzer.analyze_commits() and
+    consumed by architectural_reasoner to seed prioritized scan hypotheses.
+    """
+    return _get_db()["security_commits"]
+
+
+def get_dedup_clusters_collection() -> AsyncIOMotorCollection:
+    """validation milestone 5 — patch-semantic dedup clusters across promoted findings.
+
+    Groups findings whose remediation patches are semantically equivalent.
+    One document per cluster: {cluster_id, session_id, finding_ids[], patch_summary,
+    created_at}. Prevents duplicate CVE-assignment for the same root cause.
+    """
+    return _get_db()["dedup_clusters"]
+
+
+def get_benchmark_scorecards_collection() -> AsyncIOMotorCollection:
+    """validation milestone 7 — historical CVE recall benchmark scorecards.
+
+    One document per benchmark run: {target, cve_ids_tested[], recall, precision,
+    f1, run_at}. Produced by benchmark_recall Celery task. Surfaced at
+    GET /api/v1/benchmarks/recall.
+    """
+    return _get_db()["benchmark_scorecards"]
+
+
 def get_motor_client() -> AsyncIOMotorClient:
     return _get_client()
 
@@ -306,6 +407,33 @@ async def init_indexes() -> None:
     # reproducibility_reports (v7.x — one doc per session)
     await db["reproducibility_reports"].create_index("session_id", unique=True)
     await db["reproducibility_reports"].create_index([("target_ip", 1), ("created_at", -1)])
+
+    # judge_verdicts (v8 — SessionJudge per-round verdicts)
+    await db["judge_verdicts"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["judge_verdicts"].create_index([("session_id", 1), ("round_idx", 1)])
+
+    # supervisor_directives (v8 — SessionSupervisor agent directives)
+    await db["supervisor_directives"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["supervisor_directives"].create_index([("session_id", 1), ("agent_type", 1)])
+    await db["supervisor_directives"].create_index([("session_id", 1), ("consumed_at", 1)])
+
+    # validated_dynamic — multi-stage candidate / validation / proof pipeline
+    await db["candidate_findings"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["candidate_findings"].create_index([("session_id", 1), ("candidate_id", 1)], unique=True)
+    await db["candidate_findings"].create_index([("session_id", 1), ("dedup_key", 1)])
+    await db["candidate_findings"].create_index([("session_id", 1), ("status", 1)])
+    await db["validation_verdicts"].create_index([("session_id", 1), ("candidate_id", 1)])
+    await db["validation_verdicts"].create_index([("session_id", 1), ("verdict", 1)])
+    await db["proof_runs"].create_index([("session_id", 1), ("candidate_id", 1)])
+    await db["proof_runs"].create_index([("session_id", 1), ("passed", 1)])
+    await db["validation_proof_jobs"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["validation_proof_jobs"].create_index([("session_id", 1), ("job_id", 1)], unique=True)
+    await db["validation_proof_jobs"].create_index([("session_id", 1), ("status", 1)])
+    await db["finding_clusters"].create_index([("session_id", 1), ("cluster_id", 1)], unique=True)
+    await db["benchmark_reports"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["source_ingest_summaries"].create_index([("session_id", 1), ("created_at", -1)])
+    await db["target_surface_graphs"].create_index("session_id", unique=True)
+    await db["target_surface_graphs"].create_index("updated_at")
 
 
 async def close_mongo() -> None:

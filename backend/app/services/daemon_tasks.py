@@ -221,6 +221,38 @@ async def _async_graph_compactor() -> Dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# validation milestone 7 — recall_benchmark
+# ---------------------------------------------------------------------------
+
+_RECALL_BENCHMARK_TARGETS = ["openssl", "nginx", "libpng"]
+
+
+@celery_app.task(name="app.services.daemon_tasks.run_recall_benchmark", bind=True)
+def run_recall_benchmark(self: Any) -> List[Dict[str, Any]]:
+    """Weekly recall benchmark: measure GENESIS recall vs. historical CVEs (validation milestone 7)."""
+    return _run_async(_async_recall_benchmark())
+
+
+async def _async_recall_benchmark() -> List[Dict[str, Any]]:
+    from app.services.benchmark_recall import run_recall_benchmark as _bench
+    results = []
+    for target in _RECALL_BENCHMARK_TARGETS:
+        try:
+            result = await _bench(target_name=target, max_cves=10)
+            results.append(result)
+            logger.info(
+                "recall_benchmark: target=%s recall=%.2f%% f1=%.2f%%",
+                target,
+                (result.get("recall") or 0) * 100,
+                (result.get("f1") or 0) * 100,
+            )
+        except Exception as exc:
+            logger.warning("recall_benchmark: target=%s failed: %s", target, exc)
+            results.append({"target": target, "status": "error", "error": str(exc)})
+    return results
+
+
+# ---------------------------------------------------------------------------
 # T129 — threat_intel_ingestor
 # ---------------------------------------------------------------------------
 

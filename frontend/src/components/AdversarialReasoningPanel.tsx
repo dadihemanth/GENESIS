@@ -34,6 +34,7 @@ const VERDICT_COLOR: Record<string, string> = {
   survives: '#137a4e',
   killed: '#b53030',
   parse_failed: '#8a93a6',
+  red_blocked: '#b8740c',
   blue_blocked: '#b8740c',     // amber — red ran but blue was content-filtered
   no_response: '#8a93a6',      // grey — blue returned empty content; not approval
   red_no_response: '#8a93a6',  // grey — red returned empty content
@@ -76,8 +77,8 @@ const RawBlock: React.FC<{ label: string; text: string; color?: string }> = ({ l
 const RedBlueRow: React.FC<{ round: AdversarialRound; expanded: boolean; onToggle: (id: string) => void }> = ({ round, expanded, onToggle }) => {
   const verdict = round.verdict ?? 'survives';
   const headline = (round.red?.parsed as { hypothesis?: string } | undefined)?.hypothesis
-    ?? (round.red?.raw ?? '').slice(0, 120)
-    ?? '(no proposal)';
+    || (round.red?.raw ?? '').slice(0, 120)
+    || '(transcript loading)';
   return (
     <Accordion
       expanded={expanded}
@@ -124,7 +125,7 @@ const RedBlueRow: React.FC<{ round: AdversarialRound; expanded: boolean; onToggl
                 ? '(red returned empty content — bump max_tokens for the red_blue role profile)'
                 : round.verdict === 'parse_failed'
                   ? '(red emitted text but no valid JSON — model may need a clearer system prompt)'
-                  : '(empty)'
+                  : '(transcript loading; click Refresh if this stays empty)'
           }
         />
         <RawBlock
@@ -139,7 +140,7 @@ const RedBlueRow: React.FC<{ round: AdversarialRound; expanded: boolean; onToggl
                   ? `(blue blocked: ${(round.blue as any)?.error ?? 'content filter or 4xx'})`
                   : round.verdict === 'red_no_response' || round.verdict === 'parse_failed'
                     ? '(blue not called — red did not produce a hypothesis to challenge)'
-                    : '(blue did not respond)'
+                  : '(transcript loading; click Refresh if this stays empty)'
           }
         />
         {round.linked_hypothesis_id && (
@@ -215,6 +216,12 @@ const AdversarialReasoningPanel: React.FC<Props> = ({ sessionId, liveRounds }) =
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  useEffect(() => {
+    if (persistedRounds.length > 0 || liveRounds.length > 0) return;
+    const interval = window.setInterval(refresh, 10000);
+    return () => window.clearInterval(interval);
+  }, [persistedRounds.length, liveRounds.length, refresh]);
+
   // Whenever a live round arrives, re-fetch so the full document (with raw
   // red+blue text) replaces the compact summary the WS event carried.
   useEffect(() => {
@@ -222,13 +229,18 @@ const AdversarialReasoningPanel: React.FC<Props> = ({ sessionId, liveRounds }) =
   }, [liveRounds.length, refresh]);
 
   const merged: AdversarialRound[] = useMemo(() => {
-    // Merge persisted + live, dedup by _id, newest first.
+    // Merge persisted + live, dedup by _id, newest first. Live WebSocket events
+    // are compact summaries; persisted API records carry the full red/blue raw
+    // transcript. Let the richer persisted document replace the compact copy,
+    // while preserving any fields that may only exist on the live event.
     const map = new Map<string, AdversarialRound>();
     for (const r of liveRounds) {
       if (r && r._id) map.set(r._id, r);
     }
     for (const r of persistedRounds) {
-      if (r && r._id && !map.has(r._id)) map.set(r._id, r);
+      if (!r || !r._id) continue;
+      const existing = map.get(r._id);
+      map.set(r._id, existing ? { ...existing, ...r } : r);
     }
     return Array.from(map.values()).sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
   }, [persistedRounds, liveRounds]);

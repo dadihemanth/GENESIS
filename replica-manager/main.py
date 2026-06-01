@@ -63,6 +63,7 @@ class SpawnRequest(BaseModel):
     stack_pin: str
     observed_routes: List[str] = []
     target_ip: str = ""
+    session_id: str = ""
 
 
 class SpawnResponse(BaseModel):
@@ -78,7 +79,13 @@ async def spawn(body: SpawnRequest):
 
     # Scaffold app files and compose config
     scaffold_app(body.stack_pin, port, body.observed_routes)
-    compose_content = compose_for_stack(body.stack_pin, port, body.observed_routes)
+    compose_content = compose_for_stack(
+        body.stack_pin,
+        port,
+        body.observed_routes,
+        session_id=body.session_id,
+        replica_id=replica_id,
+    )
 
     compose_dir = Path(f"/tmp/compose_{replica_id}")
     compose_dir.mkdir(parents=True, exist_ok=True)
@@ -106,6 +113,7 @@ async def spawn(body: SpawnRequest):
         "port": port,
         "stack_pin": body.stack_pin,
         "target_ip": body.target_ip,
+        "session_id": body.session_id,
         "compose_dir": str(compose_dir),
         "status": status,
     }

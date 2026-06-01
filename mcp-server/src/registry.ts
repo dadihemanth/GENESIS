@@ -139,7 +139,7 @@ const BINARY_MAP: Record<string, string> = {
   harvester:           'theHarvester',
   enum4linux:          'enum4linux-ng',
   impacket:            'impacket-secretsdump',
-  // Mythos intelligence tools — map to the binaries they actually use
+  // GENESIS intelligence tools — map to the binaries they actually use
   binary_analyzer:     'strings',
   code_pattern_search: 'grep',
   payload_crafter:     'node',

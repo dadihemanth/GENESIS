@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from typing import Any, Dict, List, Optional, Tuple
 
 from anthropic import AsyncAnthropic
@@ -34,16 +35,74 @@ _CACHE_CAPABLE = frozenset({"anthropic"})
 # sub-agents in the process.  Without this, up to 11 Phase-2 agents fire
 # simultaneously, collectively saturating the per-minute RPM/TPM quota and
 # producing cascading 429s that exhaust retries and kill sub-agents entirely.
-# 4 concurrent calls gives enough parallelism for fast Phase-2 runs while
-# staying well inside typical Azure OpenAI S0/S1 limits.
+# Default is 2 concurrent calls — conservative enough for S0/S1 deployments.
+# Operators with higher quota can raise this via AZURE_OAI_CONCURRENCY env var
+# (e.g. AZURE_OAI_CONCURRENCY=4) without code changes.
 _AZURE_OAI_SEMAPHORE: Optional[asyncio.Semaphore] = None
+_AZURE_OAI_CONCURRENCY = int(os.getenv("AZURE_OAI_CONCURRENCY", "2"))
 
 
 def _get_azure_semaphore() -> asyncio.Semaphore:
     global _AZURE_OAI_SEMAPHORE
     if _AZURE_OAI_SEMAPHORE is None:
-        _AZURE_OAI_SEMAPHORE = asyncio.Semaphore(4)
+        _AZURE_OAI_SEMAPHORE = asyncio.Semaphore(_AZURE_OAI_CONCURRENCY)
     return _AZURE_OAI_SEMAPHORE
+
+
+def anthropic_thinking_kwargs(model: str, budget_tokens: Optional[int] = None) -> Dict[str, Any]:
+    """Return thinking kwargs compatible with the configured Claude model.
+
+    Older Claude extended-thinking models accepted:
+      {"thinking": {"type": "enabled", "budget_tokens": N}}
+
+    Newer Claude 4.6/4.7 models reject that shape and require adaptive
+    thinking controlled through output_config.effort. anthropic==0.49.0 does
+    not expose output_config as a top-level create() parameter, so we pass it
+    through extra_body.
+    """
+    m = (model or "").lower()
+    if "opus" not in m and "sonnet" not in m:
+        return {}
+
+    # Current demo profiles use claude-opus-4-7 and claude-sonnet-4-6. These
+    # models expect adaptive thinking, not the legacy enabled/budget shape.
+    adaptive_markers = (
+        "opus-4-7",
+        "opus-4-6",
+        "sonnet-4-6",
+        "sonnet-4-5",
+    )
+    if any(marker in m for marker in adaptive_markers):
+        effort = "high" if (budget_tokens or 0) >= 5000 else "medium"
+        return {
+            "thinking": {"type": "adaptive"},
+            "extra_body": {"output_config": {"effort": effort}},
+        }
+
+    budget = max(1024, int(budget_tokens or 3000))
+    return {"thinking": {"type": "enabled", "budget_tokens": budget}}
+
+
+def apply_anthropic_thinking(
+    create_kwargs: Dict[str, Any],
+    model: str,
+    budget_tokens: Optional[int] = None,
+) -> None:
+    """Mutate create_kwargs with model-compatible Claude thinking settings."""
+    thinking_kwargs = anthropic_thinking_kwargs(model, budget_tokens)
+    if not thinking_kwargs:
+        return
+
+    extra_body = thinking_kwargs.pop("extra_body", None)
+    create_kwargs.update(thinking_kwargs)
+    if extra_body:
+        merged = dict(create_kwargs.get("extra_body") or {})
+        for key, value in extra_body.items():
+            if isinstance(value, dict) and isinstance(merged.get(key), dict):
+                merged[key] = {**merged[key], **value}
+            else:
+                merged[key] = value
+        create_kwargs["extra_body"] = merged
 
 
 # ---------------------------------------------------------------------------

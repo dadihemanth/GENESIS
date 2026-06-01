@@ -59,7 +59,8 @@
       "Bash(MSYS_NO_PATHCONV=1 docker compose exec -T backend env)",
       "Bash(curl -s -H \"X-API-Key: Gen@1234\" -w \"\\\\nHTTP %{http_code}\\\\n\" \"http://localhost:8000/api/v1/vulnerabilities/novel?session_id=00000000-0000-0000-0000-000000000000\")",
       "Bash(MSYS_NO_PATHCONV=1 docker compose restart backend)",
-      "Bash(MSYS_NO_PATHCONV=1 docker compose build backend celery_worker)"
+      "Bash(MSYS_NO_PATHCONV=1 docker compose build backend celery_worker)",
+      "Bash(start *)"
     ]
   }
 }

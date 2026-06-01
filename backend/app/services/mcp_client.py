@@ -69,7 +69,7 @@ _TOOL_NAME_MAP: Dict[str, str] = {
     # Static Analysis
     "semgrep_scan":         "semgrep",
     "bandit_scan":          "bandit",
-    # Mythos Intelligence Tools
+    # GENESIS Intelligence Tools
     "payload_crafter":      "payload_crafter",
     "binary_analyzer":      "binary_analyzer",
     "code_pattern_search":  "code_pattern_search",

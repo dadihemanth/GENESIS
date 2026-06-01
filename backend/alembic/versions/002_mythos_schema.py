@@ -1,4 +1,4 @@
-"""Mythos schema: attack chains, patches, MITRE, scan profiles, network topology
+"""GENESIS schema: attack chains, patches, MITRE, scan profiles, network topology
 
 Revision ID: 002
 Revises: 001

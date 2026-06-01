@@ -66,3 +66,9 @@ class AppSettings(Base):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+# Import the dependent model after ResearchSession is declared so SQLAlchemy's
+# string relationship target is registered even when callers import only
+# AppSettings from this module before querying settings.
+from app.models.vulnerability import Vulnerability as Vulnerability  # noqa: E402,F401

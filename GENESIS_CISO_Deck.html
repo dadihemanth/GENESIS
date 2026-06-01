@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GENESIS — CISO Briefing</title>
+<style>
+  :root {
+    --navy:  #0d1b4b;
+    --blue:  #1a3a8f;
+    --sky:   #2446c2;
+    --ink:   #172033;
+    --muted: #5a6478;
+    --line:  #d9deea;
+    --soft:  #f5f7fb;
+    --red:   #b53030;
+    --amber: #b8740c;
+    --green: #137a4e;
+    --white: #ffffff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #e8ecf5; font-family: Arial, Helvetica, sans-serif; color: var(--ink); }
+
+  /* ── slide shell ── */
+  .slide {
+    width: 10in;
+    min-height: 7.5in;
+    margin: 0.3in auto;
+    background: var(--white);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── print ── */
+  @page { size: 10in 7.5in landscape; margin: 0; }
+  @media print {
+    html, body { background: var(--white); }
+    .slide { margin: 0; box-shadow: none; page-break-after: always; }
+    .slide:last-child { page-break-after: avoid; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ── shared type ── */
+  .kicker { font-size: 8.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
+  .eyebrow { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sky); margin-bottom: 0.08in; }
+  h1 { font-size: 40pt; line-height: 1; letter-spacing: -1px; }
+  h2 { font-size: 22pt; line-height: 1.1; }
+  h3 { font-size: 13pt; line-height: 1.2; }
+  p  { font-size: 11pt; line-height: 1.45; }
+  .label { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* ── SLIDE 1 — COVER ── */
+  .cover { background: var(--navy); color: var(--white); flex-direction: row; min-height: 7.5in; }
+  .cover-left {
+    width: 4.8in; padding: 0.6in 0.5in; display: flex; flex-direction: column;
+    justify-content: space-between; border-right: 1px solid rgba(255,255,255,0.12);
+  }
+  .cover-right {
+    flex: 1; padding: 0.6in 0.5in; display: flex; flex-direction: column; justify-content: center;
+    background: linear-gradient(160deg, #1a3a8f 0%, #0d1b4b 100%);
+  }
+  .cover h1 { font-size: 72pt; color: var(--white); }
+  .cover .tagline { font-size: 14pt; color: #a8c4f8; line-height: 1.4; margin-top: 0.18in; max-width: 4in; }
+  .cover-meta { font-size: 9pt; color: #7090c8; }
+  .cover-stat { margin-bottom: 0.22in; }
+  .cover-stat .big { font-size: 34pt; font-weight: 900; color: var(--white); line-height: 1; }
+  .cover-stat .lbl { font-size: 9pt; color: #a8c4f8; margin-top: 2px; }
+  .cover-pill {
+    display: inline-block; border: 1px solid rgba(255,255,255,0.25);
+    padding: 0.04in 0.1in; border-radius: 999px; font-size: 8.5pt;
+    color: #c8daff; margin-bottom: 0.08in;
+  }
+
+  /* ── SLIDE 2 — PROBLEM ── */
+  .slide-header {
+    background: var(--navy); color: var(--white);
+    padding: 0.3in 0.55in; display: flex; align-items: center; justify-content: space-between;
+  }
+  .slide-header h2 { color: var(--white); font-size: 20pt; }
+  .slide-header .slide-num { font-size: 9pt; color: #7090c8; font-weight: 700; }
+  .slide-body { flex: 1; padding: 0.3in 0.55in; }
+
+  .problem-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.2in; margin-top: 0.22in; }
+  .prob-card {
+    border: 1px solid var(--line); border-radius: 8px; padding: 0.2in;
+    border-top: 4px solid var(--red);
+  }
+  .prob-card .icon { font-size: 22pt; margin-bottom: 0.1in; }
+  .prob-card h3 { font-size: 12pt; margin-bottom: 0.08in; color: var(--navy); }
+  .prob-card p { font-size: 10pt; color: #444; line-height: 1.4; }
+
+  .stat-callout {
+    background: #fdf0f0; border: 1px solid #f0c0c0; border-radius: 8px;
+    padding: 0.18in 0.24in; margin-top: 0.22in;
+    display: flex; align-items: center; gap: 0.22in;
+  }
+  .stat-callout .big-num { font-size: 36pt; font-weight: 900; color: var(--red); line-height: 1; white-space: nowrap; }
+  .stat-callout p { font-size: 10.5pt; color: #553030; line-height: 1.4; }
+
+  /* ── SLIDE 3 — WHAT GENESIS IS ── */
+  .what-body { display: flex; gap: 0.28in; margin-top: 0.2in; }
+  .what-left { flex: 1.4; }
+  .what-right { flex: 1; }
+  .pitch-box {
+    background: var(--soft); border-left: 5px solid var(--sky);
+    padding: 0.2in; border-radius: 0 6px 6px 0; margin-bottom: 0.18in;
+  }
+  .pitch-box p { font-size: 12pt; line-height: 1.5; color: var(--navy); }
+  .diff-item { display: flex; gap: 0.1in; align-items: flex-start; margin-bottom: 0.12in; }
+  .diff-dot { min-width: 8px; height: 8px; border-radius: 50%; background: var(--sky); margin-top: 4px; }
+  .diff-item p { font-size: 10pt; line-height: 1.4; }
+  .analogy-box {
+    background: #f0fbf5; border: 1px solid #bde4d0; border-radius: 8px; padding: 0.18in;
+  }
+  .analogy-box .label { color: var(--green); margin-bottom: 0.07in; }
+  .analogy-box p { font-size: 10pt; line-height: 1.45; color: var(--ink); }
+
+  /* ── SLIDE 4 — HOW IT WORKS ── */
+  .flow-strip {
+    display: flex; gap: 0; margin: 0.22in 0 0.18in; align-items: stretch;
+  }
+  .flow-step {
+    flex: 1; text-align: center; padding: 0.15in 0.06in;
+    background: var(--soft); border: 1px solid var(--line);
+    border-right: none; font-size: 9.5pt; font-weight: 700;
+  }
+  .flow-step:first-child { border-radius: 6px 0 0 6px; }
+  .flow-step:last-child { border-radius: 0 6px 6px 0; border-right: 1px solid var(--line); background: #eef2ff; color: var(--sky); }
+  .flow-step .step-num { font-size: 8pt; color: var(--muted); font-weight: 400; display: block; margin-bottom: 3px; }
+  .how-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.15in; margin-top: 0.12in; }
+  .how-card {
+    border: 1px solid var(--line); border-radius: 7px; padding: 0.15in;
+    background: #fff;
+  }
+  .how-card .big { font-size: 24pt; font-weight: 900; color: var(--sky); line-height: 1; }
+  .how-card .lbl { font-size: 8.5pt; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin: 3px 0 5px; font-weight: 700; }
+  .how-card p { font-size: 9pt; color: #444; line-height: 1.35; }
+
+  /* ── SLIDE 5 — TRUST LAYER ── */
+  .trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.18in; margin-top: 0.2in; }
+  .trust-card {
+    border: 1px solid var(--line); border-radius: 8px; padding: 0.18in;
+    display: flex; gap: 0.12in;
+  }
+  .trust-icon {
+    width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 17pt; flex-shrink: 0; background: #eef2ff;
+  }
+  .trust-card h3 { font-size: 11pt; margin-bottom: 4px; color: var(--navy); }
+  .trust-card p { font-size: 9.5pt; color: #444; line-height: 1.4; }
+  .trust-banner {
+    background: var(--navy); color: var(--white); border-radius: 8px;
+    padding: 0.18in 0.22in; margin-top: 0.18in;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .trust-banner p { font-size: 11.5pt; line-height: 1.4; max-width: 6.5in; }
+  .trust-banner .check { font-size: 20pt; color: #6ed4a0; }
+
+  /* ── SLIDE 6 — ROI ── */
+  .roi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.18in; margin-top: 0.22in; }
+  .roi-card {
+    border-radius: 8px; padding: 0.2in; text-align: center;
+  }
+  .roi-card.dark { background: var(--navy); color: var(--white); }
+  .roi-card.mid  { background: #eef2ff; }
+  .roi-card.lite { background: #f0fbf5; }
+  .roi-card .big { font-size: 30pt; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+  .roi-card.dark .big { color: #6ed4a0; }
+  .roi-card.mid  .big { color: var(--sky); }
+  .roi-card.lite .big { color: var(--green); }
+  .roi-card .lbl { font-size: 9pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .roi-card.dark .lbl { color: #a8c4f8; }
+  .roi-card.mid  .lbl { color: var(--sky); }
+  .roi-card.lite .lbl { color: var(--green); }
+  .roi-card p { font-size: 9pt; line-height: 1.38; }
+  .roi-card.dark p { color: #c8daff; }
+
+  .compare-table { width: 100%; border-collapse: collapse; margin-top: 0.22in; }
+  .compare-table th { background: var(--navy); color: var(--white); padding: 0.09in 0.14in; font-size: 9pt; text-align: left; }
+  .compare-table td { border: 1px solid var(--line); padding: 0.07in 0.14in; font-size: 9.5pt; vertical-align: top; }
+  .compare-table tr:nth-child(even) td { background: var(--soft); }
+  .compare-table .genesis { font-weight: 700; color: var(--sky); }
+  .compare-table .old { color: var(--red); }
+
+  /* ── SLIDE 7 — STRATEGIC FIT ── */
+  .strat-body { display: flex; gap: 0.3in; margin-top: 0.2in; }
+  .strat-left { flex: 1.2; }
+  .strat-right { flex: 1; }
+  .framework-row {
+    display: flex; align-items: center; gap: 0.12in; padding: 0.1in;
+    border: 1px solid var(--line); border-radius: 6px; margin-bottom: 0.1in; background: var(--soft);
+  }
+  .fw-badge {
+    background: var(--navy); color: var(--white); font-size: 8pt; font-weight: 800;
+    padding: 0.04in 0.09in; border-radius: 4px; white-space: nowrap;
+  }
+  .framework-row p { font-size: 9.5pt; color: var(--ink); }
+  .programme-list { list-style: none; }
+  .programme-list li {
+    display: flex; gap: 0.1in; padding: 0.085in 0;
+    border-bottom: 1px solid var(--line); font-size: 10pt;
+  }
+  .programme-list li:last-child { border-bottom: none; }
+  .programme-list .tick { color: var(--green); font-weight: 900; }
+
+  /* ── SLIDE 8 — ROADMAP ── */
+  .road-header {
+    background: linear-gradient(135deg, #0d1b4b 0%, #1a3a8f 100%);
+    color: var(--white); padding: 0.3in 0.55in;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .road-header h2 { color: var(--white); font-size: 20pt; }
+  .road-body { flex: 1; padding: 0.28in 0.55in; display: flex; flex-direction: column; justify-content: space-between; }
+  .phases { display: grid; grid-template-columns: repeat(5,1fr); gap: 0.12in; margin-top: 0.12in; }
+  .phase-card {
+    border-radius: 8px; padding: 0.14in 0.12in; text-align: center;
+    border: 1px solid var(--line);
+  }
+  .phase-card.done  { background: #f0fbf5; border-color: #bde4d0; }
+  .phase-card.now   { background: var(--navy); color: var(--white); }
+  .phase-card.next  { background: #eef2ff; border-color: #c8d1ee; }
+  .phase-card .ph-num { font-size: 8pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; }
+  .phase-card.done  .ph-num { color: var(--green); }
+  .phase-card.now   .ph-num { color: #6ed4a0; }
+  .phase-card.next  .ph-num { color: var(--sky); }
+  .phase-card .ph-title { font-size: 10pt; font-weight: 700; margin: 5px 0 4px; }
+  .phase-card.now   .ph-title { color: var(--white); }
+  .phase-card .ph-dates { font-size: 8pt; color: var(--muted); margin-bottom: 6px; }
+  .phase-card.now   .ph-dates { color: #a8c4f8; }
+  .phase-card p { font-size: 8pt; line-height: 1.35; color: #444; }
+  .phase-card.now   p { color: #c8daff; }
+
+  .state-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.14in; margin-top: 0.18in; }
+  .state-item { display: flex; gap: 0.1in; align-items: flex-start; background: var(--soft); border-radius: 6px; padding: 0.1in; }
+  .state-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .state-item h3 { font-size: 9.5pt; margin-bottom: 2px; }
+  .state-item p { font-size: 8.5pt; color: var(--muted); }
+
+  /* ── SLIDE 9 — THE ASK ── */
+  .ask-slide { background: var(--navy); color: var(--white); min-height: 7.5in; flex-direction: row; }
+  .ask-left {
+    width: 3.8in; background: linear-gradient(160deg, #1a3a8f 0%, #0d1b4b 100%);
+    padding: 0.55in 0.45in; display: flex; flex-direction: column; justify-content: space-between;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .ask-right { flex: 1; padding: 0.55in 0.45in; display: flex; flex-direction: column; justify-content: space-between; }
+  .ask-left h2 { font-size: 24pt; color: var(--white); line-height: 1.15; }
+  .ask-left p { font-size: 10.5pt; color: #a8c4f8; line-height: 1.5; margin-top: 0.14in; }
+  .ask-item {
+    display: flex; gap: 0.14in; align-items: flex-start;
+    background: rgba(255,255,255,0.07); border-radius: 8px; padding: 0.16in;
+    border: 1px solid rgba(255,255,255,0.1); margin-bottom: 0.12in;
+  }
+  .ask-num {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--sky);
+    color: var(--white); font-size: 11pt; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ask-item h3 { font-size: 11pt; color: var(--white); margin-bottom: 3px; }
+  .ask-item p { font-size: 9pt; color: #a8c4f8; line-height: 1.4; }
+  .success-strip {
+    background: rgba(110,212,160,0.12); border: 1px solid rgba(110,212,160,0.3);
+    border-radius: 8px; padding: 0.14in 0.18in;
+  }
+  .success-strip .label { color: #6ed4a0; margin-bottom: 0.06in; }
+  .success-row { display: flex; gap: 0.2in; flex-wrap: wrap; }
+  .success-metric { font-size: 9pt; color: #c8daff; }
+  .success-metric strong { color: var(--white); }
+  .bottom-bar {
+    display: flex; gap: 0.2in; background: rgba(255,255,255,0.05);
+    border-radius: 8px; padding: 0.12in 0.16in; align-items: center;
+  }
+  .bottom-bar p { font-size: 9pt; color: #7090c8; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ SLIDE 1 — COVER ═══════════════════════════════ -->
+<div class="slide cover">
+  <div class="cover-left">
+    <div>
+      <div class="kicker" style="color:#7090c8;margin-bottom:0.1in;">CISO Executive Briefing — Confidential</div>
+      <h1>GENESIS</h1>
+      <div class="tagline">AI-driven security testing that proves vulnerabilities — not just lists them.</div>
+    </div>
+    <div>
+      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:0.2in;margin-top:0.2in;">
+        <div class="cover-pill">145 active security tools</div><br>
+        <div class="cover-pill">8 AI agents working in parallel</div><br>
+        <div class="cover-pill">Universal proof-backed validation</div><br>
+        <div class="cover-pill">Feature-complete v9 · Go-live July 2026</div>
+      </div>
+      <div class="cover-meta" style="margin-top:0.18in;">Prepared: May 2026 &nbsp;|&nbsp; Classification: Internal</div>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div style="margin-bottom:0.3in;">
+      <div class="kicker" style="color:#7090c8;margin-bottom:0.16in;">At a glance</div>
+      <div class="cover-stat"><div class="big">$4.88M</div><div class="lbl">Average cost of a data breach (IBM 2024) — GENESIS finds the gap before attackers do</div></div>
+      <div class="cover-stat"><div class="big">145+</div><div class="lbl">Security tools orchestrated by AI — no manual configuration per test</div></div>
+      <div class="cover-stat"><div class="big">Zero</div><div class="lbl">Confirmed findings without proof — every reported issue has verifiable evidence</div></div>
+      <div class="cover-stat"><div class="big">$2–$200</div><div class="lbl">Typical scan cost range vs $15–30k for a manual pentest engagement</div></div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:0.16in;font-size:9.5pt;color:#7090c8;">
+      This deck covers: the problem we're solving · what GENESIS is · why it's different · ROI framing · strategic alignment · roadmap · the ask.
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 2 — THE PROBLEM ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">The Problem</div>
+      <h2>Our current security testing is broken in three ways</h2>
+    </div>
+    <div class="slide-num">02 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="problem-grid">
+      <div class="prob-card">
+        <div class="icon">🔔</div>
+        <h3>Too much noise, too little signal</h3>
+        <p>Standard scanners produce hundreds of alerts per run. Security teams spend 60–70% of their time triaging false positives instead of fixing real issues. Priorities get lost in the noise.</p>
+      </div>
+      <div class="prob-card">
+        <div class="icon">🧩</div>
+        <h3>Logic bugs go undetected</h3>
+        <p>SAST and DAST tools find signature-match vulnerabilities. They cannot find business logic flaws — like "any user can access any other user's data by changing a number in the URL" — because those require reasoning, not pattern matching.</p>
+      </div>
+      <div class="prob-card">
+        <div class="icon">🔀</div>
+        <h3>SAST and DAST live in silos</h3>
+        <p>Code-level findings and live runtime findings are never connected. A developer sees a SAST warning with no proof it's exploitable. A pen tester finds a live bug with no idea where in the code to fix it. Both sides waste time.</p>
+      </div>
+    </div>
+    <div class="stat-callout">
+      <div class="big-num">$4.88M</div>
+      <p><strong>Average cost of a data breach (IBM Cost of a Data Breach Report 2024).</strong> The mean time to identify a breach is 194 days. Most exploited vulnerabilities were known issues — they just were not prioritized because they were buried in scanner noise. GENESIS fixes the prioritization problem by requiring proof before reporting.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 3 — WHAT GENESIS IS ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">The Solution</div>
+      <h2>GENESIS — what it is and what makes it different</h2>
+    </div>
+    <div class="slide-num">03 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="what-body">
+      <div class="what-left">
+        <div class="pitch-box">
+          <p>GENESIS is an AI-powered security assessment platform that thinks like a skilled analyst: it <strong>forms a theory</strong> about a potential weakness, <strong>designs a targeted test</strong>, <strong>runs the test</strong>, and <strong>demands proof</strong> before reporting anything. A second AI then challenges every finding before it reaches your team.</p>
+        </div>
+        <div class="eyebrow" style="margin-top:0.14in;">Four things no traditional scanner does</div>
+        <div class="diff-item"><div class="diff-dot"></div><p><strong>Hypothesizes before testing</strong> — writes a structured theory ("I believe this endpoint has an ownership check missing") before picking a tool, so every test has a purpose.</p></div>
+        <div class="diff-item"><div class="diff-dot"></div><p><strong>Requires proof for every finding</strong> — no finding is confirmed unless a live test, callback, or deterministic oracle verifies it. Zero unproven alerts in the final report.</p></div>
+        <div class="diff-item"><div class="diff-dot"></div><p><strong>Connects source and runtime</strong> — links the live exploitable endpoint to the exact file and line of code to fix, in one session.</p></div>
+        <div class="diff-item"><div class="diff-dot"></div><p><strong>Learns across sessions</strong> — remembers what worked on past scans and uses it to find similar issues faster next time.</p></div>
+      </div>
+      <div class="what-right">
+        <div class="analogy-box" style="margin-bottom:0.16in;">
+          <div class="label">The right analogy</div>
+          <p>A metal detector at a checkpoint is fast but produces many false alarms. GENESIS is the trained investigator who picks up each flagged item, examines it, argues with a colleague about whether it is really dangerous, and only writes up the cases with solid evidence. What reaches your remediation queue is a short, prioritized, proven list — not a pile of raw alarms.</p>
+        </div>
+        <div style="border:1px solid var(--line);border-radius:8px;padding:0.16in;background:var(--soft);">
+          <div class="eyebrow" style="margin-bottom:0.1in;">Coverage in one platform</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.08in;font-size:9.5pt;">
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Live web apps &amp; APIs</div>
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Source code analysis</div>
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Network &amp; infrastructure</div>
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Binary / compiled code</div>
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Cloud &amp; internal services</div>
+            <div style="padding:0.06in;background:#fff;border-radius:5px;border:1px solid var(--line);">✅ Auth, crypto, AD paths</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 4 — HOW IT WORKS ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">How It Works</div>
+      <h2>From target to proven finding — the seven-step loop</h2>
+    </div>
+    <div class="slide-num">04 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="flow-strip">
+      <div class="flow-step"><span class="step-num">1</span>Target &amp; scope</div>
+      <div class="flow-step"><span class="step-num">2</span>Recon &amp; map</div>
+      <div class="flow-step"><span class="step-num">3</span>Hypothesize</div>
+      <div class="flow-step"><span class="step-num">4</span>Test &amp; collect</div>
+      <div class="flow-step"><span class="step-num">5</span>Validate &amp; debate</div>
+      <div class="flow-step"><span class="step-num">6</span>Prove &amp; cluster</div>
+      <div class="flow-step"><span class="step-num">7</span>✓ Confirmed findings</div>
+    </div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="big">145</div>
+        <div class="lbl">Security tools</div>
+        <p>Web, network, source, binary, cloud, auth, crypto, AD, IoT, browser — selected automatically by the AI for each hypothesis.</p>
+      </div>
+      <div class="how-card">
+        <div class="big">8</div>
+        <div class="lbl">AI agents</div>
+        <p>Recon, Analyst, Exploit, Code, Crypto, Auth, RevEng, and Network agents work in parallel — each focused on its speciality.</p>
+      </div>
+      <div class="how-card">
+        <div class="big">5</div>
+        <div class="lbl">Validator roles</div>
+        <p>Endpoint, Source, Counter, Proof Planner, and Operator validators all challenge every candidate before promotion.</p>
+      </div>
+      <div class="how-card">
+        <div class="big">0</div>
+        <div class="lbl">Unproven findings</div>
+        <p>Every item in the Findings tab has passed a proof run, a callback hit, or explicit human attestation. No guesses reported.</p>
+      </div>
+    </div>
+    <div style="background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:0.15in 0.2in;margin-top:0.15in;display:flex;align-items:center;gap:0.2in;">
+      <div style="font-size:18pt;">💡</div>
+      <p style="font-size:10pt;color:var(--ink);">
+        <strong>Why findings appear later than raw scan activity:</strong> GENESIS discovers quickly but reports carefully. Candidates are captured immediately; they only become confirmed findings after validators, a proof run, and deduplication complete. This deliberate delay is the trust layer — it is not idle time.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 5 — THE TRUST LAYER ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">Why Leaders Trust It</div>
+      <h2>The trust layer — how GENESIS earns every confirmed finding</h2>
+    </div>
+    <div class="slide-num">05 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">🔬</div>
+        <div>
+          <h3>Universal proof gate</h3>
+          <p>Every candidate — regardless of scan mode — must pass a deterministic proof test before it becomes a finding. A passing HTTP response, a callback hit, or a symbolic execution oracle. No proof, no finding.</p>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🥊</div>
+        <div>
+          <h3>Red vs Blue AI debate</h3>
+          <p>A separate AI (the "Blue Agent" using a different model) actively tries to refute every high-confidence claim. If it finds a flaw in the argument, the finding is marked "disputed" and removed from the report.</p>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">🧬</div>
+        <div>
+          <h3>Patched-control comparison</h3>
+          <p>GENESIS can run against a known-fixed "twin" of the same target. If a Critical finding still appears on the patched version, it is flagged as a potential false positive — measurable, not just claimed.</p>
+        </div>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">📋</div>
+        <div>
+          <h3>Reproducible evidence trail</h3>
+          <p>Every finding carries the AI's hypothesis, the exact tool call made, the raw response received, the validator's reasoning, and the proof record. Engineering can reproduce or challenge any finding independently.</p>
+        </div>
+      </div>
+    </div>
+    <div class="trust-banner">
+      <p><strong>The executive message:</strong> GENESIS does not ask you to trust the AI. It asks you to trust the evidence — the same HTTP response, the same screenshot, the same proof record — that the AI used to reach its conclusion. The reasoning is visible, not hidden.</p>
+      <div class="check">✓</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 6 — ROI ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">Business Case</div>
+      <h2>Return on investment — cost, speed, and risk reduction</h2>
+    </div>
+    <div class="slide-num">06 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="roi-grid">
+      <div class="roi-card dark">
+        <div class="big">95%</div>
+        <div class="lbl">Cost reduction vs manual pentest</div>
+        <p>A traditional penetration test engagement costs $15,000–$30,000+ for a two-week scope. An equivalent GENESIS Deep Research scan costs $80–$200 in AI API tokens and can run overnight.</p>
+      </div>
+      <div class="roi-card mid">
+        <div class="big">24/7</div>
+        <div class="lbl">Continuous coverage</div>
+        <p>A human penetration tester works one engagement at a time. GENESIS can run continuously — overnight, on weekends, triggered on every major deployment — without fatigue or scheduling constraints.</p>
+      </div>
+      <div class="roi-card lite">
+        <div class="big">1 fix</div>
+        <div class="lbl">Per root cause (not per symptom)</div>
+        <p>Deduplication clusters all candidates sharing the same root cause. One architectural mistake reported as four scanner alerts becomes one prioritized ticket — reducing engineering rework by 60–75%.</p>
+      </div>
+    </div>
+    <table class="compare-table">
+      <thead><tr><th style="width:2in;">Capability</th><th>Manual pentest ($15–30k)</th><th>Basic scanner (Nessus/Burp)</th><th class="genesis">GENESIS ($2–200/scan)</th></tr></thead>
+      <tbody>
+        <tr><td>Test frequency</td><td class="old">Quarterly or annual</td><td>Weekly at best</td><td class="genesis">Every deployment, on-demand</td></tr>
+        <tr><td>False positive rate</td><td>Low (human-verified)</td><td class="old">High — requires manual triage</td><td class="genesis">Low — proof gate + AI debate</td></tr>
+        <tr><td>Logic-level bugs</td><td>Yes (skilled tester dependent)</td><td class="old">No — signature only</td><td class="genesis">Yes — reasoning loops + hypothesis</td></tr>
+        <tr><td>Evidence quality</td><td>High — written report</td><td class="old">CVE score only — no live proof</td><td class="genesis">High — proof record + reproducible</td></tr>
+        <tr><td>Source + runtime link</td><td>Manual — tester writes it up</td><td class="old">None — siloed tools</td><td class="genesis">Automatic — hybrid mapping</td></tr>
+        <tr><td>Time to first finding</td><td class="old">Days (scoping + testing)</td><td>Minutes</td><td class="genesis">Minutes (recon) → hours (confirmed)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 7 — STRATEGIC ALIGNMENT ═══════════════════════════════ -->
+<div class="slide">
+  <div class="slide-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">Strategic Fit</div>
+      <h2>How GENESIS fits the broader security programme</h2>
+    </div>
+    <div class="slide-num">07 / 09</div>
+  </div>
+  <div class="slide-body">
+    <div class="strat-body">
+      <div class="strat-left">
+        <div class="eyebrow">Compliance &amp; framework alignment</div>
+        <div class="framework-row">
+          <div class="fw-badge">NIST CSF</div>
+          <p>Maps to Identify, Protect, and Detect functions. Continuous assessment directly supports DE.CM (continuous monitoring) and ID.RA (risk assessment).</p>
+        </div>
+        <div class="framework-row">
+          <div class="fw-badge">SOC 2</div>
+          <p>Proof-backed findings with audit trail support CC7.1 (security monitoring) and CC4.1 (risk assessment). Evidence records are retention-ready.</p>
+        </div>
+        <div class="framework-row">
+          <div class="fw-badge">PCI DSS</div>
+          <p>Supports Requirement 6.3 (vulnerability scanning), 11.3 (penetration testing), and 11.4 (intrusion detection controls validation).</p>
+        </div>
+        <div class="framework-row">
+          <div class="fw-badge">ISO 27001</div>
+          <p>Addresses A.12.6 (technical vulnerability management) and A.14.2 (security in development). Reproducible evidence supports audit readiness.</p>
+        </div>
+        <div class="framework-row">
+          <div class="fw-badge">OWASP</div>
+          <p>Active coverage of all OWASP Top 10 categories plus logic-level and business flow issues that standard OWASP scanners miss.</p>
+        </div>
+      </div>
+      <div class="strat-right">
+        <div class="eyebrow">What GENESIS adds to the programme</div>
+        <ul class="programme-list">
+          <li><span class="tick">✓</span> Replaces ad-hoc annual pentest with continuous, on-demand assessment at a fraction of the cost.</li>
+          <li><span class="tick">✓</span> Closes the SAST/DAST gap — source and runtime evidence in one session, one report.</li>
+          <li><span class="tick">✓</span> Reduces mean-time-to-know by surfacing confirmed findings the same day code ships.</li>
+          <li><span class="tick">✓</span> Gives engineering prioritized, proof-backed, one-fix-per-root-cause tickets — not a scanner dump.</li>
+          <li><span class="tick">✓</span> Builds an institutional attack graph — cross-session memory of what was found where and how issues chain.</li>
+          <li><span class="tick">✓</span> Provides measurable evidence for board-level risk reporting: recall, proof coverage, duplicate rate, cost per finding.</li>
+          <li><span class="tick">✓</span> All data stays self-hosted — findings never leave your environment (only AI reasoning prompts go to Anthropic API).</li>
+          <li><span class="tick">✓</span> Authorized defensive use only — no persistence, no C2, no destructive actions. Proves impact without causing it.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 8 — ROADMAP ═══════════════════════════════ -->
+<div class="slide" style="flex-direction:column;">
+  <div class="road-header">
+    <div>
+      <div class="kicker" style="color:#7090c8;">Readiness &amp; Roadmap</div>
+      <h2>Feature-complete today — production-hardened by July 2026</h2>
+    </div>
+    <div class="slide-num" style="color:#7090c8;font-size:9pt;font-weight:700;">08 / 09</div>
+  </div>
+  <div class="road-body">
+    <div>
+      <div class="eyebrow" style="color:var(--muted);">9-week production hardening plan</div>
+      <div class="phases">
+        <div class="phase-card done">
+          <div class="ph-num">Complete ✓</div>
+          <div class="ph-title">Core Platform</div>
+          <div class="ph-dates">v9 feature-complete</div>
+          <p>All 145 tools, 8 agents, validation pipeline, reasoning loops, benchmark support — fully operational.</p>
+        </div>
+        <div class="phase-card now">
+          <div class="ph-num">Phase 0 · NOW</div>
+          <div class="ph-title">Security Fixes</div>
+          <div class="ph-dates">May 13–19, 2026</div>
+          <p>Remove hardcoded secrets, enforce HTTPS/TLS, add rate limiting, enable structured logging.</p>
+        </div>
+        <div class="phase-card next">
+          <div class="ph-num">Phase 1</div>
+          <div class="ph-title">Hardening</div>
+          <div class="ph-dates">May 20 – Jun 2</div>
+          <p>Monitoring stack, backup strategy, audit log retention, network isolation review.</p>
+        </div>
+        <div class="phase-card next">
+          <div class="ph-num">Phase 2–3</div>
+          <div class="ph-title">Test &amp; Fix</div>
+          <div class="ph-dates">Jun 3–30, 2026</div>
+          <p>Known-vulnerability regression image, automated test suite, bug triage, performance review.</p>
+        </div>
+        <div class="phase-card next">
+          <div class="ph-num">Phase 4</div>
+          <div class="ph-title">Go-Live</div>
+          <div class="ph-dates">Jul 1–14, 2026</div>
+          <p>Production deployment, operational hand-off, documentation finalization, team enablement.</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="eyebrow" style="color:var(--muted);margin-bottom:0.1in;">Current state — what's ready vs what needs hardening</div>
+      <div class="state-grid">
+        <div class="state-item"><div class="state-dot dot-green"></div><div><h3>Ready now</h3><p>All scan profiles, 145 tools, multi-agent orchestration, validation pipeline, attack graph, benchmark support, reasoning loops, REST API, WebSocket feed.</p></div></div>
+        <div class="state-item"><div class="state-dot dot-amber"></div><div><h3>Needs Phase 0 hardening</h3><p>Secrets must move to environment injection; HTTPS/TLS must be enforced end-to-end; rate limiting and session management need production-grade controls.</p></div></div>
+        <div class="state-item"><div class="state-dot dot-green"></div><div><h3>Data stays local</h3><p>Findings, artifacts, attack graph, and session data are self-hosted. Only AI reasoning prompts go to Anthropic API — governed by your existing API agreement.</p></div></div>
+        <div class="state-item"><div class="state-dot dot-amber"></div><div><h3>Needs Phase 1 hardening</h3><p>Centralized monitoring, alerting, and audit log retention must be in place before operational hand-off. Health checks exist; production observability does not yet.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════ SLIDE 9 — THE ASK ═══════════════════════════════ -->
+<div class="slide ask-slide">
+  <div class="ask-left">
+    <div>
+      <div class="kicker" style="color:#7090c8;margin-bottom:0.14in;">The Ask</div>
+      <h2>Three decisions needed to move forward</h2>
+      <p>GENESIS is built and tested. The path to production is a defined 9-week hardening plan. These are the three leadership decisions that unblock it.</p>
+    </div>
+    <div>
+      <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:0.18in;">
+        <div class="eyebrow" style="color:#7090c8;">Questions this deck answers</div>
+        <div style="font-size:9pt;color:#a8c4f8;line-height:1.8;margin-top:0.08in;">
+          Can it damage our systems? → No<br>
+          Where does our data go? → Self-hosted<br>
+          What does it cost? → $2–$200/scan<br>
+          When is it production-ready? → July 2026<br>
+          Is it better than our scanner? → See slide 06<br>
+          Who owns the findings? → You do
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ask-right">
+    <div>
+      <div class="ask-item">
+        <div class="ask-num">1</div>
+        <div>
+          <h3>Approve the 9-week hardening budget</h3>
+          <p>Phase 0–4 covers secrets management, HTTPS enforcement, monitoring, test suite, and go-live. Engineering time is the primary cost. Approval needed to begin Phase 0 immediately.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-num">2</div>
+        <div>
+          <h3>Authorize a controlled pilot scan on a staging target</h3>
+          <p>Run GENESIS against one staging application before go-live. This produces a real benchmark scorecard — recall, proof coverage, duplicate rate — so the team sees measured results, not a demo. Two weeks, zero risk to production.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-num">3</div>
+        <div>
+          <h3>Designate a security programme owner for GENESIS</h3>
+          <p>Assign one person to own scan scheduling, finding triage, and integration with the remediation workflow. This is the difference between a tool that generates reports and a programme that reduces risk.</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="success-strip">
+        <div class="label">How we measure success at go-live</div>
+        <div class="success-row">
+          <div class="success-metric"><strong>Recall</strong><br>% planted lab bugs found</div>
+          <div class="success-metric"><strong>Proof coverage</strong><br>% confirmed findings with live proof</div>
+          <div class="success-metric"><strong>FP rate</strong><br>Patched-control false positives</div>
+          <div class="success-metric"><strong>Cost/finding</strong><br>AI spend ÷ confirmed findings</div>
+          <div class="success-metric"><strong>MTTD</strong><br>Time from deploy to first finding</div>
+        </div>
+      </div>
+      <div class="bottom-bar" style="margin-top:0.12in;">
+        <p>Full technical reference: <strong style="color:#c8daff;">GENESIS_Print_Overview.html</strong> &nbsp;|&nbsp; All data self-hosted &nbsp;|&nbsp; Authorized defensive use only &nbsp;|&nbsp; Classification: Internal</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

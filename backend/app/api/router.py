@@ -8,6 +8,7 @@ from app.api.routes import (
     artifacts,
     audit,
     auth,
+    benchmarks,
     budgets,
     callback,
     compliance,
@@ -20,6 +21,7 @@ from app.api.routes import (
     hypotheses,
     integrations,
     intelligence,
+    judge,
     loops,
     provenance,
     session_memory,
@@ -27,6 +29,7 @@ from app.api.routes import (
     settings,
     source,
     tools,
+    validated,
     vulnerabilities,
 )
 
@@ -60,3 +63,9 @@ router.include_router(provenance.router, prefix="/provenance", tags=["provenance
 router.include_router(loops.router, prefix="/loops", tags=["loops"])
 router.include_router(adversarial.router, prefix="/adversarial", tags=["adversarial"])
 router.include_router(costs.router, prefix="/sessions", tags=["costs"])
+# v8 routes
+router.include_router(judge.router, prefix="/judge", tags=["judge"])
+# validated_dynamic routes
+router.include_router(validated.router, prefix="/validated", tags=["validated"])
+# validation milestone 7 — recall benchmark routes
+router.include_router(benchmarks.router, prefix="/benchmarks", tags=["benchmarks"])

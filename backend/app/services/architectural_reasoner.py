@@ -86,6 +86,24 @@ async def analyze_architecture(
     if architecture_notes:
         sections.append("## Architecture Notes\n" + architecture_notes[:2000])
 
+    # validation milestone 2 — inject commit history high-risk surface into the context.
+    # Files touched in security-sensitive commits are prioritized scan targets.
+    try:
+        from app.services.commit_analyzer import get_high_risk_commits
+        high_risk = await get_high_risk_commits(session_id, min_risk=0.3, limit=15)
+        if high_risk:
+            lines = ["## High-Risk Commits (recent security-sensitive changes)"]
+            for c in high_risk:
+                files = ", ".join(c.get("files_changed", [])[:5])
+                labels = ", ".join(c.get("security_keywords_hit", []))
+                lines.append(
+                    f"  [{c.get('risk_score', 0):.2f}] {c.get('subject', '')[:80]}"
+                    f" — files: {files} — keywords: {labels}"
+                )
+            sections.append("\n".join(lines))
+    except Exception as exc:
+        logger.debug("commit surface injection failed (non-fatal): %s", exc)
+
     if not sections:
         logger.info("architectural_reasoner: no artifacts for session=%s", session_id)
         return {}
@@ -147,6 +165,96 @@ async def analyze_architecture(
         len(threat_model.get("attack_hypotheses", [])),
     )
     return threat_model
+
+
+async def seed_commit_surface_hypotheses(
+    session_id: str,
+    client: Any,
+    model: str,
+) -> int:
+    """validation milestone 2 — generate hypotheses directly from commit surface data.
+
+    Called for source-code scan sessions that may have no OpenAPI/Compose
+    artifacts. Reads high-risk commits from MongoDB and uses the LLM to
+    derive targeted hypotheses pointing at the most recently changed, highest-
+    risk files. Returns the number of hypotheses submitted to the market.
+    """
+    if client is None:
+        return 0
+    try:
+        from app.services.commit_analyzer import get_high_risk_commits
+        high_risk = await get_high_risk_commits(session_id, min_risk=0.25, limit=20)
+    except Exception as exc:
+        logger.debug("seed_commit_surface_hypotheses: commit fetch failed: %s", exc)
+        return 0
+
+    if not high_risk:
+        return 0
+
+    surface_text = "\n".join(
+        f"  [{c.get('risk_score', 0):.2f}] {c.get('subject', '')[:80]} "
+        f"| files: {', '.join(c.get('files_changed', [])[:4])} "
+        f"| keywords: {', '.join(c.get('security_keywords_hit', []))}"
+        for c in high_risk
+    )
+    user_msg = (
+        f"Session: {session_id}\n\n"
+        "The following git commits were flagged as security-sensitive based on "
+        "keywords in their diffs. For each high-risk commit, propose a testable "
+        "security hypothesis about what could be wrong with that change.\n\n"
+        "High-risk commits (risk score | subject | files | keywords):\n"
+        f"{surface_text}\n\n"
+        "Respond with JSON: {\"hypotheses\": [{\"text\": \"...\", \"file\": \"...\", "
+        "\"confidence\": 0.0-1.0, \"vulnerability_class\": \"...\"}]}"
+    )
+    try:
+        resp = await client.messages.create(
+            model=model,
+            max_tokens=1500,
+            timeout=90.0,
+            system=(
+                "You are a security auditor analyzing recent code changes for "
+                "vulnerabilities. Focus on the files and patterns described. "
+                "Be specific — name the file, the operation that changed, and "
+                "why it could introduce a bug."
+            ),
+            messages=[{"role": "user", "content": user_msg}],
+        )
+        text = ""
+        for block in (resp.content or []):
+            if hasattr(block, "text"):
+                text += block.text
+
+        start = text.find("{")
+        end = text.rfind("}")
+        if start == -1 or end == -1:
+            return 0
+        import json as _json
+        parsed = _json.loads(text[start:end + 1])
+    except Exception as exc:
+        logger.warning("seed_commit_surface_hypotheses LLM call failed: %s", exc)
+        return 0
+
+    submitted = 0
+    for item in parsed.get("hypotheses", [])[:10]:
+        if not isinstance(item, dict) or "text" not in item:
+            continue
+        try:
+            await submit_hypothesis(
+                session_id=session_id,
+                text=item["text"],
+                proposer_agent="commit_surface_reasoner",
+                hypothesis_type=item.get("vulnerability_class", "commit_surface"),
+                confidence_stake=min(1.0, float(item.get("confidence", 0.5))),
+            )
+            submitted += 1
+        except Exception as exc:
+            logger.debug("commit surface hypothesis submit failed: %s", exc)
+
+    logger.info(
+        "seed_commit_surface_hypotheses: session=%s submitted=%d", session_id, submitted,
+    )
+    return submitted
 
 
 async def get_threat_model(session_id: str) -> Optional[Dict[str, Any]]:

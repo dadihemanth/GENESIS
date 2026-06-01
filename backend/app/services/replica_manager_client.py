@@ -24,6 +24,7 @@ async def spawn_replica(
     stack_pin: str,
     observed_routes: Optional[list] = None,
     target_ip: Optional[str] = None,
+    session_id: Optional[str] = None,
 ) -> Optional[dict]:
     """Spawn an OSS replica matching stack_pin.
 
@@ -37,6 +38,7 @@ async def spawn_replica(
                     "stack_pin": stack_pin,
                     "observed_routes": observed_routes or [],
                     "target_ip": target_ip or "",
+                    "session_id": session_id or "",
                 },
             )
             resp.raise_for_status()
@@ -72,9 +74,79 @@ async def list_replicas() -> list:
         return []
 
 
+async def spawn_asan_replica(
+    binary_path: str,
+    compile_flags: Optional[list] = None,
+    env_vars: Optional[dict] = None,
+) -> Optional[dict]:
+    """validation milestone 6 — spawn a replica instrumented with AddressSanitizer.
+
+    Asks the replica manager to build the target binary with
+    -fsanitize=address (ASan) and return a handle for executing PoC inputs.
+
+    Returns:
+      {"replica_id": str, "binary_path": str, "status": "ready"|"building",
+       "sanitizer": "asan"} or None on failure.
+    """
+    flags = compile_flags or ["-fsanitize=address", "-g", "-O1"]
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            resp = await client.post(
+                f"{REPLICA_MANAGER_URL}/spawn_native",
+                json={
+                    "binary_path": binary_path,
+                    "compile_flags": flags,
+                    "sanitizer": "asan",
+                    "env": env_vars or {"ASAN_OPTIONS": "halt_on_error=1:abort_on_error=1"},
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            logger.info(
+                "replica_manager: ASan replica spawned for %s → %s",
+                binary_path, data.get("replica_id"),
+            )
+            return data
+    except Exception as exc:
+        logger.warning("replica_manager_client.spawn_asan_replica failed: %s", exc)
+        return None
+
+
+async def execute_on_replica(
+    replica_id: str,
+    poc_input: str,
+    stdin: bool = True,
+    args: Optional[list] = None,
+    timeout: float = 30.0,
+) -> Optional[dict]:
+    """Execute a PoC input on a native replica and return sanitizer output.
+
+    Returns:
+      {"exit_code": int, "stdout": str, "stderr": str, "asan_report": str,
+       "crashed": bool} or None on failure.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=timeout + 10.0) as client:
+            resp = await client.post(
+                f"{REPLICA_MANAGER_URL}/replicas/{replica_id}/execute",
+                json={
+                    "stdin": poc_input if stdin else "",
+                    "args": args or [],
+                    "timeout": timeout,
+                },
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except Exception as exc:
+        logger.warning(
+            "replica_manager_client.execute_on_replica %s failed: %s", replica_id, exc,
+        )
+        return None
+
+
 async def get_replica_url(session_id: str, stack_pin: str, observed_routes: Optional[list] = None) -> Optional[str]:
     """Convenience: spawn a replica and return its base_url. Returns None if unavailable."""
-    result = await spawn_replica(stack_pin, observed_routes)
+    result = await spawn_replica(stack_pin, observed_routes, session_id=session_id)
     if result and result.get("base_url"):
         # Store replica_id in session MongoDB doc for later teardown
         try:

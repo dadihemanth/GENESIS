@@ -50,6 +50,12 @@ const ReasoningLoopsPanel: React.FC<Props> = ({ sessionId, liveStartedIds, liveT
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  useEffect(() => {
+    if (loops.length > 0 || liveStartedIds.length > 0) return;
+    const interval = window.setInterval(refresh, 10000);
+    return () => window.clearInterval(interval);
+  }, [loops.length, liveStartedIds.length, refresh]);
+
   // Whenever a new loop is started live, re-fetch the list so its summary card
   // appears immediately (tick deltas merge separately for already-listed loops).
   useEffect(() => {

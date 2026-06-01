@@ -1,0 +1,74 @@
+domain: "windows_kernel_driver"
+description: "Windows kernel driver security invariants — IRP handling, lock ordering, object lifetime"
+
+invariants:
+
+  - name: "irp_lock_ordering"
+    rule: "IoAcquireCancelSpinLock must be called before accessing Irp->CancelRoutine; releasing it after"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp", "*.h"]
+    keywords: ["IoAcquireCancelSpinLock", "CancelRoutine", "Irp->Cancel"]
+    confidence: "high"
+
+  - name: "refcount_release_before_use"
+    rule: "After calling ObDereferenceObject, IoFreeIrp, or ExFreePool on a pointer, that pointer must not be dereferenced"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp", "*.h"]
+    keywords: ["ObDereferenceObject", "IoFreeIrp", "ExFreePool", "IoCompleteRequest"]
+    confidence: "high"
+
+  - name: "object_reference_before_use"
+    rule: "A kernel object must be referenced (ObReferenceObject / IoAllocateIrp) before use across threads or IRQLs"
+    severity: "high"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["ObReferenceObject", "KeSetEvent", "KeWaitForSingleObject", "IoAllocateIrp"]
+    confidence: "high"
+
+  - name: "irql_check_before_paged_access"
+    rule: "Non-paged pool must be used for allocations at IRQL >= DISPATCH_LEVEL; paged pool causes BSODs"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["ExAllocatePool", "PagedPool", "NonPagedPool", "DISPATCH_LEVEL", "KeGetCurrentIrql"]
+    confidence: "high"
+
+  - name: "ioctl_input_length_validation"
+    rule: "IOCTL handlers must validate InputBufferLength and OutputBufferLength before accessing the buffer"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["IRP_MJ_DEVICE_CONTROL", "IoStackLocation", "InputBufferLength", "OutputBufferLength"]
+    confidence: "high"
+
+  - name: "probe_for_read_before_user_buffer"
+    rule: "User-mode buffer addresses must be validated with ProbeForRead/ProbeForWrite inside a __try/__except block"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["ProbeForRead", "ProbeForWrite", "__try", "__except", "UserMode", "MmProbeAndLockPages"]
+    confidence: "high"
+
+  - name: "spinlock_held_not_across_wait"
+    rule: "A spinlock must not be held while calling any function that may block or sleep"
+    severity: "high"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["KeAcquireSpinLock", "KeAcquireSpinLockAtDpcLevel", "KeWaitFor", "IoCallDriver"]
+    confidence: "medium"
+
+  - name: "kernel_stack_no_large_alloc"
+    rule: "Do not allocate large structures on the kernel stack; maximum safe allocation is ~4KB"
+    severity: "high"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["UCHAR", "CHAR", "WCHAR", "buffer[", "array[", "PAGE_SIZE"]
+    confidence: "medium"
+
+  - name: "completion_routine_must_return_status"
+    rule: "IRP completion routines must return STATUS_MORE_PROCESSING_REQUIRED to retain ownership, or STATUS_SUCCESS to release"
+    severity: "high"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["IoSetCompletionRoutine", "IoCompletion", "STATUS_MORE_PROCESSING_REQUIRED"]
+    confidence: "high"
+
+  - name: "wdm_double_complete_prevention"
+    rule: "An IRP must be completed exactly once; calling IoCompleteRequest twice causes kernel corruption"
+    severity: "critical"
+    applies_to: ["*.c", "*.cpp"]
+    keywords: ["IoCompleteRequest", "IRP", "PendingReturned"]
+    confidence: "high"

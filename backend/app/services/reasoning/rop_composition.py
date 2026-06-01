@@ -1,6 +1,6 @@
 """T155 — rop_composition_loop.
 
-Constraint-aware ROP-chain composition. The Mythos FreeBSD-NFS exploit
+Constraint-aware ROP-chain composition. The GENESIS FreeBSD-NFS exploit
 compressed a 1000-byte ROP chain into 200 bytes via 6 sequential RPC
 requests; this loop externalises that working memory so a generic Opus
 model can do the same.

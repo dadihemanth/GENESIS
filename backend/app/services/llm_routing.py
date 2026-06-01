@@ -47,9 +47,16 @@ KNOWN_ROLES = (
     "brief",         # _generate_target_brief
     "reasoning",     # _make_llm_call_adapter (deliberate loops + backstop)
     "payload",       # multi-agent payload SubAgent
-    "red_blue",      # adversarial RedBlueDialectic
+    "red_blue",      # adversarial RedBlueDialectic — Red (auditor) agent
+    "debate",        # adversarial RedBlueDialectic — Blue (debater) agent; assign a DIFFERENT provider/model than red_blue for cross-model signal
     "philosopher",   # adversarial PhilosopherAgent
     "subagent",      # multi-agent generic SubAgent
+    "judge",         # v8 SessionJudge — per-round coverage + goal evaluator
+    "validator",     # validated_dynamic candidate reachability/evidence review
+    "endpoint_validator",  # validated_dynamic live endpoint reachability reviewer
+    "source_validator",    # validated_dynamic source/taint/cross-file reviewer
+    "counter_validator",   # validated_dynamic refutation/missing-proof reviewer
+    "proof_planner",       # optional validation-lab concrete proof-action planner
 )
 
 # Per-role human-readable description + which sources fire under that role.
@@ -138,11 +145,26 @@ ROLE_DETAILS: Dict[str, Dict[str, Any]] = {
     "red_blue": {
         "fires_in": "both modes",
         "purpose": (
-            "Adversarial dialectic — red proposes attacks, blue challenges. "
-            "Two short LLM calls per round; quality matters more than speed."
+            "Adversarial dialectic — Red (auditor) proposes attacks. "
+            "Assign a capable model here. For maximum signal, assign `debate` "
+            "to a DIFFERENT provider/model family so cross-model disagreement "
+            "becomes a confidence boost (validated scanner cross_model_confirmed pattern)."
         ),
-        "good_models": "Sonnet 4.6, GPT-5.5",
-        "sources": ("red_agent", "blue_agent"),
+        "good_models": "Opus 4.7, Sonnet 4.6",
+        "sources": ("red_agent",),
+    },
+    "debate": {
+        "fires_in": "both modes",
+        "purpose": (
+            "Adversarial dialectic — Blue (debater) challenges Red's hypotheses. "
+            "When assigned to a DIFFERENT model family than `red_blue`, surviving "
+            "hypotheses are tagged `cross_model_confirmed` and receive a +0.2 "
+            "confidence stake boost — cross-model agreement is a stronger signal "
+            "than same-model agreement (validation milestone 1). Falls back to red_blue "
+            "profile when not explicitly assigned."
+        ),
+        "good_models": "GPT-4o via azure_openai (if red_blue uses Claude), or vice versa",
+        "sources": ("blue_agent",),
     },
     "philosopher": {
         "fires_in": "both modes (once per session)",
@@ -153,6 +175,70 @@ ROLE_DETAILS: Dict[str, Dict[str, Any]] = {
         ),
         "good_models": "Opus 4.7, Sonnet 4.6 (reasoning quality matters)",
         "sources": ("philosopher", "insider", "nation_state"),
+    },
+    "judge": {
+        "fires_in": "both modes (after each Phase-2 round; every 25 iterations in solo)",
+        "purpose": (
+            "v8 SessionJudge evaluator. Receives the full session state — "
+            "kill-chain coverage matrix, goal-tree progress, hypothesis "
+            "resolution rate, finding quality — and produces a structured "
+            "verdict with a ranked gap list. The SessionSupervisor then "
+            "dispatches targeted directives to subagents for each gap. "
+            "Use a fast, cheap model — Claude Haiku strongly preferred. "
+            "Guarded by a per-round counter so it fires at most once per round."
+        ),
+        "good_models": "Haiku 4.5 (fast + cheap; quality sufficient for structured eval)",
+        "sources": ("judge",),
+    },
+    "validator": {
+        "fires_in": "validated_dynamic mode",
+        "purpose": (
+            "Independent multi-stage candidate reviewer. Reads candidate "
+            "findings before promotion and decides support/refute/needs-proof "
+            "based on reachability, exploitability, evidence quality, and the "
+            "proposed deterministic proof action."
+        ),
+        "good_models": "Sonnet 4.6, GPT-5.5, Opus 4.7 for high-impact candidates",
+        "sources": ("validator",),
+    },
+    "endpoint_validator": {
+        "fires_in": "validated_dynamic mode",
+        "purpose": (
+            "Reviews live reachability for candidate findings: endpoint mapping, "
+            "HTTP method, auth/session assumptions, exploitability evidence, and "
+            "whether an endpoint proof tool should be run."
+        ),
+        "good_models": "Sonnet 4.6 or GPT-5.5 for high-impact endpoint candidates",
+        "sources": ("endpoint_validator",),
+    },
+    "source_validator": {
+        "fires_in": "validated_dynamic mode when source/artifacts exist",
+        "purpose": (
+            "Reviews source-grounded candidates: taint path plausibility, sink/input "
+            "mapping, invariants, cross-file consistency, and whether live replay is required."
+        ),
+        "good_models": "Opus 4.7, Sonnet 4.6, GPT-5.5",
+        "sources": ("source_validator",),
+    },
+    "counter_validator": {
+        "fires_in": "validated_dynamic mode",
+        "purpose": (
+            "Independent refutation role. Looks for missing reachability, weak evidence, "
+            "unmapped source-only bugs, and proof gaps before promotion."
+        ),
+        "good_models": "Cheap critic model for volume; stronger counter-model for critical candidates",
+        "sources": ("counter_validator",),
+    },
+    "proof_planner": {
+        "fires_in": "Validation Lab / Complete Validation when candidates need concrete proof parameters",
+        "purpose": (
+            "Turns a candidate's hypothesis and evidence into one safe deterministic "
+            "proof-tool call. It should produce JSON parameters for ai_request_forge, "
+            "forge_runner, browser_session, oob_check, payload_swarm, fuzz_binary, "
+            "symbolic_exec, instrument_trace, semgrep_scan, ast_walker, or taint_engine."
+        ),
+        "good_models": "Sonnet 4.6 or GPT-5.5 for precise tool params; Haiku for low-cost simple HTTP proofs",
+        "sources": ("proof_planner",),
     },
 }
 
@@ -345,4 +431,14 @@ async def get_client_and_model_for_role(
                 rates["output"] = float(rates_raw["output"])
     except (TypeError, ValueError):
         rates = {}
+
+    # v8 — judge role always defaults to Haiku when no explicit assignment is
+    # configured. This prevents the judge from accidentally inheriting Opus via
+    # the `primary` fallback cascade, which would make per-round evaluation
+    # expensive. The client (provider/endpoint) is kept as-is.
+    if role == "judge" and not assignments.get("judge"):
+        model = model or "claude-haiku-4-5-20251001"
+        if not model.startswith("claude-haiku") and "haiku" not in model.lower():
+            model = "claude-haiku-4-5-20251001"
+
     return client, model, rates

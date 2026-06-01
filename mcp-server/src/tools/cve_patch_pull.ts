@@ -44,7 +44,7 @@ function headers(): Record<string, string> {
   const h: Record<string, string> = {
     'Accept': 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'GENESIS-MYTHOS/cve_patch_pull',
+    'User-Agent': 'GENESIS/cve_patch_pull',
   };
   if (GITHUB_TOKEN) h['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
   return h;

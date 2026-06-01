@@ -112,7 +112,7 @@ export const artifactPullTool = {
         method: 'GET',
         redirect: 'follow',
         signal: controller.signal,
-        headers: { 'User-Agent': 'Mozilla/5.0 (GENESIS/MYTHOS artifact_pull)' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (GENESIS artifact_pull)' },
       });
       clearTimeout(timer);
     } catch (err) {

@@ -150,7 +150,7 @@ async function doRender(body) {
 
   const context = await browser.newContext({
     viewport: { width: viewportWidth, height: viewportHeight },
-    userAgent: 'Mozilla/5.0 (GENESIS/MYTHOS Chromium Renderer)',
+    userAgent: 'Mozilla/5.0 (GENESIS Chromium Renderer)',
     extraHTTPHeaders: extraHeaders,
     ignoreHTTPSErrors: true,
   });
@@ -217,7 +217,7 @@ async function sessionStart(body) {
   const extraHeaders = (body.headers && typeof body.headers === 'object') ? body.headers : {};
   const cookies = Array.isArray(body.cookies) ? body.cookies : [];
   const userAgent = safeString(body.user_agent, 300) ||
-    'Mozilla/5.0 (GENESIS/MYTHOS Chromium T12)';
+    'Mozilla/5.0 (GENESIS Chromium T12)';
 
   let browser;
   try { browser = await getBrowser(); }

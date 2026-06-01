@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { Session, Vulnerability, ToolInfo, AppSettings, TestConnectionResult, HealthStatus, AttackChain, NetworkTopology, IntelligencePattern, SessionError, AuthToken, User, Tenant, AuditEntry, Goal, ThreatIntelEntry, ComplianceReport, IntegrationConfig } from '../types';
+import type {
+  Session, Vulnerability, ToolInfo, AppSettings, TestConnectionResult,
+  HealthStatus, AttackChain, NetworkTopology, IntelligencePattern,
+  SessionError, AuthToken, User, Tenant, AuditEntry, Goal,
+  ThreatIntelEntry, ComplianceReport, IntegrationConfig, CandidateFinding,
+  ValidationVerdict, ProofRun, FindingCluster, BenchmarkReport, TargetSurfaceGraph,
+  ConfirmFindingsResult, CompleteValidationResult, ValidationProofJob,
+  PlainLanguageFinding,
+} from '../types';
 
 const api = axios.create({ baseURL: '/api/v1', timeout: 120000 });
 
@@ -83,6 +91,21 @@ export const sessionsApi = {
       transformResponse: (v) => v,
     });
     let filename = `genesis-session-${id.split('-')[0]}.md`;
+    const disp = (res.headers as Record<string, string>)['content-disposition'] || '';
+    const m = /filename="([^"]+)"/.exec(disp);
+    if (m) filename = m[1];
+    return { filename, body: res.data as string };
+  },
+  downloadHtmlReport: async (
+    id: string,
+    params?: { audience?: 'combined' | 'executive' | 'technical'; include_raw?: boolean; max_evidence_chars?: number },
+  ): Promise<{ filename: string; body: string }> => {
+    const res = await api.get<string>(`/sessions/${id}/report.html`, {
+      params,
+      responseType: 'text',
+      transformResponse: (v) => v,
+    });
+    let filename = `genesis-session-${id.split('-')[0]}.html`;
     const disp = (res.headers as Record<string, string>)['content-disposition'] || '';
     const m = /filename="([^"]+)"/.exec(disp);
     if (m) filename = m[1];
@@ -207,6 +230,7 @@ export interface VulnIdentification {
   severity: string;
   verification_status: string;
   confidence: number;
+  plain_language?: PlainLanguageFinding;
   cve_ids: string[];
   is_zero_day: boolean;
   is_known: boolean;
@@ -257,6 +281,74 @@ export const vulnerabilitiesApi = {
         created_at: string;
       }>;
     }>(`/vulnerabilities/novel`, { params: { session_id: sessionId } }).then(r => r.data),
+};
+
+export const validatedApi = {
+  listCandidates: (sessionId: string, params?: { status?: string; limit?: number }) =>
+    api.get<{ session_id: string; items: CandidateFinding[]; total: number }>(
+      `/validated/sessions/${sessionId}/candidates`,
+      { params },
+    ).then(r => r.data),
+  createCandidate: (sessionId: string, data: Partial<CandidateFinding>) =>
+    api.post<CandidateFinding>(`/validated/sessions/${sessionId}/candidates`, data).then(r => r.data),
+  listVerdicts: (sessionId: string, params?: { candidate_id?: string; limit?: number }) =>
+    api.get<{ session_id: string; items: ValidationVerdict[]; total: number }>(
+      `/validated/sessions/${sessionId}/verdicts`,
+      { params },
+    ).then(r => r.data),
+  addVerdict: (
+    sessionId: string,
+    candidateId: string,
+    data: Pick<ValidationVerdict, 'verdict' | 'validator' | 'reasoning'> & Partial<ValidationVerdict>,
+  ) =>
+    api.post<ValidationVerdict>(
+      `/validated/sessions/${sessionId}/candidates/${candidateId}/verdicts`,
+      data,
+    ).then(r => r.data),
+  listProofRuns: (sessionId: string, params?: { candidate_id?: string; limit?: number }) =>
+    api.get<{ session_id: string; items: ProofRun[]; total: number }>(
+      `/validated/sessions/${sessionId}/proof-runs`,
+      { params },
+    ).then(r => r.data),
+  addProofRun: (sessionId: string, candidateId: string, data: Partial<ProofRun>) =>
+    api.post<ProofRun>(
+      `/validated/sessions/${sessionId}/candidates/${candidateId}/proof-runs`,
+      data,
+    ).then(r => r.data),
+  confirmFindings: (
+    sessionId: string,
+    data?: { candidate_ids?: string[]; operator_validated?: boolean; reason?: string },
+  ) =>
+    api.post<ConfirmFindingsResult>(
+      `/validated/sessions/${sessionId}/confirm`,
+      data ?? {},
+    ).then(r => r.data),
+  completeValidation: (
+    sessionId: string,
+    data?: { candidate_ids?: string[]; max_candidates?: number; force_reproof?: boolean },
+  ) =>
+    api.post<CompleteValidationResult>(
+      `/validated/sessions/${sessionId}/complete-validation`,
+      data ?? {},
+    ).then(r => r.data),
+  getProofJob: (sessionId: string, jobId: string) =>
+    api.get<ValidationProofJob>(
+      `/validated/sessions/${sessionId}/proof-jobs/${jobId}`,
+    ).then(r => r.data),
+  listClusters: (sessionId: string, params?: { rebuild?: boolean; limit?: number }) =>
+    api.get<{ session_id: string; items: FindingCluster[]; total: number }>(
+      `/validated/sessions/${sessionId}/clusters`,
+      { params },
+    ).then(r => r.data),
+  getSurfaceGraph: (sessionId: string, params?: { rebuild?: boolean }) =>
+    api.get<TargetSurfaceGraph>(`/validated/sessions/${sessionId}/surface-graph`, { params }).then(r => r.data),
+  createBenchmark: (sessionId: string, data?: { label?: string; lane?: string; ground_truth?: unknown[] }) =>
+    api.post<BenchmarkReport>(`/validated/sessions/${sessionId}/benchmark`, data ?? {}).then(r => r.data),
+  listBenchmarkReports: (sessionId: string, params?: { limit?: number }) =>
+    api.get<{ session_id: string; items: BenchmarkReport[]; total: number }>(
+      `/validated/sessions/${sessionId}/benchmark`,
+      { params },
+    ).then(r => r.data),
 };
 
 export const settingsApi = {

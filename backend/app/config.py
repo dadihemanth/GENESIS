@@ -54,6 +54,15 @@ class Settings(BaseSettings):
     # Azure AI Foundry (optional) — set in UI settings, not env
     azure_endpoint: str = Field(default="", alias="AZURE_ENDPOINT")
 
+    # validation milestone 1 — cross-model adversarial debate.
+    # When set, the Blue (debater) agent in RedBlueDialectic uses a different
+    # model/provider than the Red (auditor) agent. Hypotheses that survive a
+    # cross-model challenge are tagged `cross_model_confirmed` (+0.2 stake).
+    # Leave empty to use the same model for both Red and Blue (legacy behaviour).
+    # Typically: if LLM_MODEL is a Claude model, set these to a GPT deployment.
+    debate_model: str = Field(default="", alias="DEBATE_MODEL")
+    debate_provider: str = Field(default="", alias="DEBATE_PROVIDER")
+
     # MCP Server
     mcp_host: str = Field(default="localhost", alias="MCP_HOST")
     mcp_port: int = Field(default=3001, alias="MCP_PORT")

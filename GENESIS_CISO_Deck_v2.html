@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GENESIS — CISO Briefing v2</title>
+<style>
+  :root {
+    --void:   #050c19;
+    --deep:   #0c1a38;
+    --mid:    #1a3065;
+    --sky:    #1e58ff;
+    --cyan:   #00d4e8;
+    --green:  #00c896;
+    --red:    #ff3d57;
+    --amber:  #ff9d3a;
+    --white:  #ffffff;
+    --ghost:  #e4ecff;
+    --muted:  #6a84b8;
+    --ink:    #0a1628;
+    --soft:   #f0f5ff;
+    --line:   #d0daf0;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #111827; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: var(--ink); }
+
+  .slide {
+    width: 10in; min-height: 7.5in; margin: 0.3in auto;
+    background: var(--white); display: flex; flex-direction: column;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.45); overflow: hidden; position: relative;
+  }
+
+  @page { size: 10in 7.5in landscape; margin: 0; }
+  @media print {
+    html, body { background: var(--white); }
+    .slide { margin: 0; box-shadow: none; page-break-after: always; }
+    .slide:last-child { page-break-after: avoid; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  /* ── base type ── */
+  .eyebrow { font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.14em; }
+  h2       { font-size: 21pt; line-height: 1.1; font-weight: 800; }
+  h3       { font-size: 12pt; line-height: 1.25; font-weight: 700; }
+  p        { font-size: 10pt; line-height: 1.5; }
+
+  /* shared slide header (light) */
+  .sh {
+    padding: 0.25in 0.52in; background: var(--soft);
+    border-bottom: 3px solid var(--sky);
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .sh .eyebrow { color: var(--sky); margin-bottom: 3px; }
+  .sh h2       { color: var(--ink); }
+  .sh .sn      { font-size: 8.5pt; font-weight: 700; color: var(--muted); }
+
+  /* shared slide header (dark) */
+  .dh {
+    padding: 0.25in 0.52in;
+    background: linear-gradient(135deg, var(--void) 0%, var(--deep) 100%);
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .dh .eyebrow { color: var(--cyan); margin-bottom: 3px; }
+  .dh h2       { color: var(--white); }
+  .dh .sn      { font-size: 8.5pt; font-weight: 700; color: #3a5278; }
+
+  .sb { flex: 1; padding: 0.28in 0.52in; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 1 — COVER
+  ══════════════════════════════════════════ */
+  .s1 {
+    background: linear-gradient(150deg, var(--void) 0%, var(--deep) 55%, #0f2255 100%);
+    color: var(--white); flex-direction: column; min-height: 7.5in;
+  }
+  .s1-bar { height: 5px; background: linear-gradient(90deg, var(--sky) 0%, var(--cyan) 55%, transparent 100%); }
+  .s1-inner { flex: 1; display: flex; flex-direction: column; padding: 0.52in 0.65in 0.38in; }
+  .s1-top { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .s1-kicker { color: #3a5278; margin-bottom: 0.14in; }
+  .s1-name { font-size: 104pt; font-weight: 900; letter-spacing: -5px; line-height: 0.92; color: var(--white); }
+  .s1-tag { font-size: 17pt; font-weight: 300; color: var(--ghost); line-height: 1.4; margin-top: 0.18in; }
+  .s1-tag strong { color: var(--cyan); font-weight: 700; }
+  .s1-stats {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 0.2in;
+    border-top: 1px solid rgba(255,255,255,0.08); padding-top: 0.22in; margin-top: 0.22in;
+  }
+  .s1-stat .num { font-size: 30pt; font-weight: 900; color: var(--cyan); line-height: 1; }
+  .s1-stat .lbl { font-size: 8pt; color: var(--muted); margin-top: 4px; line-height: 1.38; }
+  .s1-foot { font-size: 7.5pt; color: #2a3c5a; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.12in; margin-top: 0.16in; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 2 — THREAT
+  ══════════════════════════════════════════ */
+  .s2 { background: var(--void); color: var(--white); min-height: 7.5in; }
+  .s2-body { flex: 1; display: flex; gap: 0.42in; padding: 0.32in 0.52in 0.36in; align-items: stretch; }
+  .s2-left { flex: 1.15; display: flex; flex-direction: column; justify-content: center; }
+  .s2-right { flex: 1; display: flex; flex-direction: column; gap: 0.16in; justify-content: center; }
+  .s2-hl { font-size: 34pt; font-weight: 900; line-height: 1.1; color: var(--white); }
+  .s2-hl em { color: var(--red); font-style: normal; }
+  .s2-sub { font-size: 11.5pt; color: var(--muted); margin-top: 0.15in; line-height: 1.55; max-width: 4in; }
+  .s2-src { font-size: 7.5pt; color: #2a3c52; margin-top: 0.2in; }
+
+  .tstat {
+    border-left: 4px solid var(--red); padding: 0.14in 0.18in;
+    background: rgba(255,61,87,0.07); border-radius: 0 8px 8px 0;
+  }
+  .tstat.amber { border-color: var(--amber); background: rgba(255,157,58,0.07); }
+  .tstat.green { border-color: var(--green); background: rgba(0,200,150,0.07); }
+  .tstat .tnum { font-size: 42pt; font-weight: 900; line-height: 1; color: var(--red); }
+  .tstat.amber .tnum { color: var(--amber); }
+  .tstat.green .tnum { color: var(--green); }
+  .tstat .tdsc { font-size: 9.5pt; color: #7090a8; margin-top: 3px; line-height: 1.42; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 3 — THE GAP (before / after split)
+  ══════════════════════════════════════════ */
+  .gap-body { flex: 1; display: flex; }
+  .gap-before { flex: 1; padding: 0.28in 0.32in; background: #fff6f6; border-right: 2px solid #fcd0d0; }
+  .gap-after  { flex: 1; padding: 0.28in 0.32in; background: #f4f9ff; }
+  .gap-head { font-size: 9.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+    padding-bottom: 0.1in; border-bottom: 2px solid; margin-bottom: 0.14in; }
+  .gap-before .gap-head { color: var(--red); border-color: var(--red); }
+  .gap-after  .gap-head { color: var(--sky); border-color: var(--sky); }
+  .gi { display: flex; gap: 0.1in; align-items: flex-start; margin-bottom: 0.13in; }
+  .gi-icon { font-size: 13pt; flex-shrink: 0; line-height: 1.25; }
+  .gi p { font-size: 9.5pt; line-height: 1.46; }
+  .gap-before .gi p { color: #4a1818; }
+  .gap-after  .gi p { color: #0a1e38; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 4 — HOW IT WORKS
+  ══════════════════════════════════════════ */
+  .pipeline { display: flex; align-items: center; gap: 0; margin: 0.18in 0 0.16in; }
+  .ps {
+    flex: 1; text-align: center; padding: 0.15in 0.06in;
+    background: var(--soft); border: 1px solid var(--line);
+    border-right: none;
+  }
+  .ps:first-child { border-radius: 8px 0 0 8px; }
+  .ps.final { background: linear-gradient(135deg, var(--sky) 0%, var(--deep) 100%); border: none; border-radius: 0 8px 8px 0; }
+  .ps .pn { font-size: 7pt; color: var(--muted); font-weight: 700; display: block; margin-bottom: 2px; }
+  .ps.final .pn { color: rgba(255,255,255,0.65); }
+  .ps .pt { font-size: 9.5pt; font-weight: 800; color: var(--ink); }
+  .ps.final .pt { color: var(--white); }
+  .ps .pb { font-size: 7.5pt; color: var(--muted); margin-top: 1px; }
+  .ps.final .pb { color: rgba(255,255,255,0.7); }
+  .pa { font-size: 15pt; color: var(--line); flex-shrink: 0; padding: 0 1px; line-height: 1; }
+
+  .hcards { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.14in; margin-top: 0.14in; }
+  .hcard { background: var(--deep); color: var(--white); border-radius: 10px; padding: 0.17in; text-align: center; }
+  .hcard .hnum { font-size: 38pt; font-weight: 900; color: var(--cyan); line-height: 1; }
+  .hcard .hlbl { font-size: 7.5pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 4px 0; }
+  .hcard p { font-size: 8pt; color: #7090b0; line-height: 1.38; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 5 — ZERO FALSE FINDINGS (dark)
+  ══════════════════════════════════════════ */
+  .s5 { background: var(--deep); color: var(--white); min-height: 7.5in; }
+  .s5-body { flex: 1; padding: 0.34in 0.52in; display: flex; flex-direction: column; justify-content: space-between; }
+  .s5-hero { display: flex; align-items: center; gap: 0.38in; margin-bottom: 0.26in; }
+  .s5-zero { font-size: 130pt; font-weight: 900; color: var(--cyan); line-height: 1; letter-spacing: -6px; }
+  .s5-claim { flex: 1; }
+  .s5-claim h2 { font-size: 25pt; font-weight: 900; color: var(--white); line-height: 1.2; }
+  .s5-claim p { font-size: 12pt; color: var(--muted); margin-top: 0.1in; line-height: 1.52; }
+  .tcards { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.14in; }
+  .tcard {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-top: 3px solid var(--cyan); border-radius: 8px; padding: 0.15in;
+  }
+  .tcard .ticon { font-size: 18pt; margin-bottom: 0.07in; }
+  .tcard h3 { font-size: 10pt; color: var(--white); margin-bottom: 4px; }
+  .tcard p { font-size: 8pt; color: #5a7898; line-height: 1.42; }
+  .s5-banner {
+    background: rgba(0,212,232,0.09); border: 1px solid rgba(0,212,232,0.22);
+    border-radius: 10px; padding: 0.15in 0.2in; margin-top: 0.16in;
+  }
+  .s5-banner p { font-size: 10.5pt; color: var(--ghost); line-height: 1.45; }
+  .s5-banner strong { color: var(--cyan); }
+
+  /* ══════════════════════════════════════════
+     SLIDE 6 — ROI
+  ══════════════════════════════════════════ */
+  .roi-panels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 0.16in; border-radius: 10px; overflow: hidden; }
+  .rp { padding: 0.22in 0.22in; text-align: center; }
+  .rp.d { background: var(--void); color: var(--white); }
+  .rp.m { background: var(--deep); color: var(--white); }
+  .rp.l { background: var(--soft); }
+  .rp .rn { font-size: 50pt; font-weight: 900; line-height: 1; }
+  .rp.d .rn { color: var(--cyan); }
+  .rp.m .rn { color: var(--green); }
+  .rp.l .rn { color: var(--sky); }
+  .rp .rl { font-size: 8pt; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin: 6px 0 9px; }
+  .rp.d .rl { color: var(--muted); }
+  .rp.m .rl { color: #6aaa9a; }
+  .rp.l .rl { color: var(--sky); }
+  .rp p { font-size: 8.5pt; line-height: 1.42; }
+  .rp.d p, .rp.m p { color: #5a7898; }
+  .rp.l p { color: var(--ink); }
+
+  .ctable { width: 100%; border-collapse: collapse; margin-top: 0.18in; }
+  .ctable th { background: var(--deep); color: var(--white); padding: 0.08in 0.13in; font-size: 8.5pt; text-align: left; }
+  .ctable th:first-child { border-radius: 6px 0 0 0; }
+  .ctable th:last-child  { border-radius: 0 6px 0 0; background: var(--sky); }
+  .ctable td { border: 1px solid var(--line); padding: 0.065in 0.13in; font-size: 9pt; }
+  .ctable tr:nth-child(even) td { background: var(--soft); }
+  .ctable .g { font-weight: 700; color: var(--sky); }
+  .ctable .b { color: #b04040; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 7 — ROADMAP
+  ══════════════════════════════════════════ */
+  .phases { display: flex; gap: 0; margin-top: 0.16in; align-items: stretch; }
+  .ph {
+    flex: 1; padding: 0.18in 0.14in; text-align: center;
+    border-right: 1px solid var(--line); background: var(--soft);
+  }
+  .ph:last-child { border-right: none; }
+  .ph.done { background: #f0fbf6; }
+  .ph.now  {
+    background: linear-gradient(160deg, var(--deep) 0%, var(--void) 100%);
+    color: var(--white); border: none; border-radius: 8px;
+    transform: scaleY(1.05); box-shadow: 0 6px 24px rgba(30,88,255,0.28);
+    z-index: 1; position: relative; flex: 1.1;
+  }
+  .ph .ph-badge {
+    display: inline-block; font-size: 7pt; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 2px 8px; border-radius: 100px; margin-bottom: 7px;
+  }
+  .ph.done .ph-badge { background: #c8f0e0; color: #0a7040; }
+  .ph.now  .ph-badge { background: var(--cyan); color: var(--void); }
+  .ph      .ph-badge { background: #dde8ff; color: var(--sky); }
+  .ph .ph-title { font-size: 10.5pt; font-weight: 800; margin-bottom: 4px; color: var(--ink); }
+  .ph.now  .ph-title { color: var(--white); }
+  .ph .ph-dates { font-size: 7.5pt; color: var(--muted); margin-bottom: 7px; }
+  .ph.now  .ph-dates { color: var(--cyan); }
+  .ph p { font-size: 8pt; line-height: 1.4; color: #4a5a74; }
+  .ph.now p { color: #7090b0; }
+
+  .srow { display: grid; grid-template-columns: 1fr 1fr; gap: 0.12in; margin-top: 0.18in; }
+  .si { display: flex; gap: 0.1in; background: var(--soft); border-radius: 8px; padding: 0.11in; }
+  .sd { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .sg { background: var(--green); }
+  .sa { background: var(--amber); }
+  .si h3 { font-size: 9pt; margin-bottom: 2px; color: var(--ink); }
+  .si p  { font-size: 8pt; color: var(--muted); line-height: 1.38; }
+
+  /* ══════════════════════════════════════════
+     SLIDE 8 — THE ASK (cinematic)
+  ══════════════════════════════════════════ */
+  .s8 {
+    background: linear-gradient(145deg, var(--void) 0%, var(--deep) 65%, #0f2255 100%);
+    color: var(--white); min-height: 7.5in; flex-direction: row;
+  }
+  .s8-accent { width: 6px; flex-shrink: 0; background: linear-gradient(180deg, var(--cyan) 0%, var(--sky) 100%); }
+  .s8-left {
+    width: 3.55in; padding: 0.48in 0.4in;
+    display: flex; flex-direction: column; justify-content: space-between;
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  .s8-right { flex: 1; padding: 0.48in 0.4in; display: flex; flex-direction: column; justify-content: space-between; }
+  .s8-left .eyebrow { color: var(--cyan); margin-bottom: 0.12in; }
+  .s8-left h2 { font-size: 24pt; color: var(--white); line-height: 1.15; font-weight: 900; }
+  .s8-left .sub { font-size: 9.5pt; color: var(--muted); line-height: 1.52; margin-top: 0.12in; }
+  .qblock { border-top: 1px solid rgba(255,255,255,0.07); padding-top: 0.15in; margin-top: 0.18in; }
+  .qblock .eyebrow { color: #3a5278; margin-bottom: 0.09in; }
+  .qa { font-size: 8pt; color: #4a6888; line-height: 2; }
+  .qa strong { color: #8aabcc; }
+
+  .ask-item {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    border-left: 4px solid var(--sky); border-radius: 0 8px 8px 0;
+    padding: 0.14in 0.16in; margin-bottom: 0.11in;
+    display: flex; gap: 0.13in; align-items: flex-start;
+  }
+  .ask-n {
+    min-width: 24px; height: 24px; border-radius: 50%;
+    background: var(--sky); color: var(--white);
+    font-size: 10pt; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ask-item h3 { font-size: 11pt; color: var(--white); margin-bottom: 3px; font-weight: 700; }
+  .ask-item p  { font-size: 8.5pt; color: var(--muted); line-height: 1.42; }
+
+  .mblock {
+    background: rgba(0,212,232,0.08); border: 1px solid rgba(0,212,232,0.18);
+    border-radius: 10px; padding: 0.13in 0.17in;
+  }
+  .mblock .eyebrow { color: var(--cyan); margin-bottom: 0.07in; }
+  .mrow { display: flex; gap: 0.2in; flex-wrap: wrap; }
+  .mitem { font-size: 8pt; color: #5a7898; }
+  .mitem strong { color: var(--white); display: block; font-size: 8.5pt; }
+  .s8-foot { border-top: 1px solid rgba(255,255,255,0.06); padding-top: 0.1in; margin-top: 0.1in; }
+  .s8-foot p { font-size: 7.5pt; color: #2a3c52; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SLIDE 1 — COVER ═══════════ -->
+<div class="slide s1">
+  <div class="s1-bar"></div>
+  <div class="s1-inner">
+    <div class="s1-top">
+      <div class="eyebrow s1-kicker">CISO Executive Briefing &nbsp;·&nbsp; May 2026 &nbsp;·&nbsp; Internal — Confidential</div>
+      <div class="s1-name">GENESIS</div>
+      <div class="s1-tag">
+        Autonomous AI security testing that <strong>proves vulnerabilities</strong> —<br>not just lists them.
+      </div>
+    </div>
+    <div>
+      <div class="s1-stats">
+        <div class="s1-stat">
+          <div class="num">$4.88M</div>
+          <div class="lbl">Average cost of a data breach (IBM 2024). GENESIS finds the gap before attackers do.</div>
+        </div>
+        <div class="s1-stat">
+          <div class="num">145+</div>
+          <div class="lbl">Security tools orchestrated by AI. Zero manual configuration per test.</div>
+        </div>
+        <div class="s1-stat">
+          <div class="num">Zero</div>
+          <div class="lbl">Confirmed findings without proof. Every item in your queue is verified.</div>
+        </div>
+        <div class="s1-stat">
+          <div class="num">$2–$200</div>
+          <div class="lbl">Cost per scan vs $15–30k for a manual penetration test engagement.</div>
+        </div>
+      </div>
+      <div class="s1-foot">This deck: problem · what GENESIS is · the gap vs current tools · trust layer · ROI · roadmap · the ask &nbsp;·&nbsp; Full reference: GENESIS_Print_Overview.html</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 2 — THREAT ═══════════ -->
+<div class="slide s2">
+  <div class="dh" style="border-bottom: 3px solid var(--red);">
+    <div>
+      <div class="eyebrow" style="color:#ff7080;">The Cost of Inaction</div>
+      <h2>Security testing is failing — and the numbers prove it</h2>
+    </div>
+    <div class="sn" style="font-size:8.5pt;font-weight:700;color:#2a3c52;">02 / 08</div>
+  </div>
+  <div class="s2-body">
+    <div class="s2-left">
+      <div class="s2-hl">Most exploited<br>vulnerabilities were<br><em>already known.</em></div>
+      <div class="s2-sub">They weren't novel zero-days. They were buried in scanner noise, deprioritized in an 800-alert backlog, or found by the wrong tool at the wrong cadence. The threat isn't invisibility — it's the volume of false alarms preventing teams from seeing the real signal.</div>
+      <div class="s2-src">Sources: IBM Cost of a Data Breach 2024 · Verizon DBIR 2024 · Ponemon Institute</div>
+    </div>
+    <div class="s2-right">
+      <div class="tstat">
+        <div class="tnum">$4.88M</div>
+        <div class="tdsc">Average total cost of a single breach — up 10% from 2023. Healthcare averages $9.77M per incident.</div>
+      </div>
+      <div class="tstat amber">
+        <div class="tnum">194 days</div>
+        <div class="tdsc">Mean time to identify a breach. The attacker spends 194 days in your environment before you know.</div>
+      </div>
+      <div class="tstat green">
+        <div class="tnum">68%</div>
+        <div class="tdsc">Of breaches involve a human element or a known, unpatched vulnerability — not novel techniques. The fixes existed. The velocity didn't.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 3 — THE GAP ═══════════ -->
+<div class="slide">
+  <div class="sh">
+    <div>
+      <div class="eyebrow">The Gap</div>
+      <h2>Why your current tools miss what matters</h2>
+    </div>
+    <div class="sn">03 / 08</div>
+  </div>
+  <div class="gap-body">
+    <div class="gap-before">
+      <div class="gap-head">Today — without GENESIS</div>
+      <div class="gi"><div class="gi-icon">🔔</div><p><strong>Scanner floods the queue with 400+ alerts per run.</strong> Security teams spend 60–70% of triage time on false positives. Real risks get buried. Critical fixes wait weeks behind noise.</p></div>
+      <div class="gi"><div class="gi-icon">🧩</div><p><strong>Business logic bugs are invisible to automated tools.</strong> "Any user can view any other user's data by incrementing an ID" requires reasoning — not pattern-matching. No scanner can reason.</p></div>
+      <div class="gi"><div class="gi-icon">🔀</div><p><strong>SAST and DAST findings are completely siloed.</strong> A source-code alert with no proof it's exploitable. A live finding with no fix-point. Two teams, two reports, zero connection.</p></div>
+      <div class="gi"><div class="gi-icon">💸</div><p><strong>Manual pentests are expensive, slow, and point-in-time.</strong> A $15–30k engagement once a year misses everything that changed between deployments. Two weeks of testing for a year's coverage gap.</p></div>
+      <div class="gi"><div class="gi-icon">📊</div><p><strong>No measurable quality bar.</strong> A report says "Critical" — but gives no proof, no reproduction steps, no recall rate. You cannot measure what you're missing. You can only pay for it later.</p></div>
+    </div>
+    <div class="gap-after">
+      <div class="gap-head">With GENESIS</div>
+      <div class="gi"><div class="gi-icon">✅</div><p><strong>Only proven findings reach your queue.</strong> A universal proof gate rejects anything without live evidence — HTTP response, DNS callback, or symbolic oracle. Zero unproven alerts. Ever.</p></div>
+      <div class="gi"><div class="gi-icon">🧠</div><p><strong>AI reasons before testing.</strong> GENESIS forms a specific hypothesis ("ownership check missing at /api/orders/{id}") before selecting a tool. Every test has a defined purpose and expected evidence.</p></div>
+      <div class="gi"><div class="gi-icon">🔗</div><p><strong>Source code and live runtime in one session.</strong> Every finding links the exploitable endpoint to the exact file and line to fix. One complete ticket. No cross-team guesswork.</p></div>
+      <div class="gi"><div class="gi-icon">⚡</div><p><strong>Runs on every deployment, not just once a year.</strong> Overnight scans, CI/CD-triggered, costing $2–$200. Continuous coverage at a fraction of the cost — without fatigue or scheduling.</p></div>
+      <div class="gi"><div class="gi-icon">📐</div><p><strong>Measurable quality at every scan.</strong> Recall rate, proof coverage, duplicate rate, cost per finding — benchmarked against known-vulnerability targets automatically every run.</p></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 4 — HOW IT WORKS ═══════════ -->
+<div class="slide">
+  <div class="sh">
+    <div>
+      <div class="eyebrow">The Engine</div>
+      <h2>From target to proven finding — the GENESIS loop</h2>
+    </div>
+    <div class="sn">04 / 08</div>
+  </div>
+  <div class="sb">
+    <div class="pipeline">
+      <div class="ps"><span class="pn">Step 1</span><div class="pt">Target</div><div class="pb">You define scope</div></div>
+      <div class="pa">›</div>
+      <div class="ps"><span class="pn">Step 2</span><div class="pt">Map</div><div class="pb">AI maps attack surface</div></div>
+      <div class="pa">›</div>
+      <div class="ps"><span class="pn">Step 3</span><div class="pt">Hypothesize</div><div class="pb">Theory formed first</div></div>
+      <div class="pa">›</div>
+      <div class="ps"><span class="pn">Step 4</span><div class="pt">Test</div><div class="pb">145 tools by AI</div></div>
+      <div class="pa">›</div>
+      <div class="ps"><span class="pn">Step 5</span><div class="pt">Debate</div><div class="pb">Red vs Blue AI</div></div>
+      <div class="pa">›</div>
+      <div class="ps"><span class="pn">Step 6</span><div class="pt">Prove</div><div class="pb">Live evidence required</div></div>
+      <div class="pa">›</div>
+      <div class="ps final"><span class="pn">Output</span><div class="pt">✓ Confirmed</div><div class="pb">Report-ready</div></div>
+    </div>
+    <div class="hcards">
+      <div class="hcard">
+        <div class="hnum">145</div>
+        <div class="hlbl">Security tools</div>
+        <p>Web, network, source code, binary, cloud, auth, crypto, Active Directory — AI selects the right tool for each hypothesis automatically.</p>
+      </div>
+      <div class="hcard">
+        <div class="hnum">8</div>
+        <div class="hlbl">Specialist AI agents</div>
+        <p>Recon, Analyst, Exploit, Code, Crypto, Auth, Reverse Engineering, and Network — parallel execution, each domain-focused.</p>
+      </div>
+      <div class="hcard">
+        <div class="hnum">5</div>
+        <div class="hlbl">Validator roles</div>
+        <p>Endpoint, Source, Counter-argument, Proof Planner, and Operator validators all challenge every candidate before promotion.</p>
+      </div>
+      <div class="hcard">
+        <div class="hnum">0</div>
+        <div class="hlbl">Unproven findings</div>
+        <p>Every item in the Findings tab has passed a proof run, a live callback, or explicit human attestation. No guesses ever reach the queue.</p>
+      </div>
+    </div>
+    <div style="background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:0.11in 0.16in;margin-top:0.13in;display:flex;align-items:center;gap:0.16in;">
+      <div style="font-size:15pt;">💡</div>
+      <p style="font-size:9pt;color:var(--ink);"><strong>Why confirmed findings appear after scan activity:</strong> Candidates are captured immediately. They become confirmed findings only after validators, a proof run, and deduplication all succeed. This deliberate sequence is the quality gate — not idle time.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 5 — ZERO FALSE FINDINGS ═══════════ -->
+<div class="slide s5">
+  <div class="dh">
+    <div>
+      <div class="eyebrow">The Trust Layer</div>
+      <h2>Why GENESIS earns every confirmed finding</h2>
+    </div>
+    <div class="sn" style="color:#2a3c52;">05 / 08</div>
+  </div>
+  <div class="s5-body">
+    <div class="s5-hero">
+      <div class="s5-zero">0</div>
+      <div class="s5-claim">
+        <h2>Unproven findings in<br>your remediation queue.</h2>
+        <p>Every item your team receives has a proof record — a live HTTP response confirming the exploit, a DNS callback hit, or a symbolic execution oracle. Nothing is assumed. Everything is demonstrated.</p>
+      </div>
+    </div>
+    <div class="tcards">
+      <div class="tcard">
+        <div class="ticon">🔬</div>
+        <h3>Universal proof gate</h3>
+        <p>No candidate becomes a finding without deterministic live evidence. Required by policy for every scan mode — cannot be bypassed.</p>
+      </div>
+      <div class="tcard">
+        <div class="ticon">🥊</div>
+        <h3>Red vs Blue AI debate</h3>
+        <p>A separate AI model using a different architecture actively challenges every high-confidence claim. Disputed findings are marked, not buried.</p>
+      </div>
+      <div class="tcard">
+        <div class="ticon">🧬</div>
+        <h3>Patched-twin comparison</h3>
+        <p>Run against a known-fixed "twin" target. Any finding that survives a patched version is automatically flagged as a potential false positive.</p>
+      </div>
+      <div class="tcard">
+        <div class="ticon">📋</div>
+        <h3>Full evidence trail</h3>
+        <p>Every finding includes: hypothesis, exact tool call, raw response, validator reasoning, and proof record. Fully reproducible by your own engineers.</p>
+      </div>
+    </div>
+    <div class="s5-banner">
+      <p><strong>The executive message:</strong> GENESIS does not ask you to trust the AI. It asks you to trust the evidence — the same HTTP response, callback hit, or proof record the AI used. The entire reasoning chain is visible, auditable, and independently reproducible by your team.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 6 — ROI ═══════════ -->
+<div class="slide">
+  <div class="sh">
+    <div>
+      <div class="eyebrow">Business Case</div>
+      <h2>Return on investment — cost, speed, and risk reduction</h2>
+    </div>
+    <div class="sn">06 / 08</div>
+  </div>
+  <div class="sb">
+    <div class="roi-panels">
+      <div class="rp d">
+        <div class="rn">95%</div>
+        <div class="rl">Cost reduction</div>
+        <p>A traditional pentest costs $15–30k for a two-week scope. An equivalent GENESIS Deep Research scan costs $80–200 in AI API tokens and runs overnight. Same target, 95% less spend.</p>
+      </div>
+      <div class="rp m">
+        <div class="rn">24/7</div>
+        <div class="rl">Continuous coverage</div>
+        <p>Runs overnight, on weekends, triggered on every major deployment. A human tester works one engagement at a time. GENESIS runs continuously without fatigue, scheduling, or holidays.</p>
+      </div>
+      <div class="rp l">
+        <div class="rn">1 fix</div>
+        <div class="rl">Per root cause</div>
+        <p>Deduplication clusters all candidates from the same architectural mistake. Four scanner alerts become one prioritized root-cause ticket — reducing engineering rework by 60–75%.</p>
+      </div>
+    </div>
+    <table class="ctable">
+      <thead>
+        <tr>
+          <th style="width:2in;">Capability</th>
+          <th>Manual pentest ($15–30k)</th>
+          <th>Scanner (Nessus / Burp)</th>
+          <th>GENESIS ($2–200 / scan)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Test frequency</td><td class="b">Quarterly or annual</td><td>Weekly at best</td><td class="g">Every deployment, on-demand</td></tr>
+        <tr><td>False positive rate</td><td>Low (human-verified)</td><td class="b">High — requires manual triage</td><td class="g">Low — proof gate + AI debate</td></tr>
+        <tr><td>Business logic bugs</td><td>Yes (skilled tester only)</td><td class="b">No — signature matching only</td><td class="g">Yes — reasoning + hypothesis</td></tr>
+        <tr><td>Evidence quality</td><td>High — written report</td><td class="b">CVE score only, no live proof</td><td class="g">High — proof record, reproducible</td></tr>
+        <tr><td>Source + runtime link</td><td>Manual — tester writes it</td><td class="b">None — siloed outputs</td><td class="g">Automatic — hybrid mapping</td></tr>
+        <tr><td>Time to first finding</td><td class="b">Days (scoping + testing)</td><td>Minutes (unverified)</td><td class="g">Minutes (recon) → hours (confirmed)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 7 — ROADMAP ═══════════ -->
+<div class="slide">
+  <div class="dh">
+    <div>
+      <div class="eyebrow">Readiness &amp; Roadmap</div>
+      <h2>Feature-complete today — production-hardened by July 2026</h2>
+    </div>
+    <div class="sn">07 / 08</div>
+  </div>
+  <div class="sb">
+    <div class="eyebrow" style="color:var(--muted);margin-bottom:0.08in;">9-week production hardening plan</div>
+    <div class="phases">
+      <div class="ph done">
+        <div class="ph-badge">Complete ✓</div>
+        <div class="ph-title">Core Platform</div>
+        <div class="ph-dates">v9 feature-complete</div>
+        <p>All 145 tools, 8 agents, validation pipeline, reasoning loops, benchmark support — fully operational.</p>
+      </div>
+      <div class="ph now">
+        <div class="ph-badge">Phase 0 · NOW</div>
+        <div class="ph-title">Security Fixes</div>
+        <div class="ph-dates">May 13–19, 2026</div>
+        <p>Remove hardcoded secrets, enforce HTTPS/TLS, add rate limiting, enable structured logging.</p>
+      </div>
+      <div class="ph">
+        <div class="ph-badge">Phase 1</div>
+        <div class="ph-title">Hardening</div>
+        <div class="ph-dates">May 20 – Jun 2</div>
+        <p>Monitoring stack, backup strategy, audit log retention, network isolation review.</p>
+      </div>
+      <div class="ph">
+        <div class="ph-badge">Phase 2–3</div>
+        <div class="ph-title">Test &amp; Fix</div>
+        <div class="ph-dates">Jun 3–30, 2026</div>
+        <p>Regression image, automated test suite, bug triage, performance baseline.</p>
+      </div>
+      <div class="ph">
+        <div class="ph-badge">Phase 4</div>
+        <div class="ph-title">Go-Live</div>
+        <div class="ph-dates">Jul 1–14, 2026</div>
+        <p>Production deployment, operational hand-off, documentation, team enablement.</p>
+      </div>
+    </div>
+    <div class="srow">
+      <div class="si"><div class="sd sg"></div><div><h3>Ready now</h3><p>All scan profiles, 145 tools, multi-agent orchestration, validation pipeline, attack graph, benchmark support, reasoning loops, REST API, WebSocket live feed.</p></div></div>
+      <div class="si"><div class="sd sa"></div><div><h3>Needs Phase 0 hardening</h3><p>Secrets must move to environment injection; HTTPS/TLS enforced end-to-end; rate limiting and session management need production-grade controls before go-live.</p></div></div>
+      <div class="si"><div class="sd sg"></div><div><h3>Data stays self-hosted</h3><p>All findings, artifacts, attack graph, and session data are self-hosted. Only AI reasoning prompts go to Anthropic API — governed by your existing API agreement.</p></div></div>
+      <div class="si"><div class="sd sa"></div><div><h3>Needs Phase 1 hardening</h3><p>Centralized monitoring, alerting, and audit log retention must be in place before operational hand-off. Health checks exist; production observability does not yet.</p></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════ SLIDE 8 — THE ASK ═══════════ -->
+<div class="slide s8">
+  <div class="s8-accent"></div>
+  <div class="s8-left">
+    <div>
+      <div class="eyebrow">The Ask</div>
+      <h2>Three decisions that move GENESIS to production</h2>
+      <div class="sub">The platform is built and tested. The path to production is a defined 9-week plan. These are the three leadership decisions that unlock it.</div>
+    </div>
+    <div class="qblock">
+      <div class="eyebrow">Quick reference — common CISO questions</div>
+      <div class="qa">
+        <strong>Can it damage our systems?</strong> No — proves impact, never causes it<br>
+        <strong>Where does our data go?</strong> Self-hosted; findings never leave<br>
+        <strong>What does it cost?</strong> $2–$200 per scan<br>
+        <strong>When is it production-ready?</strong> July 2026 go-live<br>
+        <strong>Is it better than our scanner?</strong> See slide 06<br>
+        <strong>Who owns the findings?</strong> You do — fully and exclusively
+      </div>
+    </div>
+  </div>
+  <div class="s8-right">
+    <div>
+      <div class="ask-item">
+        <div class="ask-n">1</div>
+        <div>
+          <h3>Approve the 9-week hardening budget</h3>
+          <p>Phases 0–4 cover secrets management, HTTPS enforcement, monitoring stack, automated test suite, and production hand-off. Engineering time is the primary cost. Approval unlocks Phase 0 immediately.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">2</div>
+        <div>
+          <h3>Authorize a pilot scan on a staging target</h3>
+          <p>Two weeks. One staging application. Zero production risk. Produces a real benchmark scorecard — recall rate, proof coverage, duplicate rate — so leadership sees measured results, not a demo.</p>
+        </div>
+      </div>
+      <div class="ask-item">
+        <div class="ask-n">3</div>
+        <div>
+          <h3>Designate a GENESIS programme owner</h3>
+          <p>One person to own scan scheduling, finding triage, and integration with the remediation workflow. The difference between a tool that generates reports and a programme that reduces measurable risk.</p>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="mblock">
+        <div class="eyebrow">How we measure success at go-live</div>
+        <div class="mrow" style="margin-top:0.08in;">
+          <div class="mitem"><strong>Recall rate</strong>% planted lab bugs found</div>
+          <div class="mitem"><strong>Proof coverage</strong>% findings with live proof</div>
+          <div class="mitem"><strong>FP rate</strong>Patched-control false positives</div>
+          <div class="mitem"><strong>Cost / finding</strong>AI spend ÷ confirmed findings</div>
+          <div class="mitem"><strong>MTTD</strong>Deploy → first confirmed finding</div>
+        </div>
+      </div>
+      <div class="s8-foot">
+        <p>Full technical reference: <strong style="color:#3a5278;">GENESIS_Print_Overview.html</strong> &nbsp;·&nbsp; All findings self-hosted &nbsp;·&nbsp; Authorized defensive use only &nbsp;·&nbsp; Internal — Confidential</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

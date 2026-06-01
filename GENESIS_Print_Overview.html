@@ -1,0 +1,1150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GENESIS Print Overview</title>
+  <style>
+    :root {
+      --ink: #172033; --muted: #5a6478; --line: #d9deea; --soft: #f5f7fb;
+      --blue: #2446c2; --green: #137a4e; --amber: #b8740c; --red: #b53030;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { color: var(--ink); font-family: Arial, Helvetica, sans-serif; font-size: 8.8pt; line-height: 1.26; background: #fff; }
+    @page { size: Letter; margin: 0.38in 0.42in 0.42in; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page-break { page-break-before: always; }
+      a { color: inherit; text-decoration: none; }
+      .no-break, tr, .card { break-inside: avoid; page-break-inside: avoid; }
+    }
+    .document { max-width: 8.1in; margin: 0 auto; padding: 0.08in 0.12in 0.12in; }
+    .cover { border: 1px solid var(--line); padding: 0.16in; background: linear-gradient(180deg, #f8faff, #ffffff); }
+    h1, h2, h3 { margin: 0; color: var(--ink); }
+    h1 { font-size: 21pt; letter-spacing: 0; line-height: 1; }
+    h2 { font-size: 12.5pt; margin-top: 0.13in; padding-bottom: 0.035in; border-bottom: 1.5px solid var(--line); }
+    h3 { font-size: 9.6pt; margin-top: 0.085in; }
+    p { margin: 0.035in 0; }
+    .subtitle { color: var(--blue); font-size: 10pt; font-weight: 700; margin-top: 0.07in; }
+    .meta { color: var(--muted); font-size: 8pt; margin-top: 0.08in; }
+    .lead { font-size: 9.5pt; line-height: 1.36; margin-top: 0.1in; max-width: 7.2in; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.07in; margin: 0.07in 0; }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four  { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .wow-strip.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { border: 1px solid var(--line); background: #fff; padding: 0.065in; border-radius: 5px; }
+    .card strong { color: var(--blue); }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.045in; margin-top: 0.09in; }
+    .pill { border: 1px solid #c8d1ee; background: #eef2ff; color: #263f9f; padding: 0.025in 0.06in; border-radius: 999px; font-size: 7.6pt; font-weight: 700; white-space: nowrap; }
+    .pill.green { background: #ecf8f2; border-color: #bde4d0; color: var(--green); }
+    .pill.amber { background: #fff6e7; border-color: #edd39d; color: var(--amber); }
+    .note { border-left: 3px solid var(--blue); background: #f4f7ff; padding: 0.055in 0.075in; margin: 0.065in 0; }
+    .warning { border-left-color: var(--amber); background: #fff8ea; }
+    table { width: 100%; border-collapse: collapse; margin: 0.065in 0; }
+    th, td { border: 1px solid var(--line); padding: 0.034in 0.044in; vertical-align: top; }
+    th { background: #edf1fb; color: #233153; text-align: left; font-size: 7.8pt; text-transform: uppercase; letter-spacing: 0.02em; }
+    td { font-size: 8.2pt; }
+    code { font-family: Consolas, "Courier New", monospace; color: #1e3a8a; font-size: 0.92em; }
+    .tool-table td:first-child { width: 1.45in; font-weight: 700; color: #1f2d4f; }
+    .tool-table td:nth-child(2) { width: 1.4in; font-family: Consolas, "Courier New", monospace; color: #123078; }
+    .small { font-size: 7.8pt; color: var(--muted); }
+    .section-kicker { color: var(--muted); text-transform: uppercase; font-size: 7.2pt; letter-spacing: 0.08em; font-weight: 800; margin-top: 0.1in; }
+    ul { margin: 0.035in 0 0.055in 0.16in; padding: 0; }
+    li { margin: 0.014in 0; }
+    .flow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.03in; margin: 0.065in 0; align-items: stretch; }
+    .flow div { border: 1px solid var(--line); background: var(--soft); text-align: center; padding: 0.05in 0.03in; border-radius: 4px; font-weight: 700; font-size: 7.4pt; }
+    .toc { columns: 2; column-gap: 0.22in; margin-top: 0.09in; }
+    .toc div { break-inside: avoid; margin-bottom: 0.028in; }
+    .footer-note { margin-top: 0.1in; padding-top: 0.055in; border-top: 1px solid var(--line); color: var(--muted); font-size: 7.6pt; }
+    .wow-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.06in; margin: 0.07in 0; }
+    .wow-metric { border: 1px solid #c8d1ee; background: #f4f7ff; padding: 0.06in; border-radius: 5px; }
+    .wow-metric strong { display: block; color: var(--blue); font-size: 11pt; line-height: 1; margin-bottom: 0.03in; }
+    .quote-box { border: 1px solid #bde4d0; background: #f0fbf5; padding: 0.07in; margin: 0.07in 0; border-radius: 5px; font-size: 9pt; line-height: 1.36; }
+    /* severity row colors */
+    .sev-crit td:first-child { background:#fdf0f0; color:var(--red); font-weight:700; }
+    .sev-high td:first-child { background:#fff5ec; color:var(--amber); font-weight:700; }
+    .sev-med  td:first-child { background:#fffbe6; color:#8a6a00; font-weight:700; }
+    .sev-low  td:first-child { background:#f2fbf5; color:var(--green); font-weight:700; }
+    .sev-info td:first-child { background:#f4f7ff; color:var(--blue); font-weight:700; }
+    .no-display { display: none !important; }
+  </style>
+</head>
+<body>
+<main class="document">
+  <section class="cover">
+    <div class="section-kicker">Print overview for first-time readers</div>
+    <h1>GENESIS</h1>
+    <div class="subtitle">An AI-assisted, proof-backed security assessment platform</div>
+    <p class="lead">
+      GENESIS helps authorized security teams examine applications, networks, services, source artifacts,
+      and infrastructure. It combines AI agents with a large toolbox of scanners and proof helpers, then
+      turns raw leads into evidence-backed findings that a human team can review, reproduce, and fix.
+    </p>
+    <div class="pill-row">
+      <span class="pill">145 active tools</span>
+      <span class="pill">Multi-agent orchestration</span>
+      <span class="pill green">Universal validation pipeline</span>
+      <span class="pill">Endpoint + source reasoning</span>
+      <span class="pill green">Complete Validation</span>
+      <span class="pill">Proof planner role</span>
+      <span class="pill amber">Authorized defensive use</span>
+    </div>
+    <p class="meta">
+      Current project state: v9 overview, including universal proof-backed validation across scan profiles,
+      endpoint/source hybrid reasoning, benchmark scorecards, reasoning loops, fallback controls, proof-planner
+      continuation jobs, and operator-confirmed validation paths.
+      This handout summarizes the project and does not replace the comprehensive manual.
+    </p>
+    <div class="toc">
+      <div>Executive WOW Snapshot</div>
+      <div>WOW Features by Business Value</div>
+      <div>1. What GENESIS Is</div>
+      <div>2. How GENESIS Works</div>
+      <div>3. Scan Modes</div>
+      <div>4. Core Features</div>
+      <div>5. Architecture</div>
+      <div>6. Reading a Report</div>
+      <div>7. Scan Lifecycle</div>
+      <div>8. Reasoning Loops</div>
+      <div>9. Orchestration Logic</div>
+      <div>10. Validation Pipeline</div>
+      <div>11. Fallbacks</div>
+      <div>12. UI Areas</div>
+      <div>13. Benchmark Methodology</div>
+      <div>14. Data Objects</div>
+      <div>15. Scan Methodology Matrix</div>
+      <div>16. Operator Workflows</div>
+      <div>17. Governance</div>
+      <div>18. Containers and Kill Chain</div>
+      <div>19. GENESIS vs Traditional Tools</div>
+      <div>20. Production Readiness &amp; Roadmap</div>
+      <div>21. Sample Confirmed Finding</div>
+      <div>22. Data Security &amp; Scope Controls</div>
+      <div>23. Severity SLA, FAQ &amp; First-Scan Checklist</div>
+      <div>24. Glossary</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Executive WOW Snapshot</h2>
+    <p>
+      GENESIS is built to make security automation impressive in the way leaders actually trust: measured, reviewable,
+      and proof-backed. The "wow" is not a larger alert list. The "wow" is turning noisy discovery into evidence-backed
+      findings quickly, with optional candidate/proof records when deeper validation is useful.
+    </p>
+    <div class="wow-strip">
+      <div class="wow-metric"><strong>145</strong>Active tools grouped across web, infra, source, binary, browser, cloud, crypto, AD, IoT, OT, and validation families.</div>
+      <div class="wow-metric"><strong>Fast findings</strong>Exhaustive, Deep Research, and Validated profiles save findings through evidence checks and critic review.</div>
+      <div class="wow-metric"><strong>Optional proof</strong>The Validation Lab can add proof runs, scorecards, candidate promotion records, and operator attestations.</div>
+      <div class="wow-metric"><strong>Hybrid</strong>Live endpoint evidence can be connected to source files, handlers, artifacts, binaries, and OpenAPI context.</div>
+    </div>
+    <div class="grid">
+      <div class="card"><strong>Proof-backed value.</strong> GENESIS keeps the normal Findings view fast while preserving optional proof trails for engineering review.</div>
+      <div class="card"><strong>Complete Validation.</strong> If a scan is stopped or completed with candidates still needing proof, GENESIS can continue validation without restarting discovery.</div>
+      <div class="card"><strong>Multi-agent checks.</strong> Specialist agents discover, validators review, critics challenge, judges evaluate coverage, supervisors issue gaps, and a proof planner builds concrete proof actions.</div>
+      <div class="card"><strong>Demo-grade measurement.</strong> Vulnerable and patched twins support recall, false-positive control, duplicate reduction, proof coverage, and time-to-value reporting.</div>
+      <div class="card"><strong>Graph and kill-chain context.</strong> Hosts, services, credentials, findings, candidates, and proof artifacts can be tied into an attack-path story.</div>
+      <div class="card"><strong>Reproducible evidence.</strong> Tool outputs, proof runs, screenshots, artifacts, validator verdicts, and benchmark scorecards remain reviewable after the scan.</div>
+    </div>
+    <div class="quote-box">
+      <strong>CISO demo framing:</strong> GENESIS turns noisy discovery into evidence-backed tickets. Findings are
+      reviewed by evidence and critic logic; candidates are optional leads for deeper proof. The patched twin is the trust anchor.
+    </div>
+  </section>
+
+  <section>
+    <h2>WOW Features by Business Value</h2>
+    <table>
+      <thead><tr><th>Business value</th><th>WOW feature</th><th>Plain-English impact</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Trust</strong></td><td>Evidence rules, critic review, optional proof runs, validator verdicts, and patched-control comparisons.</td><td>Leaders see fewer unsupported claims and a clearer reason to believe each confirmed finding.</td></tr>
+        <tr><td><strong>Speed</strong></td><td>Multi-agent orchestration, role-based model routing, MCP tool automation, and background validation jobs.</td><td>GENESIS can explore broadly while reserving deeper reasoning for the places that need it.</td></tr>
+        <tr><td><strong>Depth</strong></td><td>Reasoning loops, source/runtime mapping, cross-file comparison, invariant tracking, and payload swarm.</td><td>The platform can investigate logic, code, and behavior patterns that basic scanners often miss.</td></tr>
+        <tr><td><strong>Proof</strong></td><td>Browser proof, OOB callbacks, request forge, sandbox runner, fuzzing, symbolic execution, and instrumentation.</td><td>Claims can be checked with deterministic evidence instead of relying on model confidence alone.</td></tr>
+        <tr><td><strong>Executive reporting</strong></td><td>Benchmark scorecards, demo range support, reproducibility reports, attack graph, and patched twin comparison.</td><td>The output can be discussed as a measured lab result, not a vague AI promise.</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Balanced message:</strong> GENESIS is powerful because it combines discovery, reasoning, validation, and
+      proof. It should still be presented as an authorized assessment platform whose results depend on scope, access,
+      runtime stability, and proof coverage.
+    </div>
+  </section>
+
+  <section>
+    <h2>1. What GENESIS Is</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Plain-English definition</h3>
+        <p>GENESIS is a security research assistant that plans tests, runs tools, studies the results, and writes findings with evidence.</p>
+      </div>
+      <div class="card">
+        <h3>Who uses it</h3>
+        <p>Security teams, red teams, product security engineers, and leaders who need measurable proof instead of raw scanner noise.</p>
+      </div>
+      <div class="card">
+        <h3>What it improves</h3>
+        <p>It reduces repetitive manual testing, connects related clues, and pushes the system toward proof-backed reporting.</p>
+      </div>
+      <div class="card">
+        <h3>What it is not</h3>
+        <p>It is not a magic guarantee that every issue is found. It is an authorized assessment platform that still needs human judgment.</p>
+      </div>
+    </div>
+    <div class="note">
+      <strong>Main idea:</strong> GENESIS is valuable because it does not only ask "can we find something?" It also asks
+      "can we prove it, deduplicate it, explain it, and give the owner a useful remediation path?"
+    </div>
+  </section>
+
+  <section>
+    <h2>2. How GENESIS Works</h2>
+    <div class="flow">
+      <div>Target</div>
+      <div>AI agents</div>
+      <div>Tools</div>
+      <div>Hypotheses</div>
+      <div>Evidence</div>
+      <div>Critic review</div>
+      <div>Findings</div>
+    </div>
+    <table>
+      <thead><tr><th>Word</th><th>Simple meaning</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Finding</strong></td><td>A final issue shown in the report.</td><td>This is what teams fix and track.</td></tr>
+        <tr><td><strong>Candidate</strong></td><td>A possible issue that still needs validation or proof.</td><td>It preserves leads without overstating them.</td></tr>
+        <tr><td><strong>Proof Run</strong></td><td>A controlled test that checks whether a claim is true.</td><td>It separates real findings from guesses.</td></tr>
+        <tr><td><strong>Validator Verdict</strong></td><td>A second review that supports, refutes, or asks for more proof.</td><td>It makes the system argue with itself before reporting.</td></tr>
+        <tr><td><strong>Dedup Cluster</strong></td><td>A group of repeated reports with the same root cause.</td><td>It keeps one bug from becoming ten tickets.</td></tr>
+        <tr><td><strong>Benchmark</strong></td><td>A measured test against known vulnerable and patched targets.</td><td>It shows recall, false positives, proof coverage, and duplicate rate.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>3. Scan Modes</h2>
+    <table>
+      <thead><tr><th>Mode</th><th>Best for</th><th>How to understand the output</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Exhaustive</strong></td>
+          <td>Routine broad assessments where coverage matters.</td>
+          <td>Runs many tools and agent rounds; findings are saved directly after evidence checks and critic review.</td>
+        </tr>
+        <tr>
+          <td><strong>Deep Research</strong></td>
+          <td>Longer audits where subtle or chained issues matter more than speed.</td>
+          <td>Uses more time, more rounds, stronger re-checking, and more careful evidence review.</td>
+        </tr>
+        <tr>
+          <td><strong>Validated</strong></td>
+          <td>CISO demos, benchmarks, source/runtime correlation, and low-false-positive reporting.</td>
+          <td>Emphasizes hybrid preparation, optional validation artifacts, proof planning, and scorecards without delaying normal findings.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note warning">
+      <strong>Why findings can appear later:</strong> GENESIS may still be collecting evidence, running tools, or waiting on critic review.
+      A stopped run showing "31 need proof" means the Validation Lab has 31 optional candidate leads; it no longer means the
+      main Findings tab must stay empty.
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Core Features</h2>
+    <div class="grid">
+      <div class="card"><strong>Multi-agent orchestration.</strong> Separate agents explore, analyze, validate, and challenge findings.</div>
+      <div class="card"><strong>Role-based model routing.</strong> Different models can be assigned to discovery, validation, judging, and critique.</div>
+      <div class="card"><strong>MCP tool execution.</strong> A dedicated tool server exposes the security toolbox in a controlled way.</div>
+      <div class="card"><strong>Optional Validation Lab.</strong> Candidate, verdict, proof, dedup, and promotion records are available for deeper review without blocking normal findings.</div>
+      <div class="card"><strong>Complete Validation.</strong> Stopped or completed sessions can finish proof/promotion work without rerunning full discovery.</div>
+      <div class="card"><strong>Endpoint/source hybrid mapping.</strong> GENESIS links live endpoints to source files, artifacts, and evidence when available.</div>
+      <div class="card"><strong>Proof planner role.</strong> A model role turns vague proof gaps into concrete safe tool parameters when candidates need validation.</div>
+      <div class="card"><strong>Evidence and reproducibility.</strong> Tool calls, proof outputs, and reasoning trails are stored for review.</div>
+      <div class="card"><strong>Attack graph and kill chain views.</strong> Related hosts, services, credentials, and findings can be connected visually.</div>
+      <div class="card"><strong>Benchmark support.</strong> Vulnerable and patched targets can measure recall, false positives, duplicate rate, and proof coverage.</div>
+      <div class="card"><strong>Cost and model controls.</strong> Operators can review token/cost behavior and choose model roles.</div>
+      <div class="card"><strong>Sandboxed proof execution.</strong> Custom proof scripts run in restricted environments instead of directly on the host.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Architecture in Plain English</h2>
+    <table>
+      <thead><tr><th>Part</th><th>What it does</th><th>Simple analogy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Frontend</strong></td><td>The dashboard, session viewer, findings, tools, graphs, and validated tabs.</td><td>The control room screen.</td></tr>
+        <tr><td><strong>Backend</strong></td><td>Runs the orchestrator, sessions, APIs, evidence rules, and promotion logic.</td><td>The mission control desk.</td></tr>
+        <tr><td><strong>MCP Server</strong></td><td>Registers and runs the tool fleet through a single controlled interface.</td><td>The workshop full of instruments.</td></tr>
+        <tr><td><strong>PostgreSQL</strong></td><td>Stores structured sessions and final vulnerabilities.</td><td>The official filing cabinet.</td></tr>
+        <tr><td><strong>MongoDB</strong></td><td>Stores thoughts, raw tool outputs, candidates, verdicts, proof runs, and logs.</td><td>The lab notebook.</td></tr>
+        <tr><td><strong>ChromaDB</strong></td><td>Stores searchable memory and similarity data.</td><td>The memory index.</td></tr>
+        <tr><td><strong>Neo4j</strong></td><td>Stores attack graph relationships.</td><td>The wall map connecting clues.</td></tr>
+        <tr><td><strong>Workers and sandboxes</strong></td><td>Run background tasks, browser rendering, fuzzing, symbolic execution, instrumentation, and safe proof scripts.</td><td>The controlled test labs.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>6. Reading a GENESIS Report</h2>
+    <div class="grid">
+      <div class="card"><strong>Start with confirmed findings.</strong> These have passed the strongest evidence path available for that mode.</div>
+      <div class="card"><strong>Check severity.</strong> Critical and high findings should have concrete proof and business impact.</div>
+      <div class="card"><strong>Open the evidence.</strong> Look for tool output, response differences, screenshots, proof runs, or callback hits.</div>
+      <div class="card"><strong>Review duplicates.</strong> If several findings have one root cause, fix the root cause once and retest.</div>
+      <div class="card"><strong>Treat candidates as leads.</strong> Candidates are useful, but they are not final findings until promoted.</div>
+      <div class="card"><strong>Use benchmark language carefully.</strong> Say "measured in this lab," not "finds everything everywhere."</div>
+    </div>
+    <div class="note">
+      <strong>Demo range interpretation:</strong> vulnerable app = target under test; patched twin = false-positive control;
+      fake metadata service = proof canary for SSRF, not a normal vulnerable target.
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2>7. The Scan Lifecycle</h2>
+    <p>
+      A GENESIS scan is not one giant scanner command. It is a repeated decision loop. Each round reads the current state,
+      chooses the next best action, runs a tool or records a thought, then updates the evidence trail.
+    </p>
+    <table>
+      <thead><tr><th>Stage</th><th>What happens</th><th>Plain-English checkpoint</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Prepare</strong></td><td>GENESIS loads target, scan profile, operator context, prior memory, and model routing.</td><td>What are we testing, and what do we already know?</td></tr>
+        <tr><td><strong>2. Recon</strong></td><td>Agents discover ports, services, apps, routes, technologies, and exposed artifacts.</td><td>What doors, APIs, and clues exist?</td></tr>
+        <tr><td><strong>3. Hypothesize</strong></td><td>The system writes testable ideas such as "this endpoint may lack ownership checks."</td><td>What weakness might exist, and what would disprove it?</td></tr>
+        <tr><td><strong>4. Test</strong></td><td>Tools run targeted checks, browser flows, custom requests, source queries, or sandbox proofs.</td><td>Can we collect observable evidence?</td></tr>
+        <tr><td><strong>5. Validate</strong></td><td>Evidence rules and critic review support, refute, or downgrade weak claims.</td><td>Does the evidence really support the claim?</td></tr>
+        <tr><td><strong>6. Dedup</strong></td><td>Similar findings or candidates are grouped by root cause, endpoint, proof behavior, and likely fix.</td><td>Is this one issue reported several ways?</td></tr>
+        <tr><td><strong>7. Optional proof</strong></td><td>Validation Lab can add proof runs and promotion records for candidate leads.</td><td>Would extra proof make this easier to trust?</td></tr>
+        <tr><td><strong>8. Report</strong></td><td>Findings, evidence, remediation, benchmark metrics, and reproducibility data are shown.</td><td>What should the team fix first?</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Important:</strong> GENESIS can discover quickly while still taking time to collect evidence and run critic review.
+      Candidate proof work is optional follow-up, not a required bottleneck for every finding.
+    </div>
+  </section>
+
+  <section>
+    <h2>8. Reasoning Loops</h2>
+    <p>
+      A reasoning loop is a structured way for the AI to think through a hard problem in smaller steps. Instead of asking
+      one model response to solve everything at once, GENESIS breaks a problem into ticks: consider options, choose one,
+      record why, and continue until the loop completes or hits its budget.
+    </p>
+    <table>
+      <thead><tr><th>Loop concept</th><th>Simple explanation</th><th>Why a reader should care</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tick</strong></td><td>One small reasoning step inside a loop.</td><td>Shows the reader how the agent moved from uncertainty to a choice.</td></tr>
+        <tr><td><strong>Branch</strong></td><td>An option the agent considered.</td><td>Shows alternatives, not just the final answer.</td></tr>
+        <tr><td><strong>Chosen path</strong></td><td>The branch selected for the next step.</td><td>Explains why GENESIS tested one path before another.</td></tr>
+        <tr><td><strong>State snapshot</strong></td><td>The loop's working memory at that tick.</td><td>Makes complex reasoning replayable.</td></tr>
+        <tr><td><strong>Budget</strong></td><td>A limit on ticks and tokens.</td><td>Prevents a loop from consuming unlimited cost.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Active loop types</h3>
+    <table>
+      <thead><tr><th>Loop</th><th>Plain-English purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>code_intent</code></td><td>Reads a focused piece of code and explains what it is supposed to do.</td></tr>
+        <tr><td><code>invariant_tracker</code></td><td>Finds rules the system normally follows and flags places that break those rules.</td></tr>
+        <tr><td><code>causal_trace</code></td><td>Traces how one input or event leads to a later security-relevant outcome.</td></tr>
+        <tr><td><code>counterfactual</code></td><td>Asks "what if this assumption were different?" to find alternate attack paths.</td></tr>
+        <tr><td><code>hypothesis_decomp</code></td><td>Breaks one vague idea into smaller claims that can be tested separately.</td></tr>
+        <tr><td><code>long_context_code</code></td><td>Reads larger code areas by slicing the work into manageable pieces.</td></tr>
+        <tr><td><code>cross_file_compare</code></td><td>Compares similar code patterns across files to find inconsistent behavior.</td></tr>
+        <tr><td><code>rop_composition</code></td><td>Composes low-level exploit building blocks in binary-analysis scenarios.</td></tr>
+        <tr><td><code>chain_composer</code></td><td>Connects smaller findings into a realistic end-to-end attack chain.</td></tr>
+        <tr><td><code>heap_layout</code></td><td>Reasons about memory layout when analyzing low-level memory bugs.</td></tr>
+        <tr><td><code>self_correcting</code></td><td>Classifies why a proof failed, adjusts the attempt, and tries again within budget.</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>Why the Loops tab can be empty:</strong> loops fire when GENESIS calls the internal <code>deliberate</code>
+      reasoning tool or when a profile/backstop nudges it to do so. A simple target may not need loops early. A deeper scan
+      or a hard blocked hypothesis is more likely to show loop activity.
+    </div>
+
+    <h3>When loops usually appear</h3>
+    <table>
+      <thead><tr><th>Trigger</th><th>What GENESIS is trying to solve</th><th>What the operator should do</th></tr></thead>
+      <tbody>
+        <tr><td>Complex code or artifact evidence</td><td>The agent needs to connect source, route, sink, and runtime behavior.</td><td>Check whether the loop produced a clear next proof action.</td></tr>
+        <tr><td>Repeated uncertainty</td><td>The agent has multiple possible explanations for the same observation.</td><td>Look for branches that were rejected and why.</td></tr>
+        <tr><td>Coverage backstop</td><td>The session is drifting or has not used deeper reasoning after several rounds.</td><td>Expect a loop to create a sharper plan or stop condition.</td></tr>
+        <tr><td>Proof failure</td><td>A proof attempt failed but the hypothesis may still be valid.</td><td>Confirm whether the revised plan is safer and more specific.</td></tr>
+        <tr><td>Cross-view mismatch</td><td>Endpoint evidence and source evidence disagree.</td><td>Use the loop output to decide whether the issue is unreachable, patched, or still unproven.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How to explain loops to leadership</h3>
+    <p>
+      Loops are not extra findings. They are the reasoning audit trail for hard decisions. A loop shows how GENESIS moved
+      from "this might be vulnerable" to a more precise statement such as "this route is reachable, the source path is
+      plausible, but proof still needs a browser replay." That makes the tool easier to trust because important decisions
+      are visible rather than hidden inside a single model answer.
+    </p>
+  </section>
+
+  <section>
+    <h2>9. Orchestration Logic</h2>
+    <p>
+      The orchestrator is the control logic that keeps the scan coherent. It decides what context the AI sees, what tools
+      can be used, how results are stored, and when the session is allowed to stop.
+    </p>
+    <table>
+      <thead><tr><th>Logic</th><th>What it does</th><th>Human-readable reason</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Prompt assembly</strong></td><td>Builds the AI instructions using target, profile, tool registry, memory, and recent progress.</td><td>Keeps the agent aware of its mission and current evidence.</td></tr>
+        <tr><td><strong>Role routing</strong></td><td>Routes different jobs to assigned models, such as primary, critic, validator, or judge.</td><td>Lets expensive models focus on hard reasoning and cheaper models handle volume.</td></tr>
+        <tr><td><strong>Tool dispatch</strong></td><td>Sends tool calls to the MCP server, waits for results, and stores outputs.</td><td>Separates AI planning from controlled tool execution.</td></tr>
+        <tr><td><strong>Hypothesis journal</strong></td><td>Stores active, confirmed, and ruled-out hypotheses.</td><td>Prevents the agent from forgetting why it ran a test.</td></tr>
+        <tr><td><strong>Evidence enforcement</strong></td><td>Downgrades confirmed claims that lack concrete evidence.</td><td>Protects the report from unsupported model assertions.</td></tr>
+        <tr><td><strong>Loop guard</strong></td><td>Detects repeated identical tool calls and nudges the agent to pivot or finish.</td><td>Stops the scan from getting stuck in circles.</td></tr>
+        <tr><td><strong>Coverage gate</strong></td><td>Blocks early termination until enough attack classes or kill-chain areas were explored.</td><td>Prevents shallow scans from looking complete.</td></tr>
+        <tr><td><strong>Idle stop</strong></td><td>Allows the session to stop after repeated rounds with no new progress.</td><td>Stops spending when the agent runs out of useful ideas.</td></tr>
+        <tr><td><strong>Finalization</strong></td><td>Builds surface graphs, promotes eligible validated candidates, finalizes goals, and updates performance memory.</td><td>Turns raw session activity into reportable state.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The repeated decision cycle</h3>
+    <table>
+      <thead><tr><th>Cycle step</th><th>Plain-English action</th><th>Typical output</th></tr></thead>
+      <tbody>
+        <tr><td>Observe</td><td>Read the latest target facts, tool results, candidate list, and unfinished goals.</td><td>Updated session state.</td></tr>
+        <tr><td>Choose</td><td>Select one next action that moves the scan forward.</td><td>Tool call, hypothesis, validator task, or proof plan.</td></tr>
+        <tr><td>Execute</td><td>Run the chosen tool through the controlled MCP layer or record a structured reasoning item.</td><td>Tool output, event, error, or saved thought.</td></tr>
+        <tr><td>Extract</td><td>Turn useful output into endpoints, artifacts, candidates, evidence, or graph nodes.</td><td>Structured records instead of loose text.</td></tr>
+        <tr><td>Challenge</td><td>Ask validators, critics, or loops to test whether the claim still holds.</td><td>Support, refute, disputed, or needs-proof verdict.</td></tr>
+        <tr><td>Decide</td><td>Promote, keep as candidate, rule out, dedup, or ask for one more proof.</td><td>Cleaner report state.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warning note">
+      <strong>Why findings can appear minutes later:</strong> raw tool output may arrive early, but GENESIS still needs
+      enough concrete evidence and critic review before it should be treated as a finding. Optional validation-lab proof
+      work may continue after the main finding is visible.
+    </div>
+  </section>
+
+  <section>
+    <h2>10. Validation Pipeline in Detail</h2>
+    <p>
+      The Validation Lab is now optional follow-up instead of the mandatory path for every scan profile. Exhaustive,
+      Deep Research, and Validated scans differ in discovery depth, while final findings are saved through evidence
+      checks and critic review.
+    </p>
+    <div class="flow">
+      <div>Prepare</div>
+      <div>Scan</div>
+      <div>Validate</div>
+      <div>Dedup</div>
+      <div>Prove</div>
+      <div>Promote</div>
+      <div>Report</div>
+    </div>
+    <table>
+      <thead><tr><th>Validation object</th><th>What it stores</th><th>What it prevents</th></tr></thead>
+      <tbody>
+        <tr><td><code>CandidateFinding</code></td><td>Title, attack class, affected surface, hypothesis, evidence, confidence, and proof plan.</td><td>Preserves promising leads for deeper validation without blocking normal findings.</td></tr>
+        <tr><td><code>ValidationVerdict</code></td><td>Support, refute, needs-proof, or disputed verdict with reasoning.</td><td>Prevents one agent's claim from becoming truth without challenge.</td></tr>
+        <tr><td><code>ProofRun</code></td><td>Proof tool, oracle, inputs, result, artifacts, pass/fail reason, and live/static class.</td><td>Prevents vague evidence from being treated as confirmation.</td></tr>
+        <tr><td><code>FindingCluster</code></td><td>Canonical candidate, duplicates, merged evidence, and root-cause summary.</td><td>Prevents duplicate tickets for the same fix.</td></tr>
+        <tr><td><code>TargetSurfaceGraph</code></td><td>Endpoint-to-source and artifact links with confidence.</td><td>Prevents black-box and source evidence from living in separate worlds.</td></tr>
+        <tr><td><code>BenchmarkReport</code></td><td>Candidate count, proof coverage, duplicate rate, mapping rate, and recall when ground truth is supplied.</td><td>Prevents demo claims from being unmeasured.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Promotion rules in plain English</h3>
+    <table>
+      <thead><tr><th>Rule</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Strict promotion is opt-in.</td><td>Candidates need proof or auditable operator validation only when the operator uses the Validation Lab promotion path.</td></tr>
+        <tr><td>Refute or disputed verdicts block promotion.</td><td>If a validator raises a serious objection, GENESIS keeps the candidate out of Findings.</td></tr>
+        <tr><td>Source-backed issues may need live replay.</td><td>Code evidence is valuable, but live reachability usually matters for confirmation.</td></tr>
+        <tr><td>Evidence still matters.</td><td>Normal findings still need concrete evidence, and weak claims can be downgraded to unverified or disputed.</td></tr>
+        <tr><td>Failed proof does not always erase prior proof.</td><td>A later weak attempt should not undo an earlier solid proof without context.</td></tr>
+        <tr><td>Operator Confirm is a manual attestation.</td><td>It records that a human reviewed the evidence and chose to promote a selected candidate.</td></tr>
+        <tr><td>Promote Proven reruns the strict gate.</td><td>It promotes only candidates already eligible under the validation and proof rules.</td></tr>
+        <tr><td>Complete Validation continues proof work.</td><td>It runs proof planning, proof tools, clustering, and promotion for existing candidates without restarting discovery.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Validator roles</h3>
+    <table>
+      <thead><tr><th>Validator</th><th>Main question</th><th>Evidence it prefers</th></tr></thead>
+      <tbody>
+        <tr><td><code>endpoint_validator</code></td><td>Can the issue be reached through the live target?</td><td>HTTP responses, browser behavior, auth/session state, callback hits, and proof oracles.</td></tr>
+        <tr><td><code>source_validator</code></td><td>Does the source or artifact path really support the bug theory?</td><td>Route mapping, source-to-sink path, invariant break, symbol references, and code context.</td></tr>
+        <tr><td><code>counter_validator</code></td><td>What would make this candidate wrong?</td><td>Patched behavior, missing preconditions, non-reachability, false-positive patterns, and safer explanations.</td></tr>
+        <tr><td><code>proof_planner</code></td><td>What exact safe tool call can prove or disprove this candidate?</td><td>Concrete parameters for request forge, browser proof, OOB proof, sandbox proof, fuzzing, symbex, or instrumentation.</td></tr>
+        <tr><td><code>operator_validator</code></td><td>Did a human review and accept the evidence?</td><td>Manual notes, screenshots, proof artifacts, and business context.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Candidate status guide</h3>
+    <table>
+      <thead><tr><th>Status</th><th>Meaning</th><th>Operator interpretation</th></tr></thead>
+      <tbody>
+        <tr><td><code>candidate</code></td><td>A lead exists but has not passed validation and proof gates.</td><td>Useful lead, not a final finding.</td></tr>
+        <tr><td><code>proof_queued</code></td><td>Complete Validation has queued the candidate for proof work.</td><td>Wait for the background job to run before reporting.</td></tr>
+        <tr><td><code>proof_running</code></td><td>A proof tool or proof-planning job is actively testing the candidate.</td><td>Watch Proof Runs for pass/fail evidence.</td></tr>
+        <tr><td><code>proven</code></td><td>A proof run passed for the candidate.</td><td>Ready for promotion if no blocking refutation exists.</td></tr>
+        <tr><td><code>proof_failed</code></td><td>The attempted proof did not meet its oracle.</td><td>Either the hypothesis is wrong or the proof plan needs revision.</td></tr>
+        <tr><td><code>ruled_out</code></td><td>Evidence shows the candidate is not valid.</td><td>Do not report it as a vulnerability.</td></tr>
+        <tr><td><code>source_verified_unreachable</code></td><td>Source evidence suggests a weakness, but no live path is reachable.</td><td>Track as engineering risk, not confirmed exploitable exposure.</td></tr>
+        <tr><td><code>promoted</code></td><td>The candidate passed the gate and became a finding.</td><td>Use in the Findings tab and executive report.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>11. Fallbacks and Reliability Controls</h2>
+    <p>
+      GENESIS includes fallback behavior because AI scans are long-running and tool-heavy. The platform expects timeouts,
+      model rate limits, parser quirks, target errors, and partial evidence.
+    </p>
+    <table>
+      <thead><tr><th>Fallback or guard</th><th>What happens</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tool failure capture</strong></td><td>Tool errors are recorded and shown as session errors or tool outputs.</td><td>A failed tool should explain itself instead of silently disappearing.</td></tr>
+        <tr><td><strong>Model role fallback</strong></td><td>If no model profile is assigned, roles fall back to the configured primary model.</td><td>Existing installs keep working without complex model setup.</td></tr>
+        <tr><td><strong>Rate-limit backoff</strong></td><td>Sub-agent calls can wait and retry instead of immediately failing the session.</td><td>Protects long scans from temporary provider limits.</td></tr>
+        <tr><td><strong>Evidence downgrade</strong></td><td>Claims marked confirmed without evidence are demoted to unverified or disputed.</td><td>Keeps confidence honest.</td></tr>
+        <tr><td><strong>Blind-bug proof requirement</strong></td><td>Blind SSRF, XXE, time-based SQLi, and similar classes need callbacks or passing oracles.</td><td>Prevents "maybe it worked" reports.</td></tr>
+        <tr><td><strong>Loop-breaker</strong></td><td>Repeated identical tool calls trigger a pivot-or-wrap-up nudge.</td><td>Saves time and cost.</td></tr>
+        <tr><td><strong>Wall-clock floors</strong></td><td>Exhaustive and Deep Research can refuse early final reports.</td><td>Prevents the agent from ending before enough coverage exists.</td></tr>
+        <tr><td><strong>Coverage checklist</strong></td><td>Important attack classes must be touched before some profiles complete.</td><td>Improves consistency across runs.</td></tr>
+        <tr><td><strong>Candidate preservation</strong></td><td>Unproven ideas stay in Candidates instead of being lost.</td><td>Humans can revisit leads without treating them as final findings.</td></tr>
+        <tr><td><strong>Complete Validation job</strong></td><td>Stopped or completed sessions can continue proof and promotion for existing candidates only.</td><td>Protects demos and long scans from losing value when discovery is stopped early.</td></tr>
+        <tr><td><strong>Proof planner fallback</strong></td><td>When a candidate lacks concrete proof parameters, the proof planner tries to create one safe deterministic proof action.</td><td>Turns vague leads into executable validation work without silently confirming them.</td></tr>
+        <tr><td><strong>Patched-control benchmark</strong></td><td>Running against a fixed twin checks whether high/critical findings disappear.</td><td>Builds trust that the tool is not just noisy.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Common fallback outcomes</h3>
+    <table>
+      <thead><tr><th>Situation</th><th>GENESIS response</th><th>What it means for the report</th></tr></thead>
+      <tbody>
+        <tr><td>Target is temporarily unreachable</td><td>Record error, retry when the profile allows, and preserve known state.</td><td>Findings may be incomplete; note availability as a limitation.</td></tr>
+        <tr><td>Model provider rejects a request</td><td>Use configured fallback routing or mark the agent turn as failed.</td><td>Check Errors and Costs before trusting scan completeness.</td></tr>
+        <tr><td>Validator says "needs proof"</td><td>Send the candidate to optional proof orchestration.</td><td>The candidate may need more evidence, but it does not block separately saved findings.</td></tr>
+        <tr><td>Stopped session has candidates needing proof</td><td>Run Complete Validation only if you want proof runs and promotion records for candidate leads.</td><td>The normal Findings tab should still be reviewed for saved findings.</td></tr>
+        <tr><td>Endpoint proof passes but source mapping is missing</td><td>Promote based on live proof, with source mapping marked unknown.</td><td>The finding is still useful; remediation may need human code lookup.</td></tr>
+        <tr><td>Source proof passes but live replay fails</td><td>Keep source-only status unless live reachability is not required.</td><td>Useful for engineering review, weaker for executive risk claims.</td></tr>
+        <tr><td>Duplicate candidates appear</td><td>Cluster them by endpoint, root cause, proof behavior, and likely fix.</td><td>Report one canonical finding with merged evidence.</td></tr>
+        <tr><td>Patched twin still shows the issue</td><td>Treat it as either residual vulnerability or false-positive warning.</td><td>Do not use the metric as clean proof until reviewed.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>12. Main UI Areas</h2>
+    <table>
+      <thead><tr><th>Area</th><th>What it shows</th><th>How to read it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dashboard</strong></td><td>Target entry, scan profile, operator goal, and session start controls.</td><td>Choose the profile that matches your need: breadth, depth, or validation.</td></tr>
+        <tr><td><strong>Activity</strong></td><td>Thoughts, tool calls, tool results, hypotheses, and updates in time order.</td><td>Use it to understand what GENESIS did minute by minute.</td></tr>
+        <tr><td><strong>Findings</strong></td><td>Final vulnerabilities and observations saved after evidence checks and critic review.</td><td>Use this for reports and remediation tracking.</td></tr>
+        <tr><td><strong>Validated</strong></td><td>Candidates, surface graph, debates, proof runs, proof jobs, clusters, scorecards, and Complete Validation controls.</td><td>Use this to see why a finding did or did not become confirmed.</td></tr>
+        <tr><td><strong>Reasoning Loops</strong></td><td>Structured reasoning loops, ticks, branches, choices, and token use.</td><td>Use this to inspect hard reasoning, not normal scanning.</td></tr>
+        <tr><td><strong>Adversarial</strong></td><td>Red/blue or critic-style challenge and response.</td><td>Use this to see where GENESIS tried to refute itself.</td></tr>
+        <tr><td><strong>Graph</strong></td><td>Hosts, services, findings, credentials, and relationships.</td><td>Use this to understand attack paths and chaining.</td></tr>
+        <tr><td><strong>Costs</strong></td><td>Token and model spending by source and iteration.</td><td>Use this to tune model assignments and scan depth.</td></tr>
+        <tr><td><strong>Errors</strong></td><td>Tool, API, model, and runtime problems captured during the session.</td><td>Use this first when a tab looks empty or a session stops early.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>13. Benchmark and Demo Methodology</h2>
+    <p>
+      The strongest executive demo is not a vague claim that GENESIS finds every bug. The strongest demo is a measured
+      control: vulnerable target, patched twin, known ground truth, optional proof artifacts, and clear false-positive checks.
+    </p>
+    <table>
+      <thead><tr><th>Demo object</th><th>Role</th><th>How it should be reported</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vulnerable app</strong></td><td>The target under test with planted safe vulnerabilities.</td><td>Report recall: how many planted root causes GENESIS found.</td></tr>
+        <tr><td><strong>Patched twin</strong></td><td>The false-positive control with the same app after fixes.</td><td>Report high/critical confirmed findings here as false positives or residual bugs.</td></tr>
+        <tr><td><strong>Fake metadata service</strong></td><td>A safe proof canary for SSRF impact.</td><td>Do not treat it as a normal vulnerable target; attach it as SSRF proof evidence.</td></tr>
+        <tr><td><strong>Ground truth file</strong></td><td>The expected vulnerability list for the lab.</td><td>Use it to calculate recall instead of guessing.</td></tr>
+        <tr><td><strong>Scorecard</strong></td><td>The measured result of a run.</td><td>Show recall, proof coverage, duplicate rate, and patched-control false positives.</td></tr>
+      </tbody>
+    </table>
+    <div class="grid">
+      <div class="card"><strong>Recall.</strong> How many planted issues GENESIS found.</div>
+      <div class="card"><strong>Precision proxy.</strong> Whether patched controls stay clean.</div>
+      <div class="card"><strong>Proof coverage.</strong> How many confirmed issues have passing proof evidence.</div>
+      <div class="card"><strong>Duplicate rate.</strong> How many raw leads collapse to the same root cause.</div>
+      <div class="card"><strong>Time to value.</strong> How long until the first confirmed finding appears.</div>
+      <div class="card"><strong>Cost per confirmed finding.</strong> How much model/tool spend produced validated output.</div>
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2>14. Data Objects and Evidence Records</h2>
+    <p>
+      GENESIS is easiest to understand when each object has a clear job. A raw scanner usually produces a flat list of
+      alerts. GENESIS stores separate records for leads, challenges, proofs, clusters, and final findings so the evidence
+      trail stays readable.
+    </p>
+    <table>
+      <thead><tr><th>Object</th><th>Plain-English job</th><th>Key fields a reader may see</th></tr></thead>
+      <tbody>
+        <tr><td><code>Session</code></td><td>The complete scan run for one target and profile.</td><td>Target, profile, start time, status, agents, costs, and summary.</td></tr>
+        <tr><td><code>TargetBrief</code></td><td>The short description of what is being tested.</td><td>Target, scope, exclusions, auth notes, assumptions, and known assets.</td></tr>
+        <tr><td><code>TargetSurfaceGraph</code></td><td>The map connecting endpoints, source files, services, artifacts, and findings.</td><td>Endpoint, method, file path, symbol, confidence, auth state, and observed requests.</td></tr>
+        <tr><td><code>CandidateFinding</code></td><td>A structured lead that still needs validation.</td><td>Title, class, surface, hypothesis, evidence, confidence, and proof plan.</td></tr>
+        <tr><td><code>SourceCandidateFinding</code></td><td>A candidate grounded in source, artifact, or binary analysis.</td><td>File path, symbol, sink, source input, taint path, invariant, and mapped endpoint.</td></tr>
+        <tr><td><code>ValidationVerdict</code></td><td>A challenge or support decision from a validator.</td><td>Verdict, reasoning, missing evidence, target proof action, and validator role.</td></tr>
+        <tr><td><code>ProofRun</code></td><td>A controlled test with a pass/fail oracle.</td><td>Tool, inputs, oracle, output, artifacts, result, and pass/fail reason.</td></tr>
+        <tr><td><code>ValidationProofJob</code></td><td>A background job that completes proof and promotion for existing candidates.</td><td>Queued count, processed count, passed/failed proofs, promoted count, and remaining blockers.</td></tr>
+        <tr><td><code>FindingCluster</code></td><td>A group of repeated candidates that share one root cause.</td><td>Canonical finding, duplicate list, merged evidence, root cause, and remediation shape.</td></tr>
+        <tr><td><code>Vulnerability</code></td><td>The final finding that appears in the report.</td><td>Severity, target, evidence, remediation, status, CVSS, and reproducibility links.</td></tr>
+        <tr><td><code>BenchmarkReport</code></td><td>The measured score for a scan against known ground truth.</td><td>Recall, false positives, proof coverage, duplicate rate, time, and cost.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Evidence quality ladder</h3>
+    <table>
+      <thead><tr><th>Level</th><th>Evidence type</th><th>How GENESIS treats it</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Model hypothesis only</td><td>Saved as a lead, not a finding.</td></tr>
+        <tr><td>2</td><td>Scanner output or suspicious response</td><td>Candidate evidence; may need validator challenge.</td></tr>
+        <tr><td>3</td><td>Source path or artifact support</td><td>Stronger candidate; still needs reachability if impact depends on live exposure.</td></tr>
+        <tr><td>4</td><td>Live endpoint difference or callback</td><td>Strong evidence; proof oracle can make it reportable.</td></tr>
+        <tr><td>5</td><td>Passing proof run plus no critical refutation</td><td>Eligible for confirmed finding promotion.</td></tr>
+        <tr><td>6</td><td>Passing proof plus patched-control clean result</td><td>Best demo evidence: the weakness appears in vulnerable target and disappears in the fixed twin.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="page-break">
+    <h2>15. Scan Methodology Matrix</h2>
+    <p>
+      GENESIS has several scan styles because not every question needs the same level of effort. The right profile depends
+      on whether the operator wants quick coverage, deep investigation, or proof-backed confidence.
+    </p>
+    <table>
+      <thead><tr><th>Profile</th><th>Best for</th><th>How it behaves</th><th>Tradeoff</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Standard or quick scan</strong></td><td>Fast triage and early target understanding.</td><td>Runs common recon and web checks, then saves evidence-reviewed findings.</td><td>Fastest discovery, but fewer deep proof plans.</td></tr>
+        <tr><td><strong>Exhaustive</strong></td><td>Broad routine coverage across many bug classes.</td><td>Pushes wider tool coverage and normal evidence-reviewed finding creation.</td><td>More time and cost than quick scans.</td></tr>
+        <tr><td><strong>Deep Research</strong></td><td>Long-horizon audits where hidden logic issues may matter.</td><td>Allows more agent rounds, reasoning loops, memory use, uncommon test paths, and stronger evidence review.</td><td>Best for depth, with higher runtime and cost.</td></tr>
+        <tr><td><strong>Validated Dynamic</strong></td><td>Executive reporting and low-noise remediation queues.</td><td>Adds hybrid preparation, optional validators, dedup, proof planning, and promotion scorecards.</td><td>More context and proof artifacts, with normal findings still visible.</td></tr>
+        <tr><td><strong>Hybrid validated</strong></td><td>Targets with live endpoints plus source, OpenAPI, artifacts, binaries, or sourcemaps.</td><td>Correlates runtime behavior with source and artifact evidence.</td><td>Most defensible when context is available.</td></tr>
+        <tr><td><strong>Benchmark mode</strong></td><td>Measuring GENESIS on controlled labs or demo ranges.</td><td>Compares findings to ground truth and patched controls.</td><td>Measures a defined target, not universal capability.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Endpoint-first versus repo-first reasoning</h3>
+    <table>
+      <thead><tr><th>Approach</th><th>What it starts from</th><th>Where it is strong</th><th>Where it needs help</th></tr></thead>
+      <tbody>
+        <tr><td>Endpoint-first</td><td>Live services, URLs, APIs, forms, sessions, and observable behavior.</td><td>Real deployed exposure, auth state, browser proof, OOB callbacks, and exploit-chain context.</td><td>May miss bugs that require code-level lifetime, taint, or invariant reasoning.</td></tr>
+        <tr><td>Repo-first</td><td>Source code, commit history, call graphs, symbols, and component structure.</td><td>Cross-file bugs, inconsistent patterns, patch reasoning, and source-level reachability.</td><td>May overstate risk if the vulnerable path is not exposed in the deployed target.</td></tr>
+        <tr><td>Hybrid</td><td>Both live behavior and source/artifact context.</td><td>Best path for proof-backed confidence: source explains why, endpoint proves exposure.</td><td>Needs good mapping between endpoint, handler, source file, and proof oracle.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      <strong>Recommended default:</strong> use Exhaustive for broad discovery, Deep Research for difficult targets, and
+      Validated Dynamic when the scan should spend extra effort on hybrid mapping, proof planning, and executive scorecards.
+      Candidates require proof or operator validation only when you use the optional promotion workflow.
+    </div>
+  </section>
+
+  <section>
+    <h2>16. Operator Workflows and Decision Points</h2>
+    <p>
+      This section is for the person running GENESIS. It explains what to do when a scan is active, when tabs are empty,
+      and when a finding needs human judgment.
+    </p>
+    <table>
+      <thead><tr><th>Moment</th><th>What the operator sees</th><th>Recommended action</th></tr></thead>
+      <tbody>
+        <tr><td>First few minutes</td><td>Recon, route discovery, technology detection, and early tool calls.</td><td>Let the scan build context; do not expect polished findings immediately.</td></tr>
+        <tr><td>Candidate appears</td><td>A possible issue with hypothesis and early evidence.</td><td>Use it as an optional lead for deeper proof, not as the primary report source.</td></tr>
+        <tr><td>Validation Lab shows proof pending</td><td>The candidate is plausible but needs more evidence before candidate promotion.</td><td>Use proof action or Promote Proven only when you want extra proof artifacts.</td></tr>
+        <tr><td>Validation Lab says candidates need proof</td><td>For example, "31 need proof" means optional candidate leads need follow-up proof.</td><td>Review Findings first; run Complete Validation for demo-grade proof records.</td></tr>
+        <tr><td>Operator Confirm is available</td><td>A human can manually attest after reviewing evidence.</td><td>Use sparingly and document why the human evidence is enough.</td></tr>
+        <tr><td>Loops tab is empty</td><td>No deliberate reasoning loop has been recorded yet.</td><td>Check Activity and Errors; empty loops are normal for simple or early scans.</td></tr>
+        <tr><td>Adversarial tab is empty</td><td>No critic or red/blue exchange has been stored yet.</td><td>Run deeper/validated profile or check whether the role assignment is enabled.</td></tr>
+        <tr><td>Findings arrive late</td><td>Evidence collection, tool execution, or critic review finished later.</td><td>Explain this as normal long-running scan behavior, not a mandatory candidate bottleneck.</td></tr>
+        <tr><td>Patched twin has findings</td><td>The fixed control still reports issues.</td><td>Classify each as residual bug, intentional demo route, or false positive before reporting metrics.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>How to use validation controls</h3>
+    <table>
+      <thead><tr><th>Control</th><th>What it does</th><th>When to use it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Validate candidate</strong></td><td>Asks validators to support, refute, or request proof for a selected candidate.</td><td>Use when a lead looks important but lacks validator coverage.</td></tr>
+        <tr><td><strong>Complete Validation</strong></td><td>Queues proof planning, proof execution, clustering, and promotion for existing candidates.</td><td>Use after stopping a scan or when many candidates still need proof.</td></tr>
+        <tr><td><strong>Run proof</strong></td><td>Executes a controlled proof action with a pass/fail oracle.</td><td>Use for any candidate that should become a confirmed finding.</td></tr>
+        <tr><td><strong>Promote Proven</strong></td><td>Runs the strict promotion gate for candidates with enough proof and no blocking refutation.</td><td>Use when proof is already passing and the candidate should become a finding.</td></tr>
+        <tr><td><strong>Operator Confirm</strong></td><td>Records human acceptance and creates a manual proof-style record.</td><td>Use for reviewed evidence that cannot be automatically proven but is still defensible.</td></tr>
+        <tr><td><strong>Cluster or dedup</strong></td><td>Merges repeated leads into one root-cause record.</td><td>Use before presenting metrics or remediation queues.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>17. Governance, Safety, and Executive Reporting</h2>
+    <p>
+      GENESIS should be presented as an authorized defensive assessment platform. The strongest message is not that AI is
+      magic. The strongest message is that GENESIS makes security testing measurable, reviewable, and less noisy.
+    </p>
+    <table>
+      <thead><tr><th>Governance area</th><th>What GENESIS supports</th><th>How to talk about it</th></tr></thead>
+      <tbody>
+        <tr><td>Authorization</td><td>Targets should be scoped and approved before testing.</td><td>"GENESIS is used only on systems we are allowed to assess."</td></tr>
+        <tr><td>Evidence</td><td>Findings include proof runs, screenshots, request/response evidence, or source links where available.</td><td>"A confirmed item should show why it is real."</td></tr>
+        <tr><td>Reproducibility</td><td>Sessions retain tool outputs and proof artifacts for later review.</td><td>"Engineering can reproduce or challenge the evidence."</td></tr>
+        <tr><td>False positives</td><td>Patched controls, validators, and proof gates reduce unsupported claims.</td><td>"We measure false positives in a controlled twin, not by feeling."</td></tr>
+        <tr><td>Cost control</td><td>Role-based model routing and budgets make spend visible.</td><td>"Expensive reasoning is reserved for high-value decisions."</td></tr>
+        <tr><td>Safety</td><td>Proof scripts and deeper tests run through controlled tools and sandboxes.</td><td>"The demo proves impact without destructive behavior."</td></tr>
+        <tr><td>Limitations</td><td>Results depend on scope, credentials, target stability, tools, model availability, and time budget.</td><td>"These are measured results for this target and setup."</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Executive one-page story</h3>
+    <div class="grid">
+      <div class="card"><strong>Problem.</strong> Security testing creates too many alerts and too little proof.</div>
+      <div class="card"><strong>Approach.</strong> GENESIS uses AI agents plus controlled tools to investigate like a team.</div>
+      <div class="card"><strong>Trust layer.</strong> Evidence checks, critic review, and optional proof artifacts keep raw leads separate from useful findings.</div>
+      <div class="card"><strong>Evidence.</strong> Proof runs, validators, and patched controls support the final report.</div>
+      <div class="card"><strong>Value.</strong> Teams get prioritized, reproducible, lower-noise remediation work.</div>
+      <div class="card"><strong>Limit.</strong> GENESIS is measured per scope; it is not a universal guarantee of zero risk.</div>
+    </div>
+  </section>
+
+  <section class="page-break">
+    <h2>18. Containers and Cyber Kill Chain Coverage</h2>
+    <p>
+      GENESIS currently has 145 active tools, but this print overview does not list every tool one by one. For a first-time
+      reader, the more useful view is what execution environments exist, what safety boundary each one provides, and what
+      parts of the cyber kill chain the platform covers.
+    </p>
+
+    <h3>Special execution containers and services</h3>
+    <table>
+      <thead><tr><th>Container or service</th><th>What it does</th><th>Why it matters</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Forge sandbox pool</strong></td><td>Runs small proof scripts and request checks inside restricted containers.</td><td>Lets GENESIS prove findings without running custom code directly on the host.</td></tr>
+        <tr><td><strong>MCP server</strong></td><td>Exposes the authorized security tools through one controlled API.</td><td>Keeps tool execution consistent, logged, and separate from AI reasoning.</td></tr>
+        <tr><td><strong>Celery worker</strong></td><td>Runs long background jobs such as scans, proof completion, benchmarks, and cleanup.</td><td>Keeps the UI responsive while heavy work continues safely.</td></tr>
+        <tr><td><strong>Payload swarm</strong></td><td>Fans many safe request or payload variants across four sandbox workers.</td><td>Speeds up proof attempts and reduces bottlenecks from one busy worker.</td></tr>
+        <tr><td><strong>Chromium renderer</strong></td><td>Runs a real browser for screenshots, DOM capture, JavaScript flows, and client-side proof.</td><td>Finds issues that simple HTTP requests miss, such as DOM behavior and stored XSS rendering.</td></tr>
+        <tr><td><strong>Ghidra headless</strong></td><td>Decompiles and analyzes binaries from the artifact store.</td><td>Adds reverse-engineering context without requiring a desktop reverse-engineering session.</td></tr>
+        <tr><td><strong>Fuzzer</strong></td><td>Feeds many generated inputs to binaries or parsers and watches for crashes or unsafe behavior.</td><td>Helps test compiled components and parser-heavy targets beyond normal web scanning.</td></tr>
+        <tr><td><strong>Symbolic execution</strong></td><td>Uses constraint solving to ask whether a code path is reachable and what input might reach it.</td><td>Supports deeper proof planning when brute-force testing is inefficient.</td></tr>
+        <tr><td><strong>Instrumentation</strong></td><td>Runs dynamic tracing for binaries with controlled debugging capability.</td><td>Shows what happens inside a program while keeping instrumentation isolated from live targets.</td></tr>
+        <tr><td><strong>Renderer service</strong></td><td>Turns browser state, pages, and visual artifacts into reviewable evidence.</td><td>Helps explain client-side behavior to people who do not read raw HTML or logs.</td></tr>
+        <tr><td><strong>Replica manager</strong></td><td>Starts disposable replica targets and controlled swarm workers for testing.</td><td>Lets researchers test risky ideas on a clone instead of production.</td></tr>
+        <tr><td><strong>Artifact store</strong></td><td>Stores pulled source, binaries, screenshots, proof outputs, and reports.</td><td>Keeps evidence available for replay, review, and reproducibility.</td></tr>
+        <tr><td><strong>Data stores</strong></td><td>PostgreSQL, MongoDB, ChromaDB, Neo4j, and Redis store structured findings, logs, memory, graphs, and queues.</td><td>Turns long AI activity into durable records instead of disposable chat output.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Cyber kill chain coverage</h3>
+    <p class="small">
+      Counts below are coverage-oriented, so a single tool may support more than one phase. They are meant to show
+      capability breadth, not add up to 145.
+    </p>
+    <table>
+      <thead><tr><th>Kill-chain component</th><th>Coverage count</th><th>What GENESIS covers</th><th>Boundary or design note</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1. Reconnaissance</strong></td><td>35+ tools</td><td>Host discovery, DNS, web fingerprinting, hidden paths, artifact discovery, technology detection, mobile/IoT/OT surface clues.</td><td>External cloud-asset APIs such as paid internet-wide search are not assumed by default.</td></tr>
+        <tr><td><strong>2. Weaponization planning</strong></td><td>40+ tools</td><td>Payload shaping, source and binary analysis, taint paths, symbolic execution, fuzzing, crypto checks, and proof-plan generation.</td><td>The goal is controlled proof planning, not building destructive malware.</td></tr>
+        <tr><td><strong>3. Delivery and test execution</strong></td><td>30+ tools</td><td>Custom HTTP requests, browser flows, workflow fuzzing, OOB callback checks, sandbox scripts, and request-differential probes.</td><td>Delivery means sending authorized test inputs to the scoped target.</td></tr>
+        <tr><td><strong>4. Exploitation and proof</strong></td><td>60+ tools</td><td>Injection, auth bypass, SSRF, XSS, deserialization, parser differentials, crypto mistakes, protocol issues, and binary proof helpers.</td><td>Evidence checks and optional proof runs help separate real impact from guesses.</td></tr>
+        <tr><td><strong>5. Installation and persistence</strong></td><td>0 offensive tools</td><td>No persistence installation, no rootkits, and no destructive foothold actions.</td><td>Intentionally out of scope for a defensive assessment platform.</td></tr>
+        <tr><td><strong>6. Command and control</strong></td><td>0 C2 tools</td><td>OOB tokens exist only as proof canaries for blind vulnerabilities.</td><td>GENESIS does not operate live C2 infrastructure.</td></tr>
+        <tr><td><strong>7. Actions on objectives</strong></td><td>20+ tools</td><td>Impact validation, data-exposure checks, attack graph queries, Active Directory path review, cloud metadata proof, and kill-chain summaries.</td><td>Actions are demonstrated as evidence, not used for destructive collection.</td></tr>
+        <tr><td><strong>Validation layer</strong></td><td>15+ tools and roles</td><td>Candidates, validators, proof runs, dedup, provenance, benchmark reports, graph queries, and operator confirmation.</td><td>This is GENESIS-specific and sits above the classic kill chain.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Active tool families</h3>
+    <table>
+      <thead><tr><th>Tool family</th><th>Active tools</th><th>Plain-English coverage</th></tr></thead>
+      <tbody>
+        <tr><td>Reconnaissance</td><td>11</td><td>Finds hosts, services, subdomains, DNS records, banners, and exposed internet surface.</td></tr>
+        <tr><td>Web scanning</td><td>19</td><td>Discovers routes, parameters, server behavior, web technologies, and parser inconsistencies.</td></tr>
+        <tr><td>Injection and payload testing</td><td>24</td><td>Checks SQL, command, template, deserialization, upload, LDAP, NoSQL, and payload behavior.</td></tr>
+        <tr><td>Authentication and identity</td><td>11</td><td>Checks tokens, sessions, OAuth, SAML, CORS, IDOR, defaults, and credential weaknesses.</td></tr>
+        <tr><td>Browser and client-side testing</td><td>12</td><td>Uses browser behavior to test JavaScript, DOM, WebSocket, CSP, XSS, races, and workflows.</td></tr>
+        <tr><td>Cloud, SSRF, and internal services</td><td>8</td><td>Tests metadata access, callback proof, internal service reachability, Redis, gRPC, DNS rebinding, and brokers.</td></tr>
+        <tr><td>Source, artifact, and binary analysis</td><td>14</td><td>Reads source, artifacts, binaries, patches, architecture, invariants, taint paths, and decompiled code.</td></tr>
+        <tr><td>Fuzzing, symbolic execution, and instrumentation</td><td>8</td><td>Runs crash discovery, behavior comparison, tracing, symbolic reachability, and safe replicas.</td></tr>
+        <tr><td>Crypto and TLS testing</td><td>9</td><td>Checks certificates, TLS settings, JWT crypto, padding oracles, nonce reuse, and RSA misuse.</td></tr>
+        <tr><td>Active Directory and infrastructure</td><td>5</td><td>Reviews Windows, Samba, Kerberos, network credentials, shares, and controlled path analysis.</td></tr>
+        <tr><td>IoT, OT, mobile, and specialist</td><td>12</td><td>Covers mobile apps, deep links, Bluetooth, UPnP, firmware, serial consoles, and industrial protocols.</td></tr>
+        <tr><td>AI, reasoning, and validation</td><td>12</td><td>Supports custom proof, evidence recording, attack graphs, hypothesis ranking, AI endpoint checks, and planning.</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 19 — VS TRADITIONAL TOOLS
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>19. GENESIS vs Traditional Security Tools</h2>
+    <p>
+      Leadership frequently asks: "We already have Nessus, Burp Suite, and a SAST tool — what does GENESIS add?"
+      The answer is not that GENESIS replaces any single scanner. The difference is in how it reasons, validates,
+      and reports.
+    </p>
+    <table>
+      <thead><tr><th>Capability</th><th>Traditional scanner</th><th>GENESIS</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Test strategy</strong></td><td>Fixed checklist of known signatures run against the target.</td><td>AI forms hypotheses, selects the right tool for each theory, and adapts based on results.</td></tr>
+        <tr><td><strong>False positives</strong></td><td>Often high — scanner flags anything that matches a pattern.</td><td>Evidence checks, critic review, optional validation-lab proof, and patched-control comparison suppress unproven claims.</td></tr>
+        <tr><td><strong>Logic-level bugs</strong></td><td>Very limited — tools test known patterns, not business logic.</td><td>Reasoning loops, invariant tracking, and cross-file analysis find logic and design flaws.</td></tr>
+        <tr><td><strong>Evidence quality</strong></td><td>Usually a severity score and CVE number with no live proof.</td><td>Confirmed findings need concrete evidence; blind bug classes still require callback hits, passing oracles, or human attestation.</td></tr>
+        <tr><td><strong>Source + runtime correlation</strong></td><td>SAST and DAST are separate tools; findings are disconnected.</td><td>Hybrid mapping links live endpoint behavior to source files and artifacts in one session.</td></tr>
+        <tr><td><strong>Memory across sessions</strong></td><td>Each scan starts from zero.</td><td>Cross-session graph and vector memory carry findings, patterns, and technique recall forward.</td></tr>
+        <tr><td><strong>Chained attack paths</strong></td><td>Treats each finding in isolation.</td><td>Attack graph connects vulnerabilities across services to show realistic exploitation chains.</td></tr>
+        <tr><td><strong>Report noise</strong></td><td>Hundreds of raw alerts, most requiring manual triage.</td><td>Candidates stay separate from confirmed findings; dedup clusters reduce the same root cause to one ticket.</td></tr>
+        <tr><td><strong>Novel / zero-day style issues</strong></td><td>Cannot find what is not in the signature library.</td><td>Open-ended reasoning and custom AI-written probes can test for classes of bugs, not just known CVEs.</td></tr>
+        <tr><td><strong>Explainability</strong></td><td>A score or CVE ID is the explanation.</td><td>Every finding carries a hypothesis, evidence trail, reasoning loop, and proof record.</td></tr>
+      </tbody>
+    </table>
+    <div class="note">
+      <strong>How to frame this for leadership:</strong> Think of traditional scanners as a fast metal detector at a
+      security checkpoint. GENESIS is the follow-on investigator who picks up the flagged item, examines it, argues
+      with a colleague about whether it is really dangerous, writes up confirmed cases, and files evidence — so that
+      what reaches the team's desk is a prioritized, proven list rather than a pile of raw alarms.
+    </div>
+
+    <h3>Where traditional tools still win</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Why a traditional tool may be preferred</th></tr></thead>
+      <tbody>
+        <tr><td>Known-CVE patch auditing</td><td>Signature scanners with CVE feeds (Nessus, Qualys) are fast, cheap, and purpose-built for asset-based CVE matching.</td></tr>
+        <tr><td>Compliance PCI/ISO checkbox scans</td><td>Standard scanners produce outputs that auditors recognize; GENESIS output may need mapping to compliance controls.</td></tr>
+        <tr><td>Very large asset inventory scans</td><td>Fast network scanners (masscan, Shodan connectors) sweep thousands of IPs quickly; GENESIS is designed for deeper per-target work.</td></tr>
+        <tr><td>Lightweight CI/CD SAST gate</td><td>Semgrep or Bandit as a CI pipeline check is simpler and cheaper for catching obvious patterns in code commits.</td></tr>
+      </tbody>
+    </table>
+    <p>
+      GENESIS is designed to sit <em>above</em> these tools — it can call them as sub-tools — while adding the
+      reasoning, validation, and evidence layer that they do not provide on their own.
+    </p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 20 — PRODUCTION READINESS & ROADMAP
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>20. Production Readiness &amp; Roadmap</h2>
+    <p>
+      GENESIS is feature-complete at v9 for all core capabilities described in this document. The roadmap
+      covers hardening steps needed before treating any deployment as production-grade.
+    </p>
+
+    <div class="wow-strip" style="grid-template-columns: repeat(3, minmax(0,1fr));">
+      <div class="wow-metric"><strong>v9</strong>Current feature version — all scan modes, validation pipeline, reasoning loops, and 145 tools active.</div>
+      <div class="wow-metric"><strong>July 2026</strong>Target go-live date following a 9-week production hardening plan.</div>
+      <div class="wow-metric"><strong>4 phases</strong>Security fixes → Infrastructure hardening → Test suite → Bug triage before go-live.</div>
+    </div>
+
+    <h3>Current state summary</h3>
+    <table>
+      <thead><tr><th>Area</th><th>Current status</th><th>Gap before production</th></tr></thead>
+      <tbody>
+        <tr><td>Core scanning engine</td><td>Complete — all 145 tools, all scan profiles, multi-agent orchestration, reasoning loops.</td><td>None. Feature-complete and deployed internally.</td></tr>
+        <tr><td>Validation Lab</td><td>Complete — candidates, verdicts, proof runs, dedup, scoring, Complete Validation job.</td><td>Optional follow-up layer; normal findings no longer wait on universal promotion.</td></tr>
+        <tr><td>Secrets &amp; credentials in config</td><td>Some hardcoded values present in non-production configs.</td><td>Must be moved to secrets manager or environment injection before external deployment.</td></tr>
+        <tr><td>HTTPS / TLS</td><td>Not yet enforced on all service-to-service paths in the default compose.</td><td>Required before any deployment outside an isolated lab network.</td></tr>
+        <tr><td>Rate limiting &amp; auth hardening</td><td>Basic controls in place; not production-grade.</td><td>API rate limiting, IP allowlisting, and session controls needed.</td></tr>
+        <tr><td>Structured logging &amp; audit trail</td><td>Events logged; not yet centralized or queryable at production volume.</td><td>Centralized log shipping and audit log retention policy needed.</td></tr>
+        <tr><td>Automated test suite</td><td>Not yet in place for regression testing.</td><td>Scheduled for Phase 2 (early June 2026).</td></tr>
+        <tr><td>Monitoring &amp; alerting</td><td>Health checks in Docker Compose; no external monitoring.</td><td>Metrics exporter and alert rules needed before operational hand-off.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Roadmap — 9-week hardening plan</h3>
+    <table>
+      <thead><tr><th>Phase</th><th>Dates</th><th>Focus</th><th>Key deliverables</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Phase 0</strong></td><td>May 13–19, 2026</td><td>Critical security fixes</td><td>Remove hardcoded secrets, enforce HTTPS, add basic rate limiting, structured logging.</td></tr>
+        <tr><td><strong>Phase 1</strong></td><td>May 20 – Jun 2, 2026</td><td>Infrastructure hardening</td><td>Monitoring stack, backup strategy, audit log retention, network isolation review.</td></tr>
+        <tr><td><strong>Phase 2</strong></td><td>Jun 3–16, 2026</td><td>Validation via vulnerable target image + test suite</td><td>Known-vulnerability Docker image for regression testing; automated test coverage gates.</td></tr>
+        <tr><td><strong>Phase 3</strong></td><td>Jun 17–30, 2026</td><td>Bug triage and fixes</td><td>Resolve issues found in Phase 2 testing; performance and reliability review.</td></tr>
+        <tr><td><strong>Phase 4</strong></td><td>Jul 1–14, 2026</td><td>Go-live</td><td>Production deployment, operational hand-off, documentation finalization.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note warning">
+      <strong>Leadership message:</strong> GENESIS is not a prototype — it is a fully-featured platform that requires
+      the same production hardening steps expected of any enterprise security tool before external deployment.
+      The 9-week plan is specific, executable, and tracked.
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 21 — SAMPLE FINDING
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>21. What a Confirmed Finding Looks Like</h2>
+    <p>
+      This section shows a representative example of a confirmed GENESIS finding so leadership and new readers
+      understand exactly what reaches the remediation queue — and why every field matters.
+    </p>
+
+    <div style="border: 1.5px solid #2446c2; border-radius: 7px; padding: 0.14in 0.16in; margin: 0.1in 0; background: #f7f9ff;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.08in;">
+        <div>
+          <span style="font-size:7.5pt;text-transform:uppercase;letter-spacing:0.07em;color:#5a6478;font-weight:800;">Confirmed Finding</span><br>
+          <strong style="font-size:12pt;color:#172033;">Unauthenticated IDOR — /api/v1/reports/{id} exposes any user's report</strong>
+        </div>
+        <div style="text-align:right;">
+          <span style="background:#b53030;color:#fff;padding:0.03in 0.09in;border-radius:4px;font-weight:800;font-size:9pt;">HIGH</span>
+          &nbsp;
+          <span style="background:#ecf8f2;color:#137a4e;border:1px solid #bde4d0;padding:0.03in 0.08in;border-radius:4px;font-size:8.5pt;font-weight:700;">Promoted</span>
+        </div>
+      </div>
+      <table style="margin:0;">
+        <tr><th style="width:1.5in;">Field</th><th>Value</th></tr>
+        <tr><td>Attack class</td><td>Broken Object Level Authorization (BOLA / IDOR)</td></tr>
+        <tr><td>Affected surface</td><td><code>GET /api/v1/reports/{id}</code> — authenticated endpoint, no ownership check</td></tr>
+        <tr><td>Root cause</td><td>Handler queries by <code>report_id</code> from the URL without verifying that <code>request.user.id == report.owner_id</code></td></tr>
+        <tr><td>Hypothesis</td><td>If the numeric report ID is predictable, any authenticated user can retrieve another user's report by incrementing the ID.</td></tr>
+        <tr><td>Proof type</td><td>Live endpoint proof — HTTP request forge with substituted ID returned HTTP 200 and a different user's report body.</td></tr>
+        <tr><td>Proof evidence</td><td>Request: <code>GET /api/v1/reports/1042</code> as user B. Response: HTTP 200, report owned by user A (name, content confirmed different account). Screenshot saved to artifact store.</td></tr>
+        <tr><td>Validator verdicts</td><td>Endpoint validator: <em>support</em> — live 200 response with cross-account data confirmed. Counter-validator: <em>no refutation</em> — no rate limiting, no ownership check found in handler source.</td></tr>
+        <tr><td>Source mapping</td><td><code>backend/app/api/routes/reports.py:88</code> — <code>get_report()</code> queries only by ID. No ownership assertion in the path.</td></tr>
+        <tr><td>Business impact</td><td>Any authenticated user can read, enumerate, or exfiltrate reports belonging to other tenants.</td></tr>
+        <tr><td>Remediation</td><td>Add ownership check: <code>if report.owner_id != current_user.id: raise HTTPException(403)</code>. Apply to all object-level endpoints using the same pattern.</td></tr>
+        <tr><td>CVSS estimate</td><td>7.5 (High) — Network, Low complexity, Low privileges, No user interaction, High confidentiality impact</td></tr>
+        <tr><td>Dedup note</td><td>Three similar IDOR candidates on <code>/invoices</code>, <code>/documents</code>, and <code>/comments</code> clustered to this root cause — one fix addresses all four.</td></tr>
+      </table>
+    </div>
+
+    <h3>How to read this finding as a leader</h3>
+    <div class="grid">
+      <div class="card"><strong>Severity (HIGH) tells you priority.</strong> Critical = fix within 24 hours. High = fix within 1 sprint. Medium = fix within 1 quarter.</div>
+      <div class="card"><strong>Proof evidence tells you it is real.</strong> This is not a scanner guess — a live HTTP request retrieved another user's data and a screenshot was saved.</div>
+      <div class="card"><strong>Source mapping tells you where to fix it.</strong> The developer knows exactly which file and line to change.</div>
+      <div class="card"><strong>Dedup note tells you the true blast radius.</strong> One architectural mistake caused four separate surface exposures — fix the pattern once, not four separate tickets.</div>
+      <div class="card"><strong>Business impact tells you why it matters.</strong> Cross-tenant data exposure is a data breach risk — often a compliance and legal issue, not just a technical one.</div>
+      <div class="card"><strong>Validator verdicts tell you it was challenged.</strong> A second AI tried to refute the finding and could not — so this is not an unchallenged claim.</div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 22 — DATA SECURITY & SCOPE CONTROLS
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>22. Data Security, Privacy &amp; Scope Controls</h2>
+    <p>
+      Enterprise leaders typically need answers to three questions before approving a security platform:
+      where does our data go, can the tool cause damage, and who controls the scope?
+      This section answers each directly.
+    </p>
+
+    <h3>Data residency and flow</h3>
+    <table>
+      <thead><tr><th>Data type</th><th>Where it is stored</th><th>Does it leave the network?</th></tr></thead>
+      <tbody>
+        <tr><td>Scan targets, credentials, scope notes</td><td>Local PostgreSQL database in your Docker deployment.</td><td>No. Stored only in your controlled environment.</td></tr>
+        <tr><td>Tool outputs, proof artifacts, screenshots</td><td>Local MongoDB and MinIO object store.</td><td>No. Artifacts remain inside the deployment boundary.</td></tr>
+        <tr><td>AI reasoning and hypotheses</td><td>Local MongoDB.</td><td>AI reasoning prompts are sent to Anthropic's API (Claude). Prompt content includes tool output and target observations. Governed by your Anthropic API agreement.</td></tr>
+        <tr><td>Attack graph and findings</td><td>Local Neo4j and PostgreSQL.</td><td>No. Graph data stays local.</td></tr>
+        <tr><td>Session memory and embeddings</td><td>Local ChromaDB.</td><td>No.</td></tr>
+        <tr><td>API keys and secrets</td><td>Environment variables / secrets manager (post Phase 0 hardening).</td><td>Never transmitted beyond the deployment boundary.</td></tr>
+      </tbody>
+    </table>
+    <div class="note warning">
+      <strong>Important:</strong> AI reasoning calls do send tool output snippets to Anthropic's API. Before scanning
+      systems that contain regulated data (PII, PHI, financial records), confirm that your Anthropic API agreement
+      covers the data classification involved, or configure GENESIS to redact sensitive values before reasoning prompts
+      are assembled.
+    </div>
+
+    <h3>Scope and access controls</h3>
+    <table>
+      <thead><tr><th>Control</th><th>What it does</th><th>Leadership implication</th></tr></thead>
+      <tbody>
+        <tr><td>Target scope field</td><td>Operator enters exact targets; GENESIS does not expand scope beyond what is entered.</td><td>Unauthorized testing does not happen by accident.</td></tr>
+        <tr><td>Exclusion list</td><td>Specific paths, hosts, or parameters can be explicitly excluded from testing.</td><td>Production systems, third-party SaaS, and critical infrastructure can be protected.</td></tr>
+        <tr><td>Credential isolation</td><td>Authentication credentials used for testing are scoped to the session and stored locally.</td><td>Credentials do not persist beyond the scan or leave the deployment.</td></tr>
+        <tr><td>Sandbox boundary</td><td>Payloads and proof scripts run inside a restricted container with no outbound network except the target and the controlled OOB callback listener.</td><td>Proof testing cannot pivot to unintended systems.</td></tr>
+        <tr><td>OOB callback listener</td><td>A controlled internal listener proves blind vulnerabilities — it is not a public internet beacon by default.</td><td>Callback proofs can be contained to your internal network.</td></tr>
+        <tr><td>Destructive-action policy</td><td>GENESIS is designed as an assessment platform — no persistence installation, no C2 tools, no file deletion.</td><td>A GENESIS scan proves impact but does not cause it.</td></tr>
+        <tr><td>Operator confirmation gate</td><td>Some promotion actions require a human to explicitly approve before candidates become findings.</td><td>Leadership retains final sign-off authority on contested findings.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Questions to ask before each engagement</h3>
+    <div class="grid three">
+      <div class="card"><strong>Is testing authorized?</strong><br>Written permission should exist for the target system. GENESIS should only be pointed at systems your organization owns or has explicit written authorization to test.</div>
+      <div class="card"><strong>Is the target in scope?</strong><br>Verify the target IP or domain matches the authorized scope. Confirm third-party services, CDNs, and shared infrastructure are excluded unless specifically authorized.</div>
+      <div class="card"><strong>Is the data classification acceptable?</strong><br>If the target handles PII, PHI, or payment data, confirm that AI API data handling agreements cover the classification before scanning.</div>
+      <div class="card"><strong>Is a maintenance window needed?</strong><br>GENESIS testing is non-destructive by design, but active scanning may trigger WAF alerts or briefly increase server load. Coordinate with operations for sensitive production systems.</div>
+      <div class="card"><strong>Who reviews the findings?</strong><br>Assign an owner for each confirmed finding before the scan starts. A finding without an owner is noise that will not be fixed.</div>
+      <div class="card"><strong>How are credentials handled post-scan?</strong><br>Rotate test credentials used during scanning. Do not reuse production credentials for GENESIS sessions.</div>
+    </div>
+
+    <h3>Platform security posture (post Phase 0 hardening)</h3>
+    <table>
+      <thead><tr><th>Security control</th><th>Target state after Phase 0</th></tr></thead>
+      <tbody>
+        <tr><td>Secrets management</td><td>All credentials and API keys in environment injection or a secrets manager — no hardcoded values.</td></tr>
+        <tr><td>Transport encryption</td><td>TLS enforced on all inter-service and external-facing connections.</td></tr>
+        <tr><td>Access control</td><td>API authentication, role-based access, and session management hardened.</td></tr>
+        <tr><td>Rate limiting</td><td>Request rate limits applied to the API and UI to prevent abuse.</td></tr>
+        <tr><td>Audit logging</td><td>All scan starts, findings, proof promotions, and operator actions logged with timestamps.</td></tr>
+        <tr><td>Network isolation</td><td>Testing network (vuln-lab) isolated from the management network in Docker configuration.</td></tr>
+        <tr><td>Container hardening</td><td>Sandbox containers run with read-only filesystems, no-new-privileges, and tmpfs scratch only.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 23 — SEVERITY SLA + FAQ + QUICK-START CHECKLIST
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>23. Severity Classification, Leadership FAQ &amp; First-Scan Checklist</h2>
+
+    <h3>Severity Classification &amp; Response SLA</h3>
+    <p>Every GENESIS confirmed finding is assigned a severity. This table defines what each level means in business terms and the expected response window.</p>
+    <table>
+      <thead><tr><th style="width:0.9in;">Severity</th><th style="width:0.6in;">CVSS range</th><th>Business meaning</th><th>Real-world example</th><th style="width:1in;">Fix by when</th><th style="width:0.9in;">Who leads the fix</th></tr></thead>
+      <tbody>
+        <tr class="sev-crit"><td>Critical</td><td>9.0 – 10.0</td><td>Attacker can take full control or extract all data with no authentication required.</td><td>Unauthenticated remote code execution; authentication bypass to admin panel.</td><td>Within 24 hours</td><td>CISO + Engineering lead, immediate escalation.</td></tr>
+        <tr class="sev-high"><td>High</td><td>7.0 – 8.9</td><td>Clear exploitable path exists with significant data or access risk; low complexity.</td><td>IDOR exposing all user records; SQL injection on a public form.</td><td>Within 1 sprint (≤2 weeks)</td><td>Product security + owning dev team.</td></tr>
+        <tr class="sev-med"><td>Medium</td><td>4.0 – 6.9</td><td>Exploitable only under specific conditions or with user interaction; limited blast radius.</td><td>Reflected XSS requiring click; CORS misconfiguration on non-sensitive API.</td><td>Within 1 quarter</td><td>Dev team, tracked in backlog.</td></tr>
+        <tr class="sev-low"><td>Low</td><td>0.1 – 3.9</td><td>Theoretical or informational risk; no immediate exploitable path.</td><td>Missing security headers; verbose error messages leaking stack traces.</td><td>Next planned release</td><td>Dev team, normal backlog priority.</td></tr>
+        <tr class="sev-info"><td>Info</td><td>0.0</td><td>Observation worth noting; no direct attack path identified.</td><td>Outdated but unexploited library version; debug endpoint returning empty response.</td><td>Track and review quarterly</td><td>Security team review; no immediate action required.</td></tr>
+      </tbody>
+    </table>
+    <div class="note warning">
+      <strong>Escalation rule:</strong> Any Critical finding should trigger an immediate out-of-band notification to the CISO and a war-room review before the next business day. Do not wait for the next sprint cycle.
+    </div>
+
+    <h3>Leadership FAQ — Questions Always Asked in a Briefing</h3>
+    <table>
+      <thead><tr><th style="width:2.6in;">Question</th><th>Direct answer</th></tr></thead>
+      <tbody>
+        <tr><td><strong>How long does a typical scan take?</strong></td><td>Quick/Standard: 15–45 minutes. Exhaustive: 1–3 hours. Deep Research: 4–8+ hours. Deep Research on complex targets can run longer. All profiles validate findings after discovery, so final confirmed items may appear after the discovery phase completes.</td></tr>
+        <tr><td><strong>How much does it cost to run?</strong></td><td>Cost depends on target complexity, scan profile, and model routing. A quick scan on a medium-complexity target typically consumes $2–$8 in AI API tokens. An Exhaustive run may use $15–$50. Deep Research on a large target can reach $80–$200. The Costs tab shows spend per session.</td></tr>
+        <tr><td><strong>Can GENESIS damage our systems?</strong></td><td>No. GENESIS is designed as an assessment platform. It proves vulnerabilities exist without destructive actions — no files are deleted, no data is modified, no persistence is installed. Proof payloads run inside an isolated sandbox container. Active scanning may temporarily increase server load and may trigger WAF alerts.</td></tr>
+        <tr><td><strong>Is it safe to run against production?</strong></td><td>With care. GENESIS scans are non-destructive, but active scanning sends real HTTP requests that could trigger security controls, increase load, or be logged. Recommended approach: test on staging first. For production, use a maintenance window and notify the ops team. Exclude critical write endpoints from scope.</td></tr>
+        <tr><td><strong>What does a "false positive" rate look like?</strong></td><td>GENESIS uses evidence checks, critic review, optional proof artifacts, and patched-control benchmarks to minimize false positives. In benchmark runs against a patched control target, the goal is zero Critical/High confirmed findings. In practice, residual false positives exist and are classified per session. The benchmark scorecard shows precision per run.</td></tr>
+        <tr><td><strong>What if GENESIS misses a vulnerability?</strong></td><td>No tool finds everything. GENESIS is designed for depth and proof-backed confirmation, not maximum recall from a short run. Deep Research mode and hybrid analysis improve coverage. Recall is measured in benchmarks. The correct framing is: "GENESIS found and proved X issues in this session" not "all issues are found."</td></tr>
+        <tr><td><strong>Do we need internet access for scans?</strong></td><td>The GENESIS platform itself needs internet access only for the Anthropic API (Claude). The scan target can be internal-only. The OOB callback listener for blind vulnerability proof can be deployed internally — no public internet is required for the callback to work.</td></tr>
+        <tr><td><strong>Who sees the findings data?</strong></td><td>Findings, tool outputs, and proof artifacts are stored in your self-hosted databases. Only your team with access to the GENESIS deployment sees the data. AI reasoning prompts are sent to Anthropic's API but do not include credentials or full database contents. See Section 22 for the full data residency breakdown.</td></tr>
+        <tr><td><strong>Can we integrate findings into Jira / ticketing?</strong></td><td>GENESIS exposes a REST API (<code>/api/v1/sessions</code>, <code>/vulnerabilities</code>). Confirmed findings with CVSS, evidence, and remediation can be exported and pushed to any ticketing system via the API. Native Jira integration is on the post-go-live roadmap.</td></tr>
+        <tr><td><strong>How is GENESIS different from running Burp Suite manually?</strong></td><td>Burp Suite requires a skilled operator to drive every test. GENESIS runs autonomously, forms its own hypotheses, selects tools, validates evidence with a second AI, and deduplicates findings — producing a prioritized, proof-backed list without manual intervention for each step. It also covers source code, binaries, and network simultaneously.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>First Scan Quick-Start Checklist</h3>
+    <div class="grid three">
+      <div class="card">
+        <strong>Before you start</strong>
+        <ul>
+          <li>Confirm written authorization for the target</li>
+          <li>Identify and exclude production write endpoints</li>
+          <li>Notify ops team if scanning a shared environment</li>
+          <li>Create a test user account (do not use prod credentials)</li>
+          <li>Confirm target is reachable from the GENESIS host</li>
+          <li>Choose scan profile: Quick → Exhaustive → Deep Research</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>During the scan</strong>
+        <ul>
+          <li>Watch Activity tab for early recon and hypothesis formation</li>
+          <li>Check Errors tab if Activity goes quiet unexpectedly</li>
+          <li>Candidates appearing ≠ confirmed findings — wait for validation</li>
+          <li>Review the Findings tab first; use Validation Lab proof pending items only for extra evidence</li>
+          <li>Monitor Costs tab to track AI spend in real time</li>
+          <li>Graph tab builds incrementally — check at end of recon phase</li>
+        </ul>
+      </div>
+      <div class="card">
+        <strong>After the scan</strong>
+        <ul>
+          <li>Run Complete Validation if candidates still need proof</li>
+          <li>Review Findings tab — these are your reportable items</li>
+          <li>Check Validation Lab clusters when one fix may explain multiple candidates</li>
+          <li>Open each High/Critical finding and verify proof evidence</li>
+          <li>Assign owners to each confirmed finding before sharing the report</li>
+          <li>Rotate any test credentials used during the session</li>
+          <li>Save the session — all evidence is retained for replay</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Integration Ecosystem &amp; Extension Points</h3>
+    <table>
+      <thead><tr><th style="width:1.8in;">Integration point</th><th>How it works</th><th>Current state</th></tr></thead>
+      <tbody>
+        <tr><td><strong>REST API</strong></td><td>All sessions, findings, candidates, and proof runs are accessible via <code>/api/v1/</code> endpoints. Supports GET, POST, and filter queries for automation.</td><td>Available now. Use for custom dashboards, export scripts, or CI/CD triggers.</td></tr>
+        <tr><td><strong>WebSocket live feed</strong></td><td>Real-time session events (thoughts, tool calls, findings) are broadcast over WebSocket for dashboards or alerting pipelines.</td><td>Available now. Used internally by the frontend Activity tab.</td></tr>
+        <tr><td><strong>Ticketing (Jira, Linear)</strong></td><td>Confirmed findings with severity, CVSS, evidence, and remediation can be pushed to any REST-based ticketing tool via the API.</td><td>Manual via API now. Native connector on post-go-live roadmap.</td></tr>
+        <tr><td><strong>SIEM / log aggregation</strong></td><td>Structured audit logs (scan start, finding promotion, operator confirm) can be shipped to Splunk, Elastic, or Datadog via a log forwarder.</td><td>Structured logging enabled post Phase 1 (Jun 2026).</td></tr>
+        <tr><td><strong>CI/CD pipeline trigger</strong></td><td>A scan can be triggered via API POST on code push or PR merge, with findings returned in JSON for blocking or alerting gates.</td><td>Available via API now. Pipeline-native action planned post go-live.</td></tr>
+        <tr><td><strong>Custom tool plugins (MCP)</strong></td><td>New tools can be registered in the MCP server by adding a TypeScript handler. The AI automatically discovers and uses registered tools on the next scan.</td><td>Available now for teams with MCP server access.</td></tr>
+        <tr><td><strong>GitHub / GitLab repo ingestion</strong></td><td>GENESIS can pull a repository, ingest source code, and run hybrid source+endpoint analysis in one session.</td><td>Available now via target configuration.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SECTION 24 — GLOSSARY (renumbered from 23)
+       ══════════════════════════════════════════════════════════ -->
+  <section class="page-break">
+    <h2>24. Glossary for New Readers</h2>
+    <table>
+      <thead><tr><th>Term</th><th>Plain-English explanation</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Agent</strong></td><td>An AI worker with a role, such as recon, exploit testing, source review, validation, or critique.</td></tr>
+        <tr><td><strong>Attack graph</strong></td><td>A map of how hosts, services, users, credentials, and findings connect.</td></tr>
+        <tr><td><strong>Benchmark</strong></td><td>A measured test run against a known target, often with planted issues and a fixed control.</td></tr>
+        <tr><td><strong>Candidate</strong></td><td>A possible issue saved for review before it becomes a final finding.</td></tr>
+        <tr><td><strong>Cluster</strong></td><td>A group of candidates that likely share one root cause and should become one ticket.</td></tr>
+        <tr><td><strong>CVE</strong></td><td>A public identifier for a known vulnerability in a product or component.</td></tr>
+        <tr><td><strong>Dedup</strong></td><td>The process of merging repeated reports that have the same root cause.</td></tr>
+        <tr><td><strong>Endpoint</strong></td><td>A reachable URL, API route, service, or network location being tested.</td></tr>
+        <tr><td><strong>Exploit</strong></td><td>A test that demonstrates a weakness can actually be used.</td></tr>
+        <tr><td><strong>Fallback</strong></td><td>A backup behavior used when a tool, model, network path, or proof attempt fails.</td></tr>
+        <tr><td><strong>False positive</strong></td><td>A reported issue that is not actually vulnerable.</td></tr>
+        <tr><td><strong>Finding</strong></td><td>A final report item that should be reviewed, prioritized, and fixed.</td></tr>
+        <tr><td><strong>IDOR</strong></td><td>A broken authorization issue where one user can access another user's object.</td></tr>
+        <tr><td><strong>JWT</strong></td><td>A common token format used for login and authorization decisions.</td></tr>
+        <tr><td><strong>Loop</strong></td><td>A structured reasoning process that breaks a hard question into smaller steps.</td></tr>
+        <tr><td><strong>Model</strong></td><td>The AI system used for reasoning, planning, validation, or critique.</td></tr>
+        <tr><td><strong>Needs proof</strong></td><td>A validator verdict meaning the idea is plausible but not yet proven.</td></tr>
+        <tr><td><strong>Oracle</strong></td><td>A clear pass/fail rule that tells GENESIS whether a proof succeeded.</td></tr>
+        <tr><td><strong>Patched control</strong></td><td>A fixed version of the same target used to check whether findings disappear after remediation.</td></tr>
+        <tr><td><strong>Precision</strong></td><td>The share of reported findings that are actually real.</td></tr>
+        <tr><td><strong>Promoted</strong></td><td>A candidate that passed the gate and became a reportable finding.</td></tr>
+        <tr><td><strong>Proof Run</strong></td><td>A controlled test that records whether evidence supports a candidate.</td></tr>
+        <tr><td><strong>Recall</strong></td><td>The share of known real issues that the scanner found.</td></tr>
+        <tr><td><strong>Refute</strong></td><td>A validator verdict saying the candidate is likely wrong or missing a required condition.</td></tr>
+        <tr><td><strong>Sandbox</strong></td><td>A restricted environment for running proof scripts safely.</td></tr>
+        <tr><td><strong>Source verified unreachable</strong></td><td>A source-supported weakness that does not have a confirmed live path in the tested deployment.</td></tr>
+        <tr><td><strong>SQL injection</strong></td><td>A bug where input can change a database query.</td></tr>
+        <tr><td><strong>SSRF</strong></td><td>A bug where a server can be tricked into fetching internal or cloud resources.</td></tr>
+        <tr><td><strong>Validator</strong></td><td>An agent role that challenges whether a candidate is reachable, exploitable, and sufficiently evidenced.</td></tr>
+        <tr><td><strong>XSS</strong></td><td>A bug where attacker-controlled script can run in another user's browser.</td></tr>
+      </tbody>
+    </table>
+    <div class="footer-note">
+      GENESIS should be used only for systems where testing is authorized. For executive reporting, present numbers as measured
+      results from a defined target, control, and benchmark setup rather than universal claims.
+    </div>
+  </section>
+</main>
+</body>
+</html>

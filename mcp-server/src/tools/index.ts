@@ -218,7 +218,7 @@ export const ALL_TOOLS: Record<string, Tool> = {
   semgrep: semgrepTool,
   bandit:  banditTool,
 
-  // ── Mythos Intelligence Tools ────────────────────────────────────────────────
+  // ── GENESIS Intelligence Tools ───────────────────────────────────────────────
   payload_crafter:     payloadCrafterTool,
   binary_analyzer:     binaryAnalyzerTool,
   code_pattern_search: codePatternSearchTool,

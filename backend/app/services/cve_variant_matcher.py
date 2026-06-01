@@ -137,6 +137,7 @@ async def run_sameday_replay(cve_id: str, session_id: Optional[str] = None) -> D
         stack_pin=stack_pin,
         observed_routes=["/"],
         target_ip=f"replay_{cve_id}",
+        session_id=session_id or "",
     )
     if not replica_meta:
         return {"ok": False, "error": "Failed to spawn replica"}

@@ -5,6 +5,12 @@ RedBlueDialectic (T87):
   hypothesis stake is reduced.  Two sequential LLM calls using the configured
   model.  Feeds results into hypothesis_market.
 
+  Multi-model mode (validation milestone 1): when constructed with a separate
+  debate_client / debate_model, Blue uses an independent model family.
+  If Blue (different model) cannot refute Red's hypothesis the finding is
+  tagged `cross_model_confirmed` and its confidence stake is boosted +0.2 —
+  because disagreement between independent model families is itself a signal.
+
 PhilosopherAgent (T88):
   Reads the session's anomaly log and asks "what bug class would explain all
   these anomalies?" — generates novel hypotheses from first principles rather
@@ -99,9 +105,24 @@ _NATION_STATE_SYSTEM = (
 class RedBlueDialectic:
     """T87 — two-agent adversarial hypothesis synthesis."""
 
-    def __init__(self, client: Any, model: str) -> None:
+    def __init__(
+        self,
+        client: Any,
+        model: str,
+        *,
+        debate_client: Any = None,
+        debate_model: str = "",
+    ) -> None:
         self._client = client
         self._model = model
+        # Blue agent uses debate_client/debate_model when supplied. When they
+        # differ from the auditor (Red), cross-model disagreement is a signal.
+        self._debate_client: Any = debate_client if debate_client is not None else client
+        self._debate_model: str = debate_model or model
+        self._cross_model: bool = (
+            (debate_client is not None and debate_client is not client)
+            or bool(debate_model and debate_model != model)
+        )
 
     async def synthesize(
         self,
@@ -137,26 +158,58 @@ class RedBlueDialectic:
                     f"Previous accepted hypotheses: {[h['hypothesis'] for h in accepted]}\n"
                     "Propose a NEW, untested attack hypothesis."
                 )
-                red_resp = await self._client.messages.create(
-                    model=self._model,
-                    # 2048 lets reasoning-heavy models (GPT-5/o-series) keep
-                    # ~1500 tokens for visible JSON after their internal
-                    # reasoning consumes the front of the budget. 512 was
-                    # producing empty content rounds for non-Claude models.
-                    max_tokens=2048,
-                    timeout=90.0,
-                    system=_RED_SYSTEM,
-                    messages=[{"role": "user", "content": red_user}],
-                )
+                # v7.x — isolate red's API call so a content-filter 4xx or
+                # exhausted 429 retry doesn't silently discard the whole round.
+                # Previously a rate-limit exception here fell through to the
+                # outer except (logged at debug) and the round was skipped with
+                # no WS event, causing the frontend to show "(empty)" for the
+                # proposal. Now we persist verdict="red_blocked" and continue.
                 try:
-                    from app.services.llm_usage import record_llm_usage
-                    await record_llm_usage(
-                        session_id=session_id, iteration=0, source="red_agent",
-                        model=self._model, response=red_resp,
-                        publish_fn=publish_fn,
+                    red_resp = await self._client.messages.create(
+                        model=self._model,
+                        # 2048 lets reasoning-heavy models (GPT-5/o-series) keep
+                        # ~1500 tokens for visible JSON after their internal
+                        # reasoning consumes the front of the budget. 512 was
+                        # producing empty content rounds for non-Claude models.
+                        max_tokens=2048,
+                        timeout=90.0,
+                        system=_RED_SYSTEM,
+                        messages=[{"role": "user", "content": red_user}],
                     )
-                except Exception:
-                    pass
+                    try:
+                        from app.services.llm_usage import record_llm_usage
+                        await record_llm_usage(
+                            session_id=session_id, iteration=0, source="red_agent",
+                            model=self._model, response=red_resp,
+                            publish_fn=publish_fn,
+                        )
+                    except Exception:
+                        pass
+                except Exception as red_exc:
+                    logger.warning(
+                        "red_blue: red agent failed in round %d (%s) — "
+                        "persisting red_blocked",
+                        round_idx + 1, red_exc,
+                    )
+                    doc = {
+                        "_id": f"advrnd-{uuid.uuid4().hex[:12]}",
+                        "session_id": str(session_id),
+                        "kind": "red_blue",
+                        "round": round_idx + 1,
+                        "trigger": trigger,
+                        "trigger_hypothesis_id": trigger_hypothesis_id,
+                        "red": {"raw": "", "parsed": {}, "error": str(red_exc)[:500]},
+                        "blue": None,
+                        "verdict": "red_blocked",
+                        "linked_hypothesis_id": None,
+                        "created_at": _now_utc(),
+                    }
+                    try:
+                        await col.insert_one(doc)
+                    except Exception as exc:
+                        logger.debug("adversarial_reasoning insert failed: %s", exc)
+                    await _publish_round(publish_fn, session_id, doc)
+                    continue
                 red_text = _extract_text(red_resp)
                 red_json = _parse_json(red_text)
                 if not red_json or "hypothesis" not in red_json:
@@ -201,9 +254,12 @@ class RedBlueDialectic:
                 # discard red's transcript. We persist the red half with
                 # verdict="blue_blocked" so the operator sees what was
                 # proposed even when blue couldn't engage.
+                # validation milestone 1: Blue uses self._debate_client/self._debate_model
+                # when a separate debate provider is configured so disagreement
+                # between independent model families is a first-class signal.
                 try:
-                    blue_resp = await self._client.messages.create(
-                        model=self._model,
+                    blue_resp = await self._debate_client.messages.create(
+                        model=self._debate_model,
                         max_tokens=2048,
                         timeout=90.0,
                         system=_BLUE_SYSTEM,
@@ -243,7 +299,7 @@ class RedBlueDialectic:
                     from app.services.llm_usage import record_llm_usage
                     await record_llm_usage(
                         session_id=session_id, iteration=0, source="blue_agent",
-                        model=self._model, response=blue_resp,
+                        model=self._debate_model, response=blue_resp,
                         publish_fn=publish_fn,
                     )
                 except Exception:
@@ -257,6 +313,7 @@ class RedBlueDialectic:
                 # straight into the market. Now we persist the round but
                 # refuse to submit unverified hypotheses.
                 linked_hypothesis_id: Optional[str] = None
+                cross_model_confirmed: bool = False
                 if not blue_text or not blue_json:
                     logger.warning(
                         "red_blue: blue response empty/unparseable in round %d "
@@ -272,6 +329,12 @@ class RedBlueDialectic:
                         round_idx + 1,
                     )
                 else:
+                    # validation milestone 1: when Blue (independent model) fails to kill
+                    # Red's hypothesis, that cross-model agreement is a stronger
+                    # signal than same-model agreement. Boost confidence +0.2.
+                    if self._cross_model:
+                        confidence = min(1.0, confidence + 0.2)
+                        cross_model_confirmed = True
                     verdict = "survives"
                     hyp = await submit_hypothesis(
                         session_id=session_id,
@@ -281,10 +344,20 @@ class RedBlueDialectic:
                         confidence_stake=confidence,
                     )
                     linked_hypothesis_id = hyp.get("hypothesis_id", "") or None
+                    # Persist the boosted stake back to the market when the
+                    # dedup path returned an existing hypothesis (which keeps
+                    # its own stake unchanged inside submit_hypothesis).
+                    if cross_model_confirmed and linked_hypothesis_id:
+                        try:
+                            from app.services.hypothesis_market import update_stake
+                            await update_stake(linked_hypothesis_id, confidence)
+                        except Exception as exc:
+                            logger.debug("cross_model stake update failed: %s", exc)
                     accepted.append({
                         **red_json,
                         "hypothesis_id": linked_hypothesis_id or "",
                         "round": round_idx + 1,
+                        "cross_model_confirmed": cross_model_confirmed,
                     })
 
                 # Persist the FULL round (red + blue raw + parsed + verdict)
@@ -295,9 +368,14 @@ class RedBlueDialectic:
                     "round": round_idx + 1,
                     "trigger": trigger,
                     "trigger_hypothesis_id": trigger_hypothesis_id,
-                    "red": {"raw": red_text, "parsed": red_json},
-                    "blue": {"raw": blue_text, "parsed": blue_json or {}},
+                    "red": {"raw": red_text, "parsed": red_json, "model": self._model},
+                    "blue": {
+                        "raw": blue_text,
+                        "parsed": blue_json or {},
+                        "model": self._debate_model,
+                    },
                     "verdict": verdict,
+                    "cross_model_confirmed": cross_model_confirmed if verdict == "survives" else False,
                     "linked_hypothesis_id": linked_hypothesis_id,
                     "confidence": confidence,
                     "created_at": _now_utc(),
@@ -309,7 +387,7 @@ class RedBlueDialectic:
                 await _publish_round(publish_fn, session_id, doc)
 
             except Exception as exc:
-                logger.debug("red_blue round %d failed: %s", round_idx + 1, exc)
+                logger.warning("red_blue round %d failed: %s", round_idx + 1, exc)
 
         logger.info(
             "red_blue_dialectic: session=%s accepted=%d/%d",

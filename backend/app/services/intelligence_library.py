@@ -411,7 +411,7 @@ class IntelligenceLibrary:
 
             # ---- Ask the critic model for a structured reflection ---------
             system = (
-                "You are the post-session reflection agent for GENESIS MYTHOS. "
+                "You are the post-session reflection agent for GENESIS. "
                 "Read the inputs and produce a compact JSON object describing "
                 "strategic lessons from this session — not technique recall, "
                 "but *how to approach* similar targets next time. Keys:\n"

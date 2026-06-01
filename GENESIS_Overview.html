@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENESIS — Project Overview</title>
+<style>
+  /* ── Base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #1a1a2e;
+    background: #f5f6fa;
+  }
+
+  /* ── Layout ──────────────────────────────────────── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 12px auto;
+    background: #fff;
+    padding: 14mm 14mm 12mm;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    position: relative;
+  }
+
+  /* ── Typography ──────────────────────────────────── */
+  h1 { font-size: 28px; color: #0d1b4b; letter-spacing: -0.5px; }
+  h2 { font-size: 13px; font-weight: 700; color: #0d1b4b; text-transform: uppercase;
+       letter-spacing: 0.8px; border-bottom: 2px solid #1a3a8f; padding-bottom: 3px;
+       margin-bottom: 8px; margin-top: 14px; }
+  h3 { font-size: 11px; font-weight: 700; color: #1a3a8f; margin-bottom: 4px; margin-top: 10px; }
+  p  { margin-bottom: 6px; }
+  ul { padding-left: 16px; margin-bottom: 6px; }
+  li { margin-bottom: 2px; }
+  strong { color: #0d1b4b; }
+
+  /* ── Cover ───────────────────────────────────────── */
+  .cover-header {
+    background: linear-gradient(135deg, #0d1b4b 0%, #1a3a8f 100%);
+    color: #fff;
+    padding: 22px 24px 18px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+  }
+  .cover-header h1 { color: #fff; font-size: 34px; margin-bottom: 2px; }
+  .cover-header .subtitle {
+    font-size: 13px; color: #a8c4f8; font-weight: 400; margin-bottom: 10px;
+  }
+  .cover-header .tagline {
+    font-size: 12px; color: #d0e0ff; border-top: 1px solid rgba(255,255,255,0.2);
+    padding-top: 10px;
+  }
+
+  .stats-strip {
+    display: flex; gap: 10px; margin-bottom: 14px;
+  }
+  .stat-box {
+    flex: 1; background: #eef2ff; border: 1px solid #c5d0f0;
+    border-radius: 5px; text-align: center; padding: 8px 4px;
+  }
+  .stat-box .num { font-size: 22px; font-weight: 800; color: #1a3a8f; display: block; }
+  .stat-box .lbl { font-size: 9.5px; color: #5566aa; text-transform: uppercase; letter-spacing: 0.4px; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .info-box {
+    background: #f8f9ff; border: 1px solid #dde3f5; border-radius: 5px; padding: 10px 12px;
+  }
+  .info-box h3 { margin-top: 0; font-size: 10.5px; color: #1a3a8f; }
+  .info-box p, .info-box li { font-size: 11px; }
+
+  /* ── Tables ──────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 11px; }
+  th {
+    background: #1a3a8f; color: #fff; text-align: left;
+    padding: 5px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  td { padding: 4px 8px; border-bottom: 1px solid #e8ecf5; vertical-align: top; }
+  tr:nth-child(even) td { background: #f4f6fc; }
+  td:first-child { font-weight: 600; color: #0d1b4b; white-space: nowrap; }
+  td.tool-name { font-family: 'Courier New', monospace; font-size: 10.5px; color: #1a3a8f; }
+
+  /* ── Steps ───────────────────────────────────────── */
+  .steps { counter-reset: step; display: flex; flex-direction: column; gap: 6px; }
+  .step { display: flex; align-items: flex-start; gap: 10px; background: #f4f7ff;
+          border-radius: 5px; padding: 7px 10px; border-left: 3px solid #1a3a8f; }
+  .step-num {
+    min-width: 22px; height: 22px; background: #1a3a8f; color: #fff;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .step-content strong { font-size: 11px; color: #0d1b4b; }
+  .step-content p { font-size: 11px; color: #334; margin: 1px 0 0; }
+
+  .ladder {
+    display: flex; align-items: center; gap: 0; margin: 10px 0 6px; flex-wrap: wrap;
+  }
+  .rung {
+    padding: 5px 12px; font-size: 10.5px; font-weight: 600;
+    border: 1px solid #c5d0f0; background: #eef2ff; color: #1a3a8f;
+  }
+  .rung.active { background: #1a3a8f; color: #fff; border-color: #1a3a8f; }
+  .rung.green { background: #1a6b3a; color: #fff; border-color: #1a6b3a; }
+  .rung.orange { background: #b85c00; color: #fff; border-color: #b85c00; }
+  .arrow { font-size: 14px; color: #aab; margin: 0 2px; }
+
+  /* ── Tool category headers ───────────────────────── */
+  .cat-header td {
+    background: #dde6ff !important; color: #0d1b4b !important;
+    font-weight: 700 !important; font-size: 10.5px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 5px 8px; border-bottom: 1px solid #c5d0f0;
+  }
+
+  /* ── Glossary ────────────────────────────────────── */
+  .glossary-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px 14px;
+  }
+  .gterm { display: flex; gap: 5px; font-size: 10.5px; align-items: baseline; }
+  .gterm strong { min-width: 110px; color: #0d1b4b; flex-shrink: 0; }
+
+  /* ── Footer ──────────────────────────────────────── */
+  .page-footer {
+    position: absolute; bottom: 8mm; left: 14mm; right: 14mm;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 9px; color: #8899bb; border-top: 1px solid #dde3f5; padding-top: 4px;
+  }
+
+  .badge {
+    display: inline-block; background: #e8f0ff; color: #1a3a8f;
+    border: 1px solid #c5d0f0; border-radius: 3px;
+    font-size: 9.5px; font-weight: 700; padding: 1px 6px; margin-right: 4px;
+  }
+
+  /* ── Print styles ────────────────────────────────── */
+  @media print {
+    body { background: #fff; font-size: 10.5px; }
+    .page {
+      width: 100%; margin: 0; padding: 10mm 12mm 10mm;
+      box-shadow: none; page-break-after: always; min-height: auto;
+    }
+    .page:last-child { page-break-after: avoid; }
+    .cover-header { background: #0d1b4b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    th { background: #1a3a8f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .stat-box { background: #eef2ff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .rung.active, .rung.green, .rung.orange { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cat-header td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-num { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    a { text-decoration: none; color: inherit; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 1 — COVER + AT A GLANCE
+     ═══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <div class="cover-header">
+    <div style="font-size:10px;color:#a8c4f8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">
+      Autonomous Cybersecurity Platform
+    </div>
+    <h1>GENESIS</h1>
+    <div class="subtitle">Generative Exploitation & Security Intelligence System</div>
+    <div class="tagline">
+      GENESIS is an AI-powered security testing platform that automatically discovers weaknesses in
+      websites, networks, and software — the same way a human security expert would, but faster,
+      around the clock, and without needing step-by-step instructions.
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-box"><span class="num">125+</span><span class="lbl">Security Tools</span></div>
+    <div class="stat-box"><span class="num">8</span><span class="lbl">AI Agents</span></div>
+    <div class="stat-box"><span class="num">5</span><span class="lbl">Databases</span></div>
+    <div class="stat-box"><span class="num">18</span><span class="lbl">Services</span></div>
+    <div class="stat-box"><span class="num">40+</span><span class="lbl">Custom Probes</span></div>
+  </div>
+
+  <!-- What / Who -->
+  <div class="two-col">
+    <div class="info-box">
+      <h3>What Problem Does It Solve?</h3>
+      <ul>
+        <li>Manual security testing is slow, expensive, and depends on human availability.</li>
+        <li>Basic automated scanners miss complex, logic-level vulnerabilities.</li>
+        <li>Most tools flood reports with false alarms that waste analyst time.</li>
+        <li>GENESIS replaces all of this with a reasoning AI that thinks, tests, and <em>verifies</em> before reporting.</li>
+      </ul>
+    </div>
+    <div class="info-box">
+      <h3>Who Is It For?</h3>
+      <ul>
+        <li><strong>Security teams</strong> — continuous assessment without manual effort</li>
+        <li><strong>Penetration testers</strong> — AI-assisted deep-dive engagements</li>
+        <li><strong>Developers</strong> — catch vulnerabilities before shipping code</li>
+        <li><strong>Compliance teams</strong> — evidence-backed audit reports</li>
+        <li><strong>Researchers</strong> — discover novel, zero-day style weaknesses</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Core Objectives</h2>
+  <table>
+    <tr><th style="width:30%">Objective</th><th>Plain-English Meaning</th></tr>
+    <tr><td>Autonomous Discovery</td><td>Find security flaws on its own, without a human telling it what to check next.</td></tr>
+    <tr><td>Verified Findings Only</td><td>Never report a vulnerability unless it has real, concrete proof — no guessing.</td></tr>
+    <tr><td>Full Coverage</td><td>Test the live application AND the source code, so nothing is missed.</td></tr>
+    <tr><td>Continuous Learning</td><td>Remember what worked in past scans and use that knowledge in future ones.</td></tr>
+    <tr><td>Zero False Alarms</td><td>A second AI double-checks every finding before it reaches the final report.</td></tr>
+  </table>
+
+  <div class="page-footer">
+    <span>GENESIS — Autonomous Cybersecurity Platform &nbsp;|&nbsp; Internal Use</span>
+    <span>Page 1 of 5</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 2 — KEY FEATURES
+     ═══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2>Key Features</h2>
+  <table>
+    <tr><th style="width:28%">Feature</th><th>What It Means in Plain English</th></tr>
+    <tr>
+      <td>Autonomous Reasoning Loop</td>
+      <td>GENESIS runs on its own — it decides what to test next, runs the test, reads the results, and adapts, all without human input for each step.</td>
+    </tr>
+    <tr>
+      <td>Hypothesis-Driven Testing</td>
+      <td>Before running any tool, the AI writes down its theory ("I think this login page has a SQL injection flaw") and then designs a test to prove or disprove it.</td>
+    </tr>
+    <tr>
+      <td>Evidence Verification Gate</td>
+      <td>A finding is only marked "confirmed" when there is real proof — an actual server response, a callback hit, or a passing test. No proof = not reported.</td>
+    </tr>
+    <tr>
+      <td>Red vs. Blue AI Debate</td>
+      <td>One AI argues a vulnerability is real (Red Agent); a second AI using a different model tries to prove it wrong (Blue Agent). Only surviving claims are kept.</td>
+    </tr>
+    <tr>
+      <td>Cross-Session Memory</td>
+      <td>GENESIS remembers every scan it has ever done — which techniques worked, which targets are related — and applies that knowledge to new scans automatically.</td>
+    </tr>
+    <tr>
+      <td>Multi-Agent System</td>
+      <td>Up to 8 specialised AI agents work in parallel — one focuses on reconnaissance, another on exploiting logic flaws, another on cryptography, etc.</td>
+    </tr>
+    <tr>
+      <td>Source Code Analysis</td>
+      <td>In addition to attacking a live system, GENESIS can read the actual program code and configuration files to find bugs that aren't yet visible from the outside.</td>
+    </tr>
+    <tr>
+      <td>Binary Analysis</td>
+      <td>Can examine compiled programs (even when no source code is available) by converting machine code back into readable pseudo-code using a decompiler.</td>
+    </tr>
+    <tr>
+      <td>Sandbox Isolation</td>
+      <td>Dangerous payloads are tested inside a locked-down virtual container so nothing can accidentally escape to the real network during testing.</td>
+    </tr>
+    <tr>
+      <td>Live Dashboard</td>
+      <td>A browser-based control panel shows findings, the AI's current theory, tool output, and severity ratings in real time as the scan runs.</td>
+    </tr>
+    <tr>
+      <td>Attack Graph</td>
+      <td>Builds a visual map showing how one weakness in a system could be used as a stepping stone to reach a more critical weakness in another part of the network.</td>
+    </tr>
+    <tr>
+      <td>Scheduled Automation</td>
+      <td>Background tasks automatically re-scan targets hourly, search for new CVE variants daily, and mine patterns across all past sessions every six hours.</td>
+    </tr>
+  </table>
+
+  <h2>Operating Modes</h2>
+  <table>
+    <tr><th style="width:28%">Mode</th><th>When to Use It</th></tr>
+    <tr><td>Exhaustive</td><td>Run until no new weaknesses are being discovered — best for thorough audits with no time constraint.</td></tr>
+    <tr><td>Deep Research</td><td>Long-running audit with stricter proof requirements — best for high-value, high-risk targets.</td></tr>
+    <tr><td>Validated Dynamic</td><td>Every candidate finding is challenged by a counter-validator before finalising — best for compliance reports where false positives are unacceptable.</td></tr>
+  </table>
+
+  <h2>Confidence Ladder — How a Finding Earns Its Status</h2>
+  <div class="ladder">
+    <div class="rung">&#x1F50D; Unverified<br><span style="font-size:9px;font-weight:400">Theory only, no proof yet</span></div>
+    <div class="arrow">&#x27A1;</div>
+    <div class="rung active">&#x2705; Confirmed<br><span style="font-size:9px;font-weight:400">Proof cited, critic agrees</span></div>
+    <div class="arrow">&#x27A1;</div>
+    <div class="rung green">&#x26A1; Exploited<br><span style="font-size:9px;font-weight:400">Full attack demonstrated</span></div>
+    <div class="arrow">&#x27A1;</div>
+    <div class="rung orange">&#x274C; Disputed<br><span style="font-size:9px;font-weight:400">Evidence refuted — removed</span></div>
+  </div>
+  <p style="font-size:10.5px;color:#556;margin-top:4px;">Only <strong>Confirmed</strong> and <strong>Exploited</strong> findings appear in the final report. Disputed findings are logged as false positives so the system learns to avoid them in future.</p>
+
+  <div class="page-footer">
+    <span>GENESIS — Autonomous Cybersecurity Platform &nbsp;|&nbsp; Internal Use</span>
+    <span>Page 2 of 5</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 3 — HOW IT WORKS (THE LOGIC)
+     ═══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2>How GENESIS Works — Step by Step</h2>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <strong>You Provide a Target</strong>
+        <p>You enter a URL, IP address, or upload a code repository. GENESIS builds a "Target Intent Brief" — a short internal summary of what needs to be tested and at what depth.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <strong>It Maps the Attack Surface</strong>
+        <p>Reconnaissance agents scan all open ports, discover sub-domains, list web pages and API endpoints, fingerprint software versions, and detect security controls (like firewalls) — building a complete picture of what is exposed.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <strong>The AI Forms a Theory</strong>
+        <p>Using extended reasoning (Claude's "think deeply" mode), GENESIS writes a formal hypothesis: what vulnerability it suspects, why, what evidence would confirm it, and how to falsify it if wrong. Hypotheses are saved so the scan can be resumed after a restart.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <strong>It Runs the Right Tool for the Job</strong>
+        <p>Instead of blindly running every tool, GENESIS picks the exact tool (or writes a custom one-off probe) that best tests the current theory. The tool runs inside an MCP Server — a controlled dispatcher — and results are fed back to the AI. If the result is unexpected, GENESIS updates its theory and tries again with a different approach.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <strong>A Second AI Reviews the Evidence</strong>
+        <p>Before any vulnerability is marked "confirmed", a separate AI model (Claude Haiku acting as a critic) independently reviews the evidence. It checks: Is the proof real? Is the reasoning sound? Could this be a false positive? If it finds a flaw in the argument, the finding is downgraded to "disputed" and removed from the report.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <strong>Verified Findings Are Reported</strong>
+        <p>Only confirmed vulnerabilities reach the final report, complete with: severity rating, affected component, proof evidence, step-by-step reproduction instructions, and recommended fix. The live dashboard shows everything in real time; findings are also stored in the database for later review.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:14px;">The Multi-Agent Team</h2>
+  <table>
+    <tr><th style="width:22%">Agent</th><th style="width:16%">Always Active?</th><th>What It Does</th></tr>
+    <tr><td>Recon Agent</td><td>Yes</td><td>Discovers ports, services, subdomains, and technology stack of the target.</td></tr>
+    <tr><td>Analyst Agent</td><td>Yes</td><td>Reads all findings and identifies patterns, chains, and risk priorities.</td></tr>
+    <tr><td>Exploit Agent</td><td>Yes</td><td>Designs and executes attack payloads to confirm suspected vulnerabilities.</td></tr>
+    <tr><td>Code Agent</td><td>Yes</td><td>Reads source code and configuration files to find issues invisible from outside.</td></tr>
+    <tr><td>Crypto Agent</td><td>On demand</td><td>Checks encryption usage — weak algorithms, bad key sizes, broken protocols.</td></tr>
+    <tr><td>Auth Agent</td><td>On demand</td><td>Tests login systems, session tokens, multi-factor authentication, and access controls.</td></tr>
+    <tr><td>RevEng Agent</td><td>On demand</td><td>Decompiles binaries and reverse-engineers compiled code to find hidden flaws.</td></tr>
+    <tr><td>Network Agent</td><td>On demand</td><td>Tests network-layer protocols, firewall rules, and service misconfigurations.</td></tr>
+  </table>
+  <p style="font-size:10.5px;color:#556;margin-top:2px;">"On demand" agents activate automatically when the scan surface signals their speciality is needed.</p>
+
+  <div class="page-footer">
+    <span>GENESIS — Autonomous Cybersecurity Platform &nbsp;|&nbsp; Internal Use</span>
+    <span>Page 3 of 5</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 4 — TOOLS REFERENCE
+     ═══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <h2>Security Tools Reference — What Each Tool Does</h2>
+
+  <table>
+    <tr><th style="width:26%">Tool Name</th><th>What It Does in Plain English</th></tr>
+
+    <!-- RECON -->
+    <tr class="cat-header"><td colspan="2">&#x1F50D; RECONNAISSANCE — Finding out what's there</td></tr>
+    <tr><td class="tool-name">nmap</td><td>Scans a target's network to discover which ports and services are open and reachable.</td></tr>
+    <tr><td class="tool-name">masscan</td><td>Does the same job as nmap but at extremely high speed across very large address ranges.</td></tr>
+    <tr><td class="tool-name">amass</td><td>Finds all sub-domains belonging to a target domain (e.g., api.example.com, mail.example.com).</td></tr>
+    <tr><td class="tool-name">subfinder</td><td>Another subdomain discovery tool; cross-checks multiple public databases for hidden sub-sites.</td></tr>
+    <tr><td class="tool-name">dnsrecon</td><td>Analyses a domain's DNS records to find servers, mail routes, and misconfigurations.</td></tr>
+    <tr><td class="tool-name">httpx</td><td>Quickly checks which discovered hosts are running web servers and what technology they use.</td></tr>
+    <tr><td class="tool-name">whatweb</td><td>Identifies the software, framework, and CMS (e.g., WordPress) powering a website.</td></tr>
+    <tr><td class="tool-name">wafw00f</td><td>Detects whether a website is protected by a Web Application Firewall and identifies its type.</td></tr>
+    <tr><td class="tool-name">harvester</td><td>Collects email addresses, employee names, and related info about a target from public sources.</td></tr>
+
+    <!-- WEB VULN -->
+    <tr class="cat-header"><td colspan="2">&#x1F578; WEB VULNERABILITY SCANNING — Finding weaknesses in websites</td></tr>
+    <tr><td class="tool-name">nuclei</td><td>Runs thousands of known-vulnerability checks against a target using a library of templates.</td></tr>
+    <tr><td class="tool-name">nikto</td><td>Checks a web server for outdated software, dangerous default files, and common misconfigurations.</td></tr>
+    <tr><td class="tool-name">gobuster</td><td>Brute-forces hidden web pages and directories by guessing thousands of common names.</td></tr>
+    <tr><td class="tool-name">feroxbuster</td><td>Same as gobuster but faster and better at discovering deeply nested hidden content.</td></tr>
+    <tr><td class="tool-name">ffuf</td><td>A flexible fuzzing tool — sends many variations of a request to find hidden endpoints or parameters.</td></tr>
+    <tr><td class="tool-name">arjun</td><td>Discovers hidden URL parameters that web applications accept but don't publicly advertise.</td></tr>
+    <tr><td class="tool-name">sqlmap</td><td>Automatically tests web forms and URLs for SQL Injection flaws that could expose a database.</td></tr>
+    <tr><td class="tool-name">xsstrike</td><td>Detects Cross-Site Scripting (XSS) vulnerabilities — bugs that let attackers inject malicious scripts.</td></tr>
+    <tr><td class="tool-name">commix</td><td>Tests for Command Injection — places where user input can be tricked into running OS commands.</td></tr>
+    <tr><td class="tool-name">semgrep</td><td>Scans source code for insecure coding patterns using rules written by security experts.</td></tr>
+    <tr><td class="tool-name">bandit</td><td>Specifically scans Python source code for common security mistakes and dangerous function use.</td></tr>
+
+    <!-- AUTH -->
+    <tr class="cat-header"><td colspan="2">&#x1F511; AUTHENTICATION TESTING — Checking login and access controls</td></tr>
+    <tr><td class="tool-name">hydra</td><td>Attempts to crack login pages by testing large lists of common username and password combinations.</td></tr>
+    <tr><td class="tool-name">john</td><td>Cracks password hashes (scrambled passwords) by testing millions of guesses per second.</td></tr>
+    <tr><td class="tool-name">kerbrute</td><td>Tests Kerberos authentication (used in corporate Windows networks) for weak or guessable accounts.</td></tr>
+    <tr><td class="tool-name">enum4linux</td><td>Extracts user lists, shares, and configuration details from Windows and Samba file servers.</td></tr>
+    <tr><td class="tool-name">netexec</td><td>Tests Windows domain environments for credential reuse, relay attacks, and privilege escalation paths.</td></tr>
+    <tr><td class="tool-name">impacket</td><td>A toolkit for attacking Windows network protocols — used to test relay attacks and ticket forgery.</td></tr>
+
+  </table>
+
+  <div class="page-footer">
+    <span>GENESIS — Autonomous Cybersecurity Platform &nbsp;|&nbsp; Internal Use</span>
+    <span>Page 4 of 5</span>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     PAGE 5 — ADVANCED TOOLS + ARCHITECTURE + GLOSSARY
+     ═══════════════════════════════════════════════════════ -->
+<div class="page">
+
+  <table style="margin-bottom:14px;">
+    <tr><th style="width:26%">Tool Name</th><th>What It Does in Plain English</th></tr>
+
+    <!-- ADVANCED -->
+    <tr class="cat-header"><td colspan="2">&#x1F9EA; ADVANCED ANALYSIS — Deep inspection of code and binaries</td></tr>
+    <tr><td class="tool-name">Ghidra</td><td>Decompiles compiled programs back into readable code so analysts can find hidden vulnerabilities without source code.</td></tr>
+    <tr><td class="tool-name">AFL++ / honggfuzz</td><td>Fuzzers — throw millions of random, malformed inputs at a program to crash it and reveal security bugs.</td></tr>
+    <tr><td class="tool-name">angr</td><td>Symbolic execution engine — mathematically explores all possible execution paths in a program to find exploitable conditions.</td></tr>
+    <tr><td class="tool-name">Frida</td><td>Attaches to a running application and monitors or modifies its behaviour in real time without restarting it.</td></tr>
+    <tr><td class="tool-name">DynamoRIO</td><td>Instruments running programs at the machine-code level to trace exactly which code paths execute during a test.</td></tr>
+    <tr><td class="tool-name">Chromium (headless)</td><td>Runs a real web browser invisibly to test JavaScript-heavy pages that simpler tools cannot render.</td></tr>
+
+    <!-- CUSTOM PROBES -->
+    <tr class="cat-header"><td colspan="2">&#x1F916; AI-WRITTEN CUSTOM PROBES — Specialised one-off checks written by GENESIS itself</td></tr>
+    <tr><td class="tool-name">IDOR Probe</td><td>Checks if changing an ID number in a URL lets you access another user's private data.</td></tr>
+    <tr><td class="tool-name">CORS Probe</td><td>Tests if the website mistakenly allows any other website to read its private API responses.</td></tr>
+    <tr><td class="tool-name">JWT Probe</td><td>Checks if login tokens can be forged or modified to gain unauthorised access.</td></tr>
+    <tr><td class="tool-name">Cache Poison Probe</td><td>Tests if an attacker can store malicious content inside the website's cache and serve it to other users.</td></tr>
+    <tr><td class="tool-name">HTTP Smuggling Probe</td><td>Checks for a request-parsing mismatch that lets attackers "smuggle" hidden requests past security controls.</td></tr>
+    <tr><td class="tool-name">NoSQL Injection Probe</td><td>Same concept as SQL injection, but targeting document databases like MongoDB instead of relational ones.</td></tr>
+    <tr><td class="tool-name">SSRF Probe</td><td>Tests if the server can be tricked into making requests to internal systems on the attacker's behalf.</td></tr>
+    <tr><td class="tool-name">OAuth / SAML Probe</td><td>Checks "Sign in with Google/Microsoft" style flows for logic flaws that allow account takeover.</td></tr>
+    <tr><td class="tool-name">Race Condition Probe</td><td>Sends requests at the same split-second to catch bugs that only appear when two actions happen simultaneously.</td></tr>
+    <tr><td class="tool-name">OOB Callback Probe</td><td>Detects blind vulnerabilities by checking if the target server calls out to a controlled listener — proving the bug exists even when there is no visible output.</td></tr>
+  </table>
+
+  <h2>System Architecture at a Glance</h2>
+  <table style="margin-bottom:14px;">
+    <tr><th style="width:26%">Component</th><th>Role in Plain English</th></tr>
+    <tr><td>Frontend (React)</td><td>The browser-based dashboard where you start scans, watch findings appear live, and read reports.</td></tr>
+    <tr><td>Backend / Orchestrator</td><td>The central brain — runs the AI reasoning loop, coordinates agents, and enforces evidence rules.</td></tr>
+    <tr><td>MCP Server</td><td>The tool dispatcher — receives instructions from the AI and actually runs the security tools.</td></tr>
+    <tr><td>PostgreSQL</td><td>Stores sessions, vulnerabilities, and user settings permanently in a structured database.</td></tr>
+    <tr><td>MongoDB</td><td>Stores the AI's thoughts, hypotheses, and scan candidates in flexible document format.</td></tr>
+    <tr><td>Redis</td><td>A fast in-memory relay that lets multiple agents share discoveries with each other instantly.</td></tr>
+    <tr><td>Neo4j</td><td>Graph database that maps how vulnerabilities chain together across different targets.</td></tr>
+    <tr><td>ChromaDB</td><td>Vector database that stores "memory embeddings" so the AI can recall similar past situations.</td></tr>
+    <tr><td>Sandbox Container</td><td>An isolated virtual environment where dangerous exploit payloads are safely tested.</td></tr>
+    <tr><td>MinIO</td><td>Object storage that holds binary files, source archives, and scan artefacts.</td></tr>
+  </table>
+
+  <h2>Glossary — Key Terms Simply Explained</h2>
+  <div class="glossary-grid">
+    <div class="gterm"><strong>Vulnerability</strong> <span>A weakness in a system that an attacker could exploit to cause harm.</span></div>
+    <div class="gterm"><strong>CVE</strong> <span>A publicly catalogued, numbered vulnerability (e.g., CVE-2024-1234) shared across the industry.</span></div>
+    <div class="gterm"><strong>SQL Injection</strong> <span>Tricking a database by inserting code into a text field instead of normal data.</span></div>
+    <div class="gterm"><strong>XSS</strong> <span>Injecting malicious scripts into a webpage that run in another user's browser.</span></div>
+    <div class="gterm"><strong>SSRF</strong> <span>Making a server fetch internal resources it should never expose to the outside world.</span></div>
+    <div class="gterm"><strong>IDOR</strong> <span>Accessing another person's data simply by changing a number in a URL.</span></div>
+    <div class="gterm"><strong>Fuzzing</strong> <span>Automatically sending random, broken inputs to a program to find crashes and bugs.</span></div>
+    <div class="gterm"><strong>Symbolic Execution</strong> <span>Mathematically tracing all possible code paths to find conditions that cause failures.</span></div>
+    <div class="gterm"><strong>Hypothesis</strong> <span>A documented theory about a suspected weakness, written before testing begins.</span></div>
+    <div class="gterm"><strong>Exploit</strong> <span>A technique or piece of code that actively takes advantage of a vulnerability.</span></div>
+    <div class="gterm"><strong>Pentest</strong> <span>Short for "penetration test" — an authorised, simulated attack to find weaknesses before real attackers do.</span></div>
+    <div class="gterm"><strong>Attack Graph</strong> <span>A map showing how individual vulnerabilities connect and chain toward a critical target.</span></div>
+  </div>
+
+  <div class="page-footer">
+    <span>GENESIS — Autonomous Cybersecurity Platform &nbsp;|&nbsp; Internal Use</span>
+    <span>Page 5 of 5</span>
+  </div>
+</div>
+
+</body>
+</html>

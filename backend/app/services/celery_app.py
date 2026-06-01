@@ -85,4 +85,10 @@ celery_app.conf.beat_schedule = {
         "schedule": crontab(minute=0, hour=4, day_of_week=0),
         "options": {"queue": "research"},
     },
+    # validation milestone 7 — recall benchmark: weekly on Sunday 05:00 UTC (after drift check)
+    "recall-benchmark": {
+        "task": "app.services.daemon_tasks.run_recall_benchmark",
+        "schedule": crontab(minute=0, hour=5, day_of_week=0),
+        "options": {"queue": "research"},
+    },
 }

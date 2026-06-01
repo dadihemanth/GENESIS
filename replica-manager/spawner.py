@@ -10,9 +10,27 @@ from typing import List, Optional
 REPLICA_NETWORK = os.getenv("REPLICA_NETWORK", "genesis_replica_net")
 
 
-def compose_for_stack(stack_pin: str, port: int, observed_routes: List[str]) -> str:
+def _compose_labels(session_id: str = "", replica_id: str = "") -> str:
+    labels = []
+    if session_id:
+        labels.append(f'      - "genesis.session_id={session_id}"')
+    if replica_id:
+        labels.append(f'      - "genesis.replica_id={replica_id}"')
+    if not labels:
+        return ""
+    return "    labels:\n" + "\n".join(labels) + "\n"
+
+
+def compose_for_stack(
+    stack_pin: str,
+    port: int,
+    observed_routes: List[str],
+    session_id: str = "",
+    replica_id: str = "",
+) -> str:
     """Return docker-compose YAML for the given stack pin."""
     pin = stack_pin.lower()
+    labels = _compose_labels(session_id=session_id, replica_id=replica_id)
 
     if "express" in pin or ("node" in pin and "spring" not in pin):
         version = extract_version(stack_pin, "express") or "4.18"
@@ -23,6 +41,7 @@ services:
     command: sh -c "npm install express@{version} && node /app/server.js"
     ports: ["{port}:3000"]
     volumes: ["/tmp/replica_{port}:/app"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -36,6 +55,7 @@ services:
     command: sh -c "pip install django && python /app/manage.py runserver 0.0.0.0:8000"
     ports: ["{port}:8000"]
     volumes: ["/tmp/replica_{port}:/app"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -49,6 +69,7 @@ services:
     command: sh -c "pip install flask && python /app/app.py"
     ports: ["{port}:5000"]
     volumes: ["/tmp/replica_{port}:/app"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -60,6 +81,7 @@ services:
   app:
     image: tomcat:10-jdk17-openjdk-slim
     ports: ["{port}:8080"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -72,6 +94,7 @@ services:
     image: php:8.2-apache
     ports: ["{port}:80"]
     volumes: ["/tmp/replica_{port}:/var/www/html"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -85,6 +108,7 @@ services:
     command: sh -c "gem install rails && rails server -b 0.0.0.0 -p 3000"
     ports: ["{port}:3000"]
     volumes: ["/tmp/replica_{port}:/app"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:
@@ -96,6 +120,7 @@ services:
   app:
     image: nginx:alpine
     ports: ["{port}:80"]
+{labels}
     networks: [{REPLICA_NETWORK}]
 networks:
   {REPLICA_NETWORK}:

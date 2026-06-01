@@ -281,6 +281,27 @@ const FindingDetailDialog: React.FC<Props> = ({ vulnId, onClose }) => {
             </Box>
 
             {/* §1 — Is this a known vulnerability? */}
+            {data.plain_language && (
+              <Box sx={{ p: 2, mb: 2, borderRadius: 2, backgroundColor: '#ffffff', border: '1px solid #dfe3ec', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                {[
+                  ['Description', data.plain_language.description],
+                  ['Why it matters', data.plain_language.why_it_matters],
+                  ['Proof', data.plain_language.proof],
+                  ['Solution', data.plain_language.solution],
+                  ['Validation note', data.plain_language.validation_note],
+                ].map(([label, text]) => (
+                  <Box key={label} sx={{ mb: label === 'Validation note' ? 0 : 1.25 }}>
+                    <Typography sx={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: 0.5, color: '#8a93a6', fontWeight: 800, mb: 0.25 }}>
+                      {label}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.86rem', color: '#1a1f2e', lineHeight: 1.55 }}>
+                      {text}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+            )}
+
             <Box sx={{
               p: 2, mb: 2, borderRadius: 2,
               backgroundColor: data.is_known ? 'rgba(78,92,237,0.06)' : 'rgba(255,152,0,0.06)',

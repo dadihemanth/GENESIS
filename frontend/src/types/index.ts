@@ -15,7 +15,7 @@ export interface SessionError {
 }
 export type SessionPhase = 'reconnaissance' | 'service_analysis' | 'vulnerability_scan' | 'exploitation' | 'reporting';
 export type Severity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-export type ScanProfile = 'fast' | 'deep' | 'stealth' | 'full' | 'apt_sim' | 'exhaustive';
+export type ScanProfile = 'fast' | 'deep' | 'stealth' | 'full' | 'apt_sim' | 'exhaustive' | 'deep_research' | 'validated_dynamic';
 export type AgentMode = 'solo' | 'multi_agent';
 export type VerificationStatus = 'unverified' | 'confirmed' | 'exploited' | 'disputed';
 export type HypothesisStatus = 'active' | 'confirmed' | 'ruled_out';
@@ -35,9 +35,13 @@ export interface Hypothesis {
 // v7.x — adversarial-reasoning transcripts (red/blue dialectic + philosopher
 //        + persona agents: insider-threat, nation-state APT)
 export type AdversarialKind = 'red_blue' | 'philosopher' | 'insider' | 'nation_state';
-export type AdversarialTrigger = 'seed' | 'confirmed_hypothesis' | 'anomaly_threshold';
+export type AdversarialTrigger =
+  | 'seed'
+  | 'pre_scan_bootstrap'
+  | 'confirmed_hypothesis'
+  | 'anomaly_threshold';
 export type AdversarialVerdict =
-  | 'survives' | 'killed' | 'parse_failed' | 'blue_blocked'
+  | 'survives' | 'killed' | 'parse_failed' | 'red_blocked' | 'blue_blocked'
   | 'no_response' | 'red_no_response';
 
 export interface AdversarialAgentTurn {
@@ -116,7 +120,16 @@ export interface Vulnerability {
   chain_position?: number;
   mitre_techniques: string[];
   is_zero_day: boolean;
+  plain_language?: PlainLanguageFinding;
   created_at: string;
+}
+
+export interface PlainLanguageFinding {
+  description: string;
+  why_it_matters: string;
+  proof: string;
+  solution: string;
+  validation_note: string;
 }
 
 export interface DeepThought {
@@ -245,7 +258,229 @@ export interface ModelProfile {
 
 export type RoleName =
   | 'primary' | 'critic' | 'compress' | 'brief' | 'reasoning'
-  | 'payload' | 'red_blue' | 'philosopher' | 'subagent';
+  | 'payload' | 'red_blue' | 'philosopher' | 'subagent' | 'validator'
+  | 'endpoint_validator' | 'source_validator' | 'counter_validator' | 'proof_planner';
+
+export interface CandidateSourceContext {
+  repo?: string;
+  file_path?: string;
+  symbol?: string;
+  language?: string;
+  line_range?: string;
+  snippet_id?: string;
+}
+
+export interface CandidateReachabilityContext {
+  endpoint?: string;
+  method?: string;
+  auth_required?: boolean | string | null;
+  params?: unknown;
+  taint_path?: unknown;
+  confidence?: number;
+}
+
+export interface CandidateProofPlan {
+  preferred_tool?: string;
+  tool?: string;
+  oracle?: unknown;
+  live_replay_required?: boolean;
+  fallback_tools?: string[];
+}
+
+export interface CandidateFinding {
+  _id: string;
+  candidate_id: string;
+  session_id: string;
+  title: string;
+  candidate_kind: 'endpoint' | 'source' | 'hybrid' | string;
+  attack_class: string;
+  affected_surface: string;
+  hypothesis: string;
+  evidence: string[];
+  reachability_claim: string;
+  proposed_proof: Record<string, unknown>;
+  proof_plan: CandidateProofPlan;
+  source_context: CandidateSourceContext;
+  reachability_context: CandidateReachabilityContext;
+  sink?: string;
+  source_input?: string;
+  taint_path?: unknown;
+  invariant?: unknown;
+  commit_signal?: unknown;
+  root_cause_key?: string;
+  patch_dedup_key?: string;
+  priority_score?: number;
+  confidence: number;
+  severity: string;
+  endpoint: string;
+  affected_service: string;
+  status: 'candidate' | 'proof_queued' | 'proof_running' | 'proven' | 'proof_failed' | 'promoted' | 'ruled_out' | 'source_verified_unreachable' | 'source_verified_needs_replay' | string;
+  source_agent: string;
+  source_agents: string[];
+  dedup_key: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ValidationVerdict {
+  _id: string;
+  session_id: string;
+  candidate_id: string;
+  validator: string;
+  verdict: 'support' | 'refute' | 'needs-proof' | 'disputed' | string;
+  reasoning: string;
+  missing_evidence: string[];
+  target_proof_action: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface ProofRun {
+  _id: string;
+  session_id: string;
+  candidate_id: string;
+  proof_tool: string;
+  oracle: unknown;
+  inputs: unknown;
+  result: unknown;
+  artifacts: string[];
+  passed: boolean;
+  proof_class?: 'live' | 'static' | 'other' | string;
+  live_replay_required?: boolean;
+  pass_fail_reason: string;
+  created_at: string;
+}
+
+export interface FindingCluster {
+  _id: string;
+  cluster_id: string;
+  session_id: string;
+  dedup_key: string;
+  canonical_candidate_id: string;
+  title: string;
+  attack_class: string;
+  affected_surface: string;
+  duplicates: string[];
+  candidate_count: number;
+  merged_evidence: string[];
+  root_cause_summary: string;
+  updated_at: string;
+}
+
+export interface BenchmarkReport {
+  _id: string;
+  session_id: string;
+  label: string;
+  candidate_count: number;
+  cluster_count: number;
+  duplicate_rate: number;
+  proof_run_count: number;
+  passed_proof_count: number;
+  proof_coverage: number;
+  vulnerability_count: number;
+  confirmed_vulnerability_count: number;
+  precision_proxy: number;
+  lane?: string;
+  live_proof_count?: number;
+  static_proof_count?: number;
+  endpoint_candidate_count?: number;
+  source_candidate_count?: number;
+  hybrid_candidate_count?: number;
+  surface_link_count?: number;
+  hybrid_surface_link_count?: number;
+  endpoint_source_mapping_rate?: number;
+  ground_truth_count: number;
+  matched_ground_truth_count: number;
+  recall: number | null;
+  created_at: string;
+}
+
+export interface TargetSurfaceLink {
+  link_id: string;
+  candidate_id?: string;
+  candidate_title?: string;
+  candidate_kind?: string;
+  attack_class?: string;
+  endpoint?: string;
+  method?: string;
+  auth_required?: boolean | string | null;
+  params?: unknown;
+  handler_symbol?: string;
+  file_path?: string;
+  repo?: string;
+  language?: string;
+  snippet_id?: string;
+  taint_path?: unknown;
+  confidence: number;
+  updated_at?: string;
+}
+
+export interface TargetSurfaceGraph {
+  _id: string;
+  session_id: string;
+  endpoints: Array<Record<string, unknown>>;
+  source_nodes: Array<Record<string, unknown>>;
+  artifact_nodes: Array<Record<string, unknown>>;
+  links: TargetSurfaceLink[];
+  high_risk_commits: Array<Record<string, unknown>>;
+  endpoint_count: number;
+  source_node_count: number;
+  artifact_count: number;
+  link_count: number;
+  hybrid_link_count: number;
+  endpoint_source_mapping_rate: number;
+  updated_at: string;
+}
+
+export interface ConfirmFindingsResult {
+  session_id: string;
+  selected_count: number;
+  operator_validated_count: number;
+  promoted_count: number;
+  remaining: {
+    candidate_count: number;
+    promoted_count: number;
+    missing_proof_count: number;
+    missing_support_count: number;
+    blocked_refute_count: number;
+    live_replay_needed_count: number;
+    examples: Array<{
+      candidate_id: string;
+      title: string;
+      severity: string;
+      status: string;
+      reason: string;
+    }>;
+  };
+}
+
+export interface CompleteValidationResult {
+  session_id: string;
+  job_id: string;
+  queued_count: number;
+  status: string;
+}
+
+export interface ValidationProofJob {
+  _id?: string;
+  job_id: string;
+  session_id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed' | string;
+  candidate_ids: string[];
+  requested_candidate_ids?: string[];
+  max_candidates: number;
+  force_reproof: boolean;
+  queued_count: number;
+  processed_count: number;
+  passed_count: number;
+  failed_count: number;
+  promoted_count: number;
+  remaining_blockers?: ConfirmFindingsResult['remaining'];
+  error?: string;
+  created_at: string;
+  updated_at: string;
+  started_at?: string | null;
+  completed_at?: string | null;
+}
 
 export interface ModelPricingRate {
   input: number;

@@ -15,6 +15,7 @@ from app.database.postgres import AsyncSessionLocal
 from app.database.redis_client import publish_session_message
 from app.models.session import AppSettings, ResearchSession
 from app.models.vulnerability import Vulnerability
+from app.services.llm_providers import apply_anthropic_thinking
 from app.services.mcp_client import MCPClient
 
 logger = logging.getLogger(__name__)
@@ -63,10 +64,10 @@ def _infer_phase(tool_name: str, current_phase: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# MYTHOS System Prompt
+# GENESIS System Prompt
 # ---------------------------------------------------------------------------
 
-MYTHOS_SYSTEM_PROMPT = """You are GENESIS MYTHOS — an autonomous cyber-intelligence engine conducting a fully authorized security assessment.
+GENESIS_SYSTEM_PROMPT = """You are GENESIS — an autonomous cyber-intelligence engine conducting a fully authorized security assessment.
 
 Target: {target}
 Session ID: {session_id}
@@ -86,9 +87,9 @@ Template (copy this shape):
 
 Status values: active | confirmed | ruled_out. Update existing hypotheses by reusing the same id. Always include falsification_criteria — the concrete observable that would definitively rule the hypothesis out. You may freely reference hypotheses by id in prose (e.g. "confirming h1 with forge_runner") AFTER the JSON block has been emitted.
 
-**CRITICAL HYPOTHESIS → VULNERABILITY RULE:** when a hypothesis describes a real security issue and you flip it to `status: "confirmed"` with confidence ≥ 0.7, you MUST also emit a matching `{"VULNERABILITY": {...}}` block in the same response (or the immediately following one). The platform persists VULNERABILITY rows in Postgres and renders them on the Findings tab; HYPOTHESIS rows alone are NOT shown there. A confirmed hypothesis without a VULNERABILITY block means the operator's Findings tab will say "0 findings" even when you discovered something real. Skip the VULNERABILITY emission ONLY when the hypothesis is purely about your own environment (e.g. "the target is unreachable", "my IP is firewalled", "DNS resolution failed") — those are operator-side observations, not target findings. Anything about the target's surface, configuration, behaviour, or data MUST become a VULNERABILITY row.
+**CRITICAL HYPOTHESIS → FINDING RULE:** when a hypothesis describes a real security issue and you flip it to `status: "confirmed"` with confidence ≥ 0.7, you MUST also emit a matching `{"VULNERABILITY": {...}}`, `{"CANDIDATE_FINDING": {...}}`, or `{"SOURCE_CANDIDATE_FINDING": {...}}` block in the same response (or the immediately following one). HYPOTHESIS rows alone are reasoning notes and are NOT final report findings. Skip structured finding emission ONLY when the hypothesis is purely about your own environment (e.g. "the target is unreachable", "my IP is firewalled", "DNS resolution failed") — those are operator-side observations, not target findings. Anything about the target's surface, configuration, behaviour, or data MUST become a structured finding or candidate.
 
-If you confirm 3 hypotheses about the target during a session, the operator should see 3 entries in the Findings tab. If the count differs, you broke this rule.
+`VULNERABILITY` blocks go through GENESIS's evidence rules and critic review, then appear in Findings as confirmed, disputed, or unverified. `CANDIDATE_FINDING` blocks are optional validation-lab artifacts for leads that need follow-up proof planning.
 
 ## Creative scenario hypothesising (the novelty mandate)
 
@@ -272,7 +273,7 @@ Single-shot exploitation thinks small. **Novel** vulnerabilities live in the gap
 - If every variant returns the modal shape, the boundary you tested is uniform — your hypothesis is probably wrong, move on.
 - If 1–2 variants stand out, that is your candidate. Re-run them in `forge_runner` with a tightened oracle to upgrade them to confirmed evidence.
 
-**Hypothesis discipline still applies.** A single passing oracle in a swarm is *evidence*; the novelty score alone is *signal* (worth investigating, not yet a finding). When the swarm produces a candidate, write a focused `forge_runner` call with a precise oracle that proves the bug, then emit the VULNERABILITY block.
+**Hypothesis discipline still applies.** A single passing oracle in a swarm is *evidence*; the novelty score alone is *signal* (worth investigating, not yet a finding). When the swarm produces a candidate, write a focused `forge_runner` call with a precise oracle that proves the bug, then emit the candidate block. The platform promotes proof-backed candidates into final findings.
 
 **Don't use it for** (a) probing whether a port is open — that's `nmap_scan`, (b) confirming a known CVE — that's `forge_runner` with the published PoC, (c) recon — too narrow, you'd just be retrying the same shape.
 
@@ -299,6 +300,20 @@ For every confirmed vulnerability, generate the exact code change or configurati
 
 ## Vulnerability Output Format
 {"VULNERABILITY": {"title": "...", "severity": "critical|high|medium|low|info", "cvss_score": 9.8, "cve_ids": ["CVE-XXXX-YYYY"], "affected_service": "Apache/2.4.49", "port": 443, "description": "...", "exploit_code": "...", "patch_code": "...", "remediation": "...", "confidence": 0.95, "attack_chain_id": "chain-1", "chain_position": 2, "verification_status": "confirmed", "mitre_techniques": ["T1190"], "is_zero_day": false, "evidence_for": ["concrete_proof_1", "concrete_proof_2"], "endpoint": "/api/users/1", "technique_tag": "idor-sequential-int"}}
+
+## Optional Candidate / Validation Lab Format
+Use candidates when a lead is plausible but not yet ready to be reported as a
+finding, or when the scan is explicitly running in strict validation mode.
+`exhaustive`, `deep_research`, and `validated_dynamic` control discovery depth;
+normal findings are still emitted as `VULNERABILITY` blocks and validated by
+GENESIS's evidence rules and critic review:
+{"CANDIDATE_FINDING": {"title": "...", "attack_class": "sqli|idor|ssrf|auth|...", "affected_surface": "host:port/path or service", "hypothesis": "one testable claim", "evidence": ["concrete observation"], "reachability_claim": "why attacker input reaches the sink", "proposed_proof": {"tool": "ai_request_forge|forge_runner|oob_check|browser_session|payload_swarm|fuzz_binary|symbolic_exec|instrument_trace", "oracle": "what observable proves it"}, "confidence": 0.7, "severity": "critical|high|medium|low|info", "endpoint": "/path", "affected_service": "product/version"}}
+When source, artifacts, sourcemaps, binaries, OpenAPI, or commit history are available, emit source-grounded candidates:
+{"SOURCE_CANDIDATE_FINDING": {"title": "...", "attack_class": "sqli|idor|auth|lifecycle|...", "hypothesis": "one source-grounded testable claim", "source_context": {"repo": "...", "file_path": "routes/users.ts", "symbol": "getUser", "language": "typescript", "line_range": "40-75", "snippet_id": "..."}, "reachability_context": {"endpoint": "/api/users/:id", "method": "GET", "auth_required": true, "params": ["id"], "taint_path": "req.params.id -> db.query", "confidence": 0.8}, "sink": "db.query", "source_input": "req.params.id", "taint_path": "input to sink", "invariant": "optional invariant violation", "commit_signal": "optional security-sensitive commit clue", "evidence": ["source line / AST / taint observation"], "proof_plan": {"preferred_tool": "ai_request_forge|forge_runner|browser_session|semgrep_scan|taint_engine|symbolic_exec|fuzz_binary|instrument_trace", "oracle": "observable that proves it", "live_replay_required": true, "fallback_tools": ["..."]}, "confidence": 0.7, "severity": "critical|high|medium|low|info", "endpoint": "/api/users/:id"}}
+Strict candidate -> proof -> promotion is an opt-in validation-lab workflow.
+When strict validation is enabled, candidates need a passing proof run or
+explicit operator validation before promotion. Otherwise, `VULNERABILITY`
+blocks are the normal path into Findings.
 
 ### Evidence Rules (enforced by the platform)
 `evidence_for` is REQUIRED when `verification_status` is `"confirmed"` or `"exploited"`. Each entry must be a concrete observable, not a paraphrase — quote the tool output, response diff, status code pair, response length delta, or OOB token. Examples:
@@ -386,6 +401,33 @@ SCAN_PROFILES: Dict[str, Dict[str, Any]] = {
             "attack_chain_id to link related findings, not to replace individual "
             "emissions. The Chains tab is built from multiple linked VULNERABILITY rows, "
             "not from a single multi-step VULNERABILITY."
+        ),
+    },
+    "validated_dynamic": {
+        "max_iter": None,
+        "min_iter": 80,
+        "min_iter_per_agent": 25,
+        "max_rounds": 6,
+        "min_duration_minutes": 0,
+        "instructions": (
+            "VALIDATED DYNAMIC MODE — validated hybrid scanner pipeline. "
+            "Operate in explicit stages: prepare a target brief, endpoint "
+            "inventory, artifact/source inventory, and endpoint↔source surface "
+            "graph; scan by emitting CANDIDATE_FINDING blocks for live endpoint "
+            "signals and SOURCE_CANDIDATE_FINDING blocks for repo/artifact/taint "
+            "signals; validate candidates with endpoint_validator, "
+            "source_validator, and counter_validator reasoning; deduplicate by "
+            "root cause and likely patch shape; prove candidates using "
+            "deterministic oracles; report only proof-backed promoted findings. "
+            "When source-backed evidence exists, prefer hybrid proof: static "
+            "source proof first, then live replay through ai_request_forge, "
+            "forge_runner, browser_session, oob_check, or payload_swarm. "
+            "Source-only bugs without a reachable endpoint must remain "
+            "source_verified_unreachable, not confirmed. Raw VULNERABILITY "
+            "blocks are preserved as candidates until the validation/proof gate "
+            "promotes them. Every severity, including low/info, needs either a "
+            "passing proof_run / forge_runner / ai_request_forge / OOB oracle "
+            "or an explicit operator validation before it can land as confirmed."
         ),
     },
     "fast": {
@@ -2303,7 +2345,7 @@ def _thinking_budget(iteration: int, max_iter: int, max_tokens: int | None = Non
 
 class AIOrchestrator:
     """
-    GENESIS MYTHOS autonomous research engine.
+    GENESIS autonomous research engine.
 
     Key differences from basic orchestrator:
     - Extended thinking enabled (10k token budget)
@@ -2347,7 +2389,7 @@ class AIOrchestrator:
         return build_llm_client(app_settings)
 
     async def run_session(self, session_id: str, target_ip: str) -> None:
-        logger.info("[MYTHOS] Starting session %s for target %s", session_id, target_ip)
+        logger.info("[GENESIS] Starting session %s for target %s", session_id, target_ip)
 
         # Celery tasks create a fresh asyncio loop per invocation via asyncio.run().
         # asyncpg and Motor both bind to the loop they were first used on; reusing
@@ -2694,7 +2736,7 @@ class AIOrchestrator:
 
         # Delegate to multi-agent orchestrator if configured
         if agent_mode == "multi_agent":
-            logger.info("[MYTHOS] Routing session %s to MultiAgentOrchestrator", session_id)
+            logger.info("[GENESIS] Routing session %s to MultiAgentOrchestrator", session_id)
             from app.services.multi_agent_orchestrator import MultiAgentOrchestrator
             # Multi-agent sub-agents inherit the main orchestrator's LLM
             # client + model — built by build_client() from the UI-stored
@@ -2762,7 +2804,7 @@ class AIOrchestrator:
             await self._finalize_session(session_id)
             await publish_session_message(session_id, {
                 "type": "session_complete",
-                "data": {"summary": "Multi-agent MYTHOS assessment completed.", "mode": "multi_agent"},
+                "data": {"summary": "Multi-agent GENESIS assessment completed.", "mode": "multi_agent"},
                 "timestamp": _now_iso(),
             })
             return
@@ -2771,7 +2813,7 @@ class AIOrchestrator:
         # literal JSON examples like {"HYPOTHESIS": {...}} whose braces would be
         # interpreted as format placeholders and raise KeyError.
         system_prompt = (
-            MYTHOS_SYSTEM_PROMPT
+            GENESIS_SYSTEM_PROMPT
             .replace("{target}", target_ip)
             .replace("{session_id}", session_id)
             .replace("{scan_profile}", scan_profile)
@@ -2790,7 +2832,7 @@ class AIOrchestrator:
         system_prompt += (
             "\n\n## ★ Reasoning loops are first-class tools (v7.0) ★\n"
             "When you need STRUCTURED reasoning rather than another single-shot probe, "
-            "call `deliberate(loop_type=..., inputs={...})`. The 12 available loops are "
+            "call `deliberate(loop_type=..., inputs={...})`. The 11 available loops are "
             "documented in detail below — but the high-frequency cases are:\n"
             "  • Stuck on a hypothesis or hit a WAF/CSP/auth wall → `deliberate(loop_type=\"counterfactual\", inputs={\"baseline\": \"<what's blocking you>\", \"starting_primitives\": [<what you have>], \"context\": \"<target details>\"})`\n"
             "  • Read a function and want to find a Heartbleed-style smell → `deliberate(loop_type=\"code_intent\", inputs={\"function_text\": \"...\", \"file_text\": \"...\", \"function_name\": \"...\", \"file_path\": \"...\"})`\n"
@@ -2930,6 +2972,10 @@ class AIOrchestrator:
         # Used to nudge the agent toward uncovered endpoint+class combinations and
         # to block idle-stop termination while coverage gaps remain.
         endpoint_probe_coverage: Dict[str, Set[str]] = {}
+        # v8 — kill-chain phase coverage tracker (7 phases, ≥80% gate)
+        from app.services.killchain_coverage import KillChainCoverage  # noqa: PLC0415
+        killchain_coverage = KillChainCoverage()
+        _last_judge_iter: int = -1
         artifact_pulled_at_iter: Optional[int] = None
         first_vuln_iter: Optional[int] = None
         # Fire the artifact_hunter nudge ~15% of the way in — early enough
@@ -3091,6 +3137,44 @@ class AIOrchestrator:
                         "[EP_NUDGE] session=%s iter=%d endpoint gaps injected",
                         session_id, iteration,
                     )
+
+                # ── v8 — SessionJudge fires every 25 iterations (solo mode) ─
+                if (
+                    iteration > 0
+                    and iteration % 25 == 0
+                    and iteration != _last_judge_iter
+                ):
+                    _last_judge_iter = iteration
+                    try:
+                        from app.services.session_judge import SessionJudge  # noqa: PLC0415
+                        from app.services.session_supervisor import SessionSupervisor  # noqa: PLC0415
+                        from app.services.llm_routing import get_client_and_model_for_role  # noqa: PLC0415
+                        _j_client, _j_model, _ = await get_client_and_model_for_role(
+                            "judge", app_settings,
+                        )
+                        _j_vcounts = await self._fetch_vulnerability_counts(session_id)
+                        _j_publish = getattr(self, "_publish_fn", None)
+                        _verdict = await SessionJudge(_j_client, _j_model).evaluate(
+                            session_id=session_id,
+                            round_idx=iteration,
+                            killchain_coverage=killchain_coverage.to_dict(),
+                            tools_used=set(),
+                            goal_tree=await self._fetch_goal_tree(session_id),
+                            goal_progress=await self._fetch_goal_progress(session_id),
+                            hypothesis_stats=await self._fetch_hypothesis_stats(session_id),
+                            finding_count=_j_vcounts["total"],
+                            confirmed_finding_count=_j_vcounts["confirmed"],
+                            coverage_pct=killchain_coverage.overall_pct(),
+                            publish_fn=_j_publish,
+                        )
+                        await SessionSupervisor.dispatch_from_verdict(
+                            session_id=session_id,
+                            verdict=_verdict,
+                            publish_fn=_j_publish,
+                            max_directives=3,
+                        )
+                    except Exception as _judge_exc:
+                        logger.debug("[JUDGE] solo iter=%d fire failed (non-fatal): %s", iteration, _judge_exc)
 
                 # ── v7.x — Reasoning-loop backstop ──────────────────────────
                 # If the agent has already received the soft (iter≥5) and
@@ -3280,7 +3364,7 @@ class AIOrchestrator:
                     # Enable extended thinking if model supports it
                     if "opus" in model or "sonnet" in model:
                         budget = _thinking_budget(iteration, max_iter if max_iter is not None else 0, max_tokens)
-                        create_kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget}
+                        apply_anthropic_thinking(create_kwargs, model, budget)
                     # Activate prompt caching beta header
                     if use_caching:
                         create_kwargs["extra_headers"] = {"anthropic-beta": "prompt-caching-2024-07-31"}
@@ -3344,6 +3428,13 @@ class AIOrchestrator:
                         "timestamp": _now_iso(),
                     })
                     await self._store_thought(session_id, text_content, iteration)
+
+                    cand_count = await self._extract_and_save_candidates(
+                        session_id,
+                        text_content,
+                        source_agent="orchestrator",
+                    )
+                    progress_signals_this_iter += cand_count
 
                     # Detect FINAL_REPORT early so we can defer vulnerability
                     # extraction.  Saving vulns BEFORE gate checks caused every
@@ -3651,7 +3742,7 @@ class AIOrchestrator:
                             iters_since_progress += 1
                             continue
                         logger.info(
-                            "[MYTHOS] Session %s terminating "
+                            "[GENESIS] Session %s terminating "
                             "(iter=%d, all gates satisfied)",
                             session_id, iteration,
                         )
@@ -3717,6 +3808,9 @@ class AIOrchestrator:
                             ]
                             if _ep_classes:
                                 endpoint_probe_coverage.setdefault(_ep, set()).update(_ep_classes)
+
+                        # v8 — record tool against kill-chain phase coverage
+                        killchain_coverage.record_tool(tool_name)
 
                         # v7.x — session-scoped (tool, params_hash, target) dedup.
                         # The 3rd occurrence short-circuits with a synthetic
@@ -3819,6 +3913,8 @@ class AIOrchestrator:
 
                         start_time = datetime.now(timezone.utc)
                         try:
+                            if tool_name == "spawn_replica" and isinstance(tool_params, dict):
+                                tool_params.setdefault("session_id", session_id)
                             if tool_name == "deliberate":
                                 # ── v7.0: route to the reasoning-loop registry ──
                                 from app.services.reasoning import registry as _reasoning_registry
@@ -4216,10 +4312,10 @@ class AIOrchestrator:
 
         await publish_session_message(session_id, {
             "type": "session_complete",
-            "data": {"summary": "MYTHOS assessment completed.", "iterations": iteration},
+            "data": {"summary": "GENESIS assessment completed.", "iterations": iteration},
             "timestamp": _now_iso(),
         })
-        logger.info("[MYTHOS] Session %s completed after %d iterations", session_id, iteration)
+        logger.info("[GENESIS] Session %s completed after %d iterations", session_id, iteration)
 
     # -------------------------------------------------------------------------
     # Intelligence recall
@@ -4502,7 +4598,7 @@ class AIOrchestrator:
             return None
 
         system = (
-            "You are the pre-scan reasoning agent for GENESIS MYTHOS. "
+            "You are the pre-scan reasoning agent for GENESIS. "
             "Given a target IP / hostname and any cross-session intelligence, "
             "produce a structured Target Intent Brief *before* any active scanning. "
             "Reason about the attack surface, predict the stack, and name bug *classes* "
@@ -4533,14 +4629,15 @@ class AIOrchestrator:
         brief: Optional[Dict[str, Any]] = None
         raw_text = ""
         try:
-            resp = await client.messages.create(
+            create_kwargs: Dict[str, Any] = dict(
                 model=model,
                 max_tokens=min(max_tokens, 4000),
                 timeout=_ANTHROPIC_TIMEOUT_SHORT_SECONDS,
-                thinking={"type": "enabled", "budget_tokens": 3000},
                 system=system,
                 messages=[{"role": "user", "content": "\n".join(user_lines)}],
             )
+            apply_anthropic_thinking(create_kwargs, model, 3000)
+            resp = await client.messages.create(**create_kwargs)
             try:
                 from app.services.llm_usage import record_llm_usage
                 await record_llm_usage(
@@ -5070,24 +5167,123 @@ class AIOrchestrator:
             logger.debug("fetch_top_hypothesis failed (non-fatal): %s", exc)
         return ""
 
+    # ------------------------------------------------------------------
+    # v8 — SessionJudge data-fetch helpers
+    # ------------------------------------------------------------------
+
+    async def _fetch_hypothesis_stats(self, session_id: str) -> Dict[str, int]:
+        """Return {total, confirmed, ruled_out, active} from hypothesis_journals."""
+        stats = {"total": 0, "confirmed": 0, "ruled_out": 0, "active": 0}
+        try:
+            from app.database.mongodb import get_hypothesis_journals_collection
+            col = get_hypothesis_journals_collection()
+            cursor = col.find(
+                {"session_id": str(session_id)},
+                projection={"status": 1},
+            )
+            async for doc in cursor:
+                stats["total"] += 1
+                s = (doc.get("status") or "").lower()
+                if s == "confirmed":
+                    stats["confirmed"] += 1
+                elif s in ("ruled_out", "refuted"):
+                    stats["ruled_out"] += 1
+                else:
+                    stats["active"] += 1
+        except Exception as exc:
+            logger.debug("[JUDGE] _fetch_hypothesis_stats failed: %s", exc)
+        return stats
+
+    async def _fetch_vulnerability_counts(self, session_id: str) -> Dict[str, int]:
+        """Return {total, confirmed, unverified} from Postgres vulnerabilities."""
+        counts = {"total": 0, "confirmed": 0, "unverified": 0}
+        try:
+            from app.database.postgres import get_db as get_pg
+            from app.models.vulnerability import Vulnerability
+            from sqlalchemy import select, func
+            async with get_pg() as db:
+                result = await db.execute(
+                    select(
+                        func.count(Vulnerability.id).label("total"),
+                        func.count(
+                            Vulnerability.id
+                        ).filter(
+                            Vulnerability.verification_status.in_(["confirmed", "exploited"])
+                        ).label("confirmed"),
+                    ).where(Vulnerability.session_id == str(session_id))
+                )
+                row = result.one_or_none()
+                if row:
+                    counts["total"] = int(row.total or 0)
+                    counts["confirmed"] = int(row.confirmed or 0)
+                    counts["unverified"] = counts["total"] - counts["confirmed"]
+        except Exception as exc:
+            logger.debug("[JUDGE] _fetch_vulnerability_counts failed: %s", exc)
+        return counts
+
+    async def _fetch_goal_tree(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Return the goal_trees document for this session or None."""
+        try:
+            from app.database.mongodb import get_goal_trees_collection
+            col = get_goal_trees_collection()
+            doc = await col.find_one({"session_id": str(session_id)})
+            return doc
+        except Exception as exc:
+            logger.debug("[JUDGE] _fetch_goal_tree failed: %s", exc)
+            return None
+
+    async def _fetch_goal_progress(self, session_id: str) -> Optional[Dict[str, Any]]:
+        """Return the goal_progress document for this session or None."""
+        try:
+            from app.database.mongodb import get_goal_progress_collection
+            col = get_goal_progress_collection()
+            doc = await col.find_one({"session_id": str(session_id)})
+            return doc
+        except Exception as exc:
+            logger.debug("[JUDGE] _fetch_goal_progress failed: %s", exc)
+            return None
+
+    # ------------------------------------------------------------------
+
     async def _get_red_blue(self, client: Any, model: str):
         """Lazily build a RedBlueDialectic for this session and reuse it.
 
         v7.x — resolves the `red_blue` role via the multi-model router. Falls
         back to the supplied (client, model) — which is the orchestrator's
         primary — when routing fails or no profiles are configured.
+
+        validation milestone 1: also resolves the `debate` role for Blue. When `debate`
+        maps to a different profile than `red_blue`, RedBlueDialectic runs Blue
+        with an independent model family so cross-model surviving hypotheses
+        earn the cross_model_confirmed tag and a +0.2 stake boost.
         """
         from app.services.adversarial_agents import RedBlueDialectic
         rb_client, rb_model = client, model
+        debate_client, debate_model = None, ""
+        app_settings = getattr(self, "_app_settings", None) or {}
         try:
             from app.services.llm_routing import get_client_and_model_for_role
             rb_client, rb_model, _ = await get_client_and_model_for_role(
-                "red_blue", getattr(self, "_app_settings", None) or {},
+                "red_blue", app_settings,
             )
         except Exception as exc:
             logger.debug("[ROUTING] red_blue resolve failed: %s", exc)
+        try:
+            from app.services.llm_routing import get_client_and_model_for_role
+            dc, dm, _ = await get_client_and_model_for_role("debate", app_settings)
+            # Only use as a separate debate client when it genuinely differs —
+            # if no explicit `debate` assignment exists the router falls back to
+            # the same profile as `red_blue`, giving dc is rb_client.
+            if dc is not rb_client or dm != rb_model:
+                debate_client, debate_model = dc, dm
+        except Exception as exc:
+            logger.debug("[ROUTING] debate resolve failed: %s", exc)
         if getattr(self, "_red_blue", None) is None or self._red_blue_client is not rb_client:
-            self._red_blue = RedBlueDialectic(rb_client, rb_model)
+            self._red_blue = RedBlueDialectic(
+                rb_client, rb_model,
+                debate_client=debate_client,
+                debate_model=debate_model,
+            )
             self._red_blue_client = rb_client
         return self._red_blue
 
@@ -5709,6 +5905,44 @@ class AIOrchestrator:
         except Exception as exc:
             logger.error("Failed to store tool output: %s", exc)
 
+    async def _session_uses_validation_pipeline(self, session_id: str) -> bool:
+        """Return True only when the strict candidate-promotion gate is enabled."""
+        try:
+            session = await self._load_session(session_id)
+            if not session:
+                return False
+            config = getattr(session, "config", None)
+            if not isinstance(config, dict):
+                return False
+            return bool(
+                config.get("strict_validation_pipeline_enabled") is True
+                or config.get("validation_pipeline_enabled") is True
+            )
+        except Exception:
+            return False
+
+    async def _session_uses_validated_dynamic(self, session_id: str) -> bool:
+        """Backward-compatible alias for strict validation-lab sessions."""
+        return await self._session_uses_validation_pipeline(session_id)
+
+    async def _extract_and_save_candidates(
+        self,
+        session_id: str,
+        text: str,
+        source_agent: str = "orchestrator",
+    ) -> int:
+        """Persist CANDIDATE_FINDING blocks emitted by any scanner mode."""
+        try:
+            from app.services.validated_scanner import store_candidates_from_text
+            return await store_candidates_from_text(
+                session_id=session_id,
+                text=text,
+                source_agent=source_agent,
+            )
+        except Exception as exc:
+            logger.debug("candidate extract failed (non-fatal): %s", exc)
+            return 0
+
     async def _extract_and_save_vulnerabilities(self, session_id: str, text: str) -> List[str]:
         """Parse, persist, and emit chain-follow-up suggestions for vulnerability blocks.
 
@@ -5716,7 +5950,20 @@ class AIOrchestrator:
         next user turn so the orchestrator actively drives multi-step chains.
         """
         suggestions: List[str] = []
-        for vuln_data in _extract_vulnerability_blocks(text):
+        vulnerability_blocks = _extract_vulnerability_blocks(text)
+        if await self._session_uses_validation_pipeline(session_id):
+            try:
+                from app.services.validated_scanner import store_vulnerability_blocks_as_candidates
+                await store_vulnerability_blocks_as_candidates(
+                    session_id,
+                    vulnerability_blocks,
+                    source_agent="vulnerability_block",
+                )
+            except Exception as exc:
+                logger.debug("validation gate vuln->candidate failed: %s", exc)
+            return suggestions
+
+        for vuln_data in vulnerability_blocks:
             suggestion = await self._save_vulnerability(session_id, vuln_data)
             if suggestion:
                 suggestions.append(suggestion)
@@ -5950,7 +6197,7 @@ class AIOrchestrator:
         remediation = str(vuln_data.get("remediation", ""))
         confidence = float(vuln_data.get("confidence", 0.5))
         exploit_available = bool(exploit_code and str(exploit_code).strip())
-        # Mythos-specific fields
+        # GENESIS-specific fields
         claimed_status = str(vuln_data.get("verification_status", "unverified")).lower()
         attack_chain_id = vuln_data.get("attack_chain_id")
         chain_position = _safe_int(vuln_data.get("chain_position"))
@@ -5988,6 +6235,34 @@ class AIOrchestrator:
                 downgrade_reason = (
                     "blind-class vuln without confirmed OOB callback hit or passing forge oracle"
                 )
+
+        # Strict validation-lab gate: when explicitly enabled, confirmed
+        # findings need a deterministic proof signal or an operator attestation.
+        if (
+            working_status in ("confirmed", "exploited")
+            and await self._session_uses_validation_pipeline(session_id)
+        ):
+            proof_blob = " ".join(evidence_for).lower()
+            proof_marker_ok = any(
+                marker in proof_blob
+                for marker in (
+                    "validated_dynamic proof_run_passed",
+                    "proof_run_passed",
+                    "oracle passed",
+                    "oracle_passed",
+                    "forge_runner",
+                    "ai_request_forge",
+                    "oob_check",
+                    "operator_validation",
+                    "operator attestation",
+                )
+            )
+            oracle_ok = proof_marker_ok or await self._has_passing_oracle(session_id, evidence_for)
+            if not oracle_ok:
+                working_status = "unverified"
+                downgrade_reason = (
+                    (downgrade_reason + "; ") if downgrade_reason else ""
+                ) + "strict validation gate requires a passing proof oracle or operator attestation"
 
         # Rule 3: always-on critic — can downgrade confirmed -> disputed,
         # or promote unverified (confidence>=0.6) -> confirmed/disputed.
@@ -6236,7 +6511,7 @@ class AIOrchestrator:
             "role": "user",
             "content": f"[COMPRESSED PROGRESS — iterations up to {iteration - KEEP_TAIL}]\n{summary_text}",
         }
-        logger.debug("[MYTHOS] Compressed %d messages into progress summary at iter %d", COMPRESS_WINDOW, iteration)
+        logger.debug("[GENESIS] Compressed %d messages into progress summary at iter %d", COMPRESS_WINDOW, iteration)
         return head + [compressed_msg] + tail
 
     # -------------------------------------------------------------------------
@@ -6303,6 +6578,22 @@ class AIOrchestrator:
             logger.error("Failed to update session %s: %s", session_id, exc)
 
     async def _finalize_session(self, session_id: str) -> None:
+        validation_pipeline = await self._session_uses_validation_pipeline(session_id)
+
+        if validation_pipeline:
+            try:
+                from app.services.validated_scanner import rebuild_target_surface_graph, promote_ready_candidates
+                await self._bridge_hypotheses_to_candidates(session_id)
+                await rebuild_target_surface_graph(session_id)
+                promoted = await promote_ready_candidates(session_id, self._save_vulnerability)
+                if promoted:
+                    logger.info(
+                        "strict validation lab promoted %d proof-backed candidates for %s",
+                        promoted, session_id,
+                    )
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("strict validation lab promotion failed for %s: %s", session_id, exc)
+
         # Safety net: bridge confirmed hypotheses that never got a matching
         # VULNERABILITY block into actual findings. Without this, sessions can
         # end with 0 saved vulns even when the agent confirmed h1/h2/h3 with
@@ -6310,10 +6601,11 @@ class AIOrchestrator:
         # and skipped the structured block. The platform persists vulns,
         # not hypotheses, so this bridge is what makes the operator's UI
         # reflect what the agent actually found.
-        try:
-            await self._bridge_hypotheses_to_findings(session_id)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("hypothesis→finding bridge failed for %s: %s", session_id, exc)
+        if not validation_pipeline:
+            try:
+                await self._bridge_hypotheses_to_findings(session_id)
+            except Exception as exc:  # noqa: BLE001
+                logger.warning("hypothesis→finding bridge failed for %s: %s", session_id, exc)
 
         # v7.x — flip every non-done sub-goal to `not_achieved` with a reason
         # so the Goal tab clearly shows what was missed instead of leaving
@@ -6336,7 +6628,8 @@ class AIOrchestrator:
         # ID so per-session sandboxes / replicas don't pile up after the
         # scan ends. Best-effort; failures don't block finalize.
         try:
-            await self._cleanup_session_containers(session_id)
+            from app.services.session_container_cleanup import cleanup_session_containers
+            await cleanup_session_containers(session_id, reason="session_completed")
         except Exception as exc:  # noqa: BLE001
             logger.debug("container cleanup failed for %s: %s", session_id, exc)
 
@@ -6537,6 +6830,10 @@ class AIOrchestrator:
             logger.debug("[HIGH_WATER] update failed: %s", exc)
 
     async def _cleanup_session_containers(self, session_id: str) -> None:
+        from app.services.session_container_cleanup import cleanup_session_containers
+
+        await cleanup_session_containers(session_id, reason="session_lifecycle")
+        return
         """Best-effort cleanup of per-session docker resources.
 
         Removes:
@@ -6619,6 +6916,131 @@ class AIOrchestrator:
                 "[CLEANUP] nothing to remove for session=%s (project=%s)",
                 session_id, compose_project,
             )
+
+    async def _bridge_hypotheses_to_candidates(self, session_id: str) -> int:
+        """Auto-derive candidates from confirmed hypotheses that lack candidate blocks.
+
+        Under the strict validation gate this preserves the old safety net
+        without creating final findings directly. The derived candidates still
+        need proof or operator validation before promotion.
+        """
+        from app.database.mongodb import (
+            get_candidate_findings_collection,
+            get_hypothesis_journals_collection,
+        )
+        from app.services.validated_scanner import store_candidate
+
+        cursor = get_hypothesis_journals_collection().find(
+            {"session_id": session_id, "status": "confirmed"}
+        ).sort("timestamp", -1)
+        latest_by_id: Dict[str, Dict[str, Any]] = {}
+        async for doc in cursor:
+            hid = str(doc.get("hyp_id", "")).strip()
+            if hid and hid not in latest_by_id:
+                latest_by_id[hid] = doc
+        if not latest_by_id:
+            return 0
+
+        existing_titles: Set[str] = set()
+        try:
+            async for cand in get_candidate_findings_collection().find(
+                {"session_id": session_id},
+                {"title": 1},
+            ):
+                title = str(cand.get("title") or "").strip().lower()
+                if title:
+                    existing_titles.add(title)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("candidate bridge dedup query failed: %s", exc)
+
+        env_signals = (
+            "unreachable", "no route to host", "ehostunreach", "errno 113",
+            "firewall block", "host-based or network-level firewall",
+            "blocking inbound", "non-http target", "target is offline",
+            "connection refused", "no exploit", "cannot succeed",
+        )
+
+        bridged = 0
+        for hid, h in latest_by_id.items():
+            statement = str(h.get("statement", "")).strip()
+            confidence = float(h.get("confidence", 0) or 0)
+            if confidence < 0.7 or not statement:
+                continue
+            low = statement.lower()
+            if any(sig in low for sig in env_signals) or low in existing_titles:
+                continue
+
+            evidence_for = h.get("evidence_for") or []
+            if not isinstance(evidence_for, list):
+                evidence_for = [str(evidence_for)]
+            evidence = [str(e)[:500] for e in evidence_for if str(e).strip()]
+            evidence.append(
+                f"auto-derived from confirmed hypothesis {hid} (confidence={confidence:.2f})"
+            )
+
+            severity = "medium"
+            if any(kw in low for kw in ("rce", "remote code execution", "shell access", "auth bypass", "credentials exposed", "private key", "exfiltrat")):
+                severity = "critical"
+            elif any(kw in low for kw in ("sql injection", "rfi", "lfi", "ssrf", "deserialization", "directory traversal", "default credentials")):
+                severity = "high"
+            elif any(kw in low for kw in ("info disclosure", "disclosure", "directory listing", "verbose error", "version leak")):
+                severity = "low"
+
+            next_test = str(h.get("next_test", "")).strip()
+            candidate = {
+                "title": statement[:300],
+                "attack_class": "auto-bridged-from-hypothesis",
+                "affected_surface": "",
+                "hypothesis": (
+                    f"Auto-derived from confirmed hypothesis {hid}. "
+                    "This remains a candidate until proof or operator validation passes."
+                ),
+                "evidence": evidence[:10],
+                "reachability_claim": next_test or "Confirmed hypothesis requires proof planning.",
+                "proposed_proof": {
+                    "tool": "proof_planner",
+                    "oracle": next_test or "Create a deterministic proof action for this hypothesis.",
+                },
+                "proof_plan": {
+                    "preferred_tool": "proof_planner",
+                    "oracle": next_test or "Create a deterministic proof action for this hypothesis.",
+                    "live_replay_required": True,
+                },
+                "confidence": confidence,
+                "severity": severity,
+                "endpoint": "",
+                "affected_service": "",
+            }
+            try:
+                await store_candidate(
+                    session_id=session_id,
+                    data=candidate,
+                    source_agent="hypothesis_bridge",
+                )
+                bridged += 1
+                existing_titles.add(low)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("hypothesis->candidate bridge failed for %s: %s", hid, exc)
+
+        if bridged > 0:
+            logger.info("Bridged %d confirmed hypotheses to validation candidates (session %s)", bridged, session_id)
+            try:
+                await publish_session_message(session_id, {
+                    "type": "agent_thought",
+                    "data": {
+                        "session_id": session_id,
+                        "thought": (
+                            f"[platform] Auto-bridged {bridged} confirmed hypothesis(es) into "
+                            "validation candidates for optional proof follow-up."
+                        ),
+                        "phase": "reporting",
+                        "iteration": 9999,
+                    },
+                    "timestamp": _now_iso(),
+                })
+            except Exception:  # noqa: BLE001
+                pass
+        return bridged
 
     async def _bridge_hypotheses_to_findings(self, session_id: str) -> int:
         """Auto-derive Vulnerability rows from confirmed hypotheses that lack one.
@@ -6761,6 +7183,11 @@ class AIOrchestrator:
                 await db.commit()
         except Exception as exc:
             logger.error("Failed to mark session %s as failed: %s", session_id, exc)
+        try:
+            from app.services.session_container_cleanup import cleanup_session_containers
+            await cleanup_session_containers(session_id, reason="session_failed")
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("container cleanup after failure failed for %s: %s", session_id, exc)
 
 
 # ---------------------------------------------------------------------------

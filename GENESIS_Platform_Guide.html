@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENESIS Platform — Complete Guide for Leaders</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --accent: #6366f1;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --yellow: #eab308;
+    --text: #1e293b;
+    --muted: #64748b;
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --critical: #7f1d1d;
+    --critical-bg: #fef2f2;
+    --high-bg: #fff7ed;
+    --high: #9a3412;
+    --med: #92400e;
+    --med-bg: #fffbeb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; font-size: 15px; }
+
+  /* Navigation */
+  nav { position: sticky; top: 0; z-index: 100; background: var(--primary); padding: 12px 40px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  nav .logo { color: #fff; font-weight: 800; font-size: 18px; letter-spacing: 2px; }
+  nav .logo span { color: var(--accent); }
+  nav .subtitle { color: #94a3b8; font-size: 13px; margin-left: auto; }
+
+  /* Hero */
+  .hero { background: linear-gradient(135deg, var(--primary) 0%, #1e3a5f 60%, #0c4a6e 100%); color: #fff; padding: 72px 40px 64px; }
+  .hero h1 { font-size: 42px; font-weight: 800; line-height: 1.2; max-width: 800px; }
+  .hero h1 span { color: var(--accent2); }
+  .hero p { margin-top: 20px; font-size: 18px; color: #cbd5e1; max-width: 700px; }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+  .badge { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #e2e8f0; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+  /* Content wrapper */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+
+  /* Sections */
+  .section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  .section:last-child { border-bottom: none; }
+  .section-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 32px; }
+  .section-number { background: var(--accent); color: #fff; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; margin-top: 4px; }
+  .section-title { font-size: 28px; font-weight: 700; color: var(--primary); }
+  .section-sub { color: var(--muted); font-size: 15px; margin-top: 4px; }
+
+  h3 { font-size: 19px; font-weight: 700; color: var(--primary); margin: 32px 0 12px; }
+  h4 { font-size: 16px; font-weight: 700; color: var(--accent); margin: 20px 0 8px; }
+  p { margin-bottom: 14px; color: var(--text); }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-green { border-left: 4px solid var(--green); }
+  .card-red { border-left: 4px solid var(--red); }
+  .card-orange { border-left: 4px solid var(--orange); }
+
+  /* Analogy box */
+  .analogy { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #bae6fd; border-radius: 12px; padding: 20px 24px; margin: 20px 0; }
+  .analogy-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent2); margin-bottom: 8px; }
+  .analogy p { margin-bottom: 0; color: #0c4a6e; }
+
+  /* Step flow */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px dashed var(--border); }
+  .step:last-child { border-bottom: none; }
+  .step-icon { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px; flex-shrink: 0; }
+  .step-content h4 { margin-top: 0; font-size: 17px; color: var(--primary); }
+
+  /* Agent grid */
+  .agent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin: 20px 0; }
+  .agent-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .agent-card .agent-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .agent-card h4 { margin: 0 0 8px; font-size: 15px; color: var(--primary); }
+  .agent-card p { font-size: 13px; color: var(--muted); margin: 0; }
+  .type-recon { color: var(--accent2); }
+  .type-attack { color: var(--red); }
+  .type-debate { color: var(--orange); }
+  .type-think { color: #8b5cf6; }
+  .type-validate { color: var(--green); }
+
+  /* Pipeline */
+  .pipeline { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding: 20px 0; }
+  .pipe-step { display: flex; flex-direction: column; align-items: center; min-width: 130px; }
+  .pipe-box { background: var(--primary); color: #fff; padding: 12px 16px; border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; width: 120px; line-height: 1.3; }
+  .pipe-box.green { background: var(--green); }
+  .pipe-box.red { background: var(--red); }
+  .pipe-box.orange { background: var(--orange); color: var(--primary); }
+  .pipe-box.purple { background: #7c3aed; }
+  .pipe-arrow { color: var(--muted); font-size: 24px; padding: 0 8px; margin-top: 20px; }
+
+  /* DB table */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { background: var(--primary); color: #fff; padding: 12px 16px; text-align: left; font-weight: 600; }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  tr:hover td { background: #f1f5f9; }
+
+  /* Severity badges */
+  .sev { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  .sev-critical { background: var(--critical-bg); color: var(--critical); }
+  .sev-high { background: var(--high-bg); color: var(--high); }
+  .sev-medium { background: var(--med-bg); color: var(--med); }
+  .sev-low { background: #f0fdf4; color: #166534; }
+
+  /* Example finding */
+  .finding-example { background: #0f172a; color: #e2e8f0; border-radius: 14px; padding: 28px; margin: 24px 0; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.8; }
+  .finding-example .comment { color: #64748b; }
+  .finding-example .key { color: var(--accent2); }
+  .finding-example .value { color: #86efac; }
+  .finding-example .label { color: #f59e0b; font-weight: 700; }
+
+  /* Q&A */
+  .qa-item { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+  .qa-q { background: #f8fafc; padding: 16px 20px; font-weight: 700; color: var(--primary); cursor: default; border-left: 4px solid var(--accent); }
+  .qa-a { padding: 16px 20px; background: #fff; font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* Callout */
+  .callout { display: flex; gap: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 20px 0; }
+  .callout-icon { font-size: 28px; flex-shrink: 0; }
+  .callout-text h4 { margin: 0 0 6px; color: var(--primary); font-size: 15px; }
+  .callout-text p { margin: 0; font-size: 14px; color: var(--muted); }
+
+  /* Comparison */
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+  .compare-col { border: 1px solid var(--border); border-radius: 10px; padding: 20px; background: var(--card); }
+  .compare-col.left { border-top: 4px solid #ef4444; }
+  .compare-col.right { border-top: 4px solid var(--green); }
+  .compare-col h4 { margin: 0 0 16px; font-size: 15px; }
+  .compare-col ul { padding-left: 20px; font-size: 14px; color: var(--muted); }
+  .compare-col ul li { margin-bottom: 8px; }
+
+  /* Timeline */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before { content: ''; position: absolute; left: 12px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 24px; }
+  .timeline-dot { position: absolute; left: -26px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+  .timeline-item h4 { margin: 0 0 4px; }
+  .timeline-item p { font-size: 14px; color: var(--muted); margin: 0; }
+
+  /* Next steps */
+  .next-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .next-card { border: 1px solid var(--border); border-radius: 10px; padding: 20px; background: var(--card); }
+  .next-card .priority { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .p0 { color: var(--red); }
+  .p1 { color: var(--orange); }
+  .p2 { color: var(--yellow); }
+  .p3 { color: var(--green); }
+
+  /* Footer */
+  footer { background: var(--primary); color: #64748b; text-align: center; padding: 32px; font-size: 13px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 28px; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .container { padding: 0 20px; }
+    nav { padding: 12px 20px; }
+  }
+
+  /* TOC */
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 32px 0; }
+  .toc h3 { margin-top: 0; margin-bottom: 16px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 500; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* Highlight */
+  .highlight { background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); border: 1px solid #ddd6fe; border-radius: 10px; padding: 16px 20px; margin: 16px 0; }
+  .stat-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0; }
+  .stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; flex: 1; min-width: 140px; text-align: center; }
+  .stat-box .num { font-size: 32px; font-weight: 800; color: var(--accent); }
+  .stat-box .label { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">GEN<span>ESIS</span></div>
+  <div class="subtitle">Platform Intelligence Guide — For Leaders &amp; Decision Makers</div>
+</nav>
+
+<div class="hero">
+  <div class="container">
+    <h1>GENESIS: The Security Platform That <span>Thinks Like an Attacker</span></h1>
+    <p>A complete, plain-English guide to how GENESIS works — from the moment a scan starts to the final security report — written for executives, directors, and non-technical stakeholders.</p>
+    <div class="hero-badges">
+      <span class="badge">Version 7.0</span>
+      <span class="badge">Multi-Agent AI</span>
+      <span class="badge">Zero False-Positive Design</span>
+      <span class="badge">Validated Findings Only</span>
+      <span class="badge">CISO Briefing Ready</span>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#what-is-genesis">What Is GENESIS? The Simple Explanation</a></li>
+      <li><a href="#vs-others">How GENESIS Differs From Regular Security Scanners</a></li>
+      <li><a href="#scan-journey">The GENESIS Scan Journey — Step by Step</a></li>
+      <li><a href="#agents">The Agents — Who Does What</a></li>
+      <li><a href="#tools">Tools &amp; MCP Servers — The Scanner's Toolkit</a></li>
+      <li><a href="#adversarial">Adversarial Thinking — Red vs. Blue Debate</a></li>
+      <li><a href="#reasoning">Reasoning Loops — How GENESIS Thinks Deeper</a></li>
+      <li><a href="#databases">The Memory System — What Gets Saved and Where</a></li>
+      <li><a href="#validation">Validation Pipeline — From Suspicion to Confirmed Fact</a></li>
+      <li><a href="#finding-example">A Real Finding, Explained End to End</a></li>
+      <li><a href="#patches">Patches, Exploitation &amp; Recommendations</a></li>
+      <li><a href="#ciso-questions">Questions CISOs and Directors Should Ask</a></li>
+      <li><a href="#value">Where GENESIS Adds Value — Business Case</a></li>
+      <li><a href="#next-steps">Next Steps — Gaps, Improvements &amp; Roadmap</a></li>
+    </ol>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="what-is-genesis">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div>
+        <div class="section-title">What Is GENESIS? The Simple Explanation</div>
+        <div class="section-sub">No jargon. No assumptions about technical background.</div>
+      </div>
+    </div>
+
+    <p>Imagine you own a large office building and you want to test how secure it is. You could hire a single security guard to walk around and check that all the doors are locked. That is what a traditional security scanner does — it checks known locks against a list of known problems.</p>
+    <p>GENESIS is different. Instead of one guard with a checklist, GENESIS sends in a <strong>team of specialized investigators</strong> who each have deep expertise, think independently, argue with each other about what they find, verify every claim before reporting it, and write a full brief that tells you exactly how a real attacker could break in and what to do about it.</p>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Forensic Investigation Team</div>
+      <p>Think of GENESIS like hiring an entire forensic investigation firm rather than a security guard. One investigator focuses on the building's external footprint (reconnaissance). Another specializes in door-lock mechanisms (authentication). A third is an expert in hidden passages (code analysis). A fourth tries to argue that every proposed risk is exaggerated, forcing the team to prove their claims (adversarial debate). Nothing gets reported as a confirmed finding until the evidence has been tested and verified. The final report tells you not just what is broken, but proves it is broken, explains how a thief would exploit it step by step, and tells you exactly how to fix it.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box"><div class="num">50+</div><div class="label">Security Tools Orchestrated</div></div>
+      <div class="stat-box"><div class="num">15+</div><div class="label">Specialized AI Agents</div></div>
+      <div class="stat-box"><div class="num">6</div><div class="label">Databases Working Together</div></div>
+      <div class="stat-box"><div class="num">100%</div><div class="label">Findings Proof-Verified</div></div>
+      <div class="stat-box"><div class="num">0%</div><div class="label">False Positive Target</div></div>
+    </div>
+
+    <h3>The Core Promise</h3>
+    <p>GENESIS makes one specific promise that most security tools cannot: <strong>every finding it reports has been tested and proven to be real.</strong> If GENESIS says your login page has a critical vulnerability, it has already demonstrated that vulnerability against your actual system and collected the evidence. You will never receive a long list of theoretical risks that may or may not apply to you.</p>
+
+    <div class="callout">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-text">
+        <h4>One Sentence Summary</h4>
+        <p>GENESIS is an AI-powered security investigation platform that thinks through every possible attack path, debates its own findings, proves each vulnerability is real before reporting it, and tells you exactly how to fix what it found.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="vs-others">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div>
+        <div class="section-title">How GENESIS Differs From Regular Security Scanners</div>
+        <div class="section-sub">Understanding the gap between checking boxes and thinking through attacks.</div>
+      </div>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col left">
+        <h4>❌ Traditional / Automated Scanners</h4>
+        <ul>
+          <li>Run a fixed list of pre-programmed checks</li>
+          <li>Match patterns against a known-vulnerability database</li>
+          <li>Report everything that might be an issue (many false positives)</li>
+          <li>Cannot connect multiple small issues into one big attack chain</li>
+          <li>Finish when the checklist is done</li>
+          <li>Cannot adapt to your specific application's technology</li>
+          <li>Cannot form hypotheses or reason about novel vulnerabilities</li>
+          <li>Produce reports that require weeks of human expert review to validate</li>
+        </ul>
+      </div>
+      <div class="compare-col right">
+        <h4>✅ GENESIS</h4>
+        <ul>
+          <li>Dynamically plans which checks to run based on what it discovers</li>
+          <li>Forms its own hypotheses about what might be broken and why</li>
+          <li>Only reports what it has actually proven (near-zero false positives)</li>
+          <li>Assembles chains showing how attackers could combine issues for bigger impact</li>
+          <li>Continues iterating until coverage goals are met, not until a timer stops</li>
+          <li>Activates specialist agents based on your specific technology stack</li>
+          <li>Discovers novel vulnerabilities not in any database</li>
+          <li>Delivers validated, immediately actionable findings</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Doctor vs. The Checklist</div>
+      <p>A traditional scanner is like a receptionist with a checklist: "Do you have a fever? Yes or no. Do you have a cough? Yes or no." It runs through a fixed set of questions and flags anything that matches. GENESIS is like a senior physician: it listens, forms a diagnosis, orders targeted tests to confirm it, and only tells you what it has ruled in — not everything it might have considered and ruled out.</p>
+    </div>
+
+    <h3>The Key Differentiator: GENESIS Does Not Scan — It Investigates</h3>
+    <p>Most tools are <em>scanners</em> — they run automated checks. GENESIS is an <em>investigator</em> — it reasons about attack scenarios, selects the right tools for each scenario, tests its hypotheses, refines them based on what it finds, and builds a case from evidence. This is fundamentally different from running a tool against a list of known vulnerabilities.</p>
+
+    <div class="card card-accent">
+      <strong>The "Thinking" Difference:</strong> After finding a login page, a traditional scanner checks: "Does it have default passwords? Does it lock out after 10 tries?" GENESIS asks: "What is this login page built with? What is the trust model? If I forge a token with the wrong algorithm, does it still accept me? If I chain this login weakness with that database call I saw earlier, can I reach customer data?" — and then it actually tries.
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="scan-journey">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div>
+        <div class="section-title">The GENESIS Scan Journey — Step by Step</div>
+        <div class="section-sub">Everything that happens from the moment you press "Start Scan" to the final report.</div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">1</div>
+        <div class="step-content">
+          <h4>Scan Initiation — Setting the Mission</h4>
+          <p>When you start a GENESIS scan, you provide a target (an IP address or web application URL) and a scan mode: <em>Standard</em>, <em>Deep Research</em>, or <em>Exhaustive</em>. These modes control how long GENESIS spends and how deeply it digs. Deep Research runs for at least 6 hours of active investigation. Exhaustive runs until every avenue has been explored.</p>
+          <p>GENESIS immediately creates a <strong>session</strong> — a unique workspace that tracks every decision, every tool run, every hypothesis, and every finding for this particular investigation. Think of it as opening a case file. A background task manager (called Celery) picks up this case file and begins the investigation process.</p>
+          <div class="analogy">
+            <div class="analogy-label">Analogy</div>
+            <p>Like a detective agency opening a new case. The case number is assigned, the client brief is logged, the investigators are briefed on scope, and the clock starts.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">2</div>
+        <div class="step-content">
+          <h4>Goal Setting — What Does Success Look Like?</h4>
+          <p>Before doing anything, GENESIS defines its investigation goals. These goals are specific, testable questions such as: "Have we tested all authentication endpoints?", "Have we checked all places where user data is passed to the database?", "Have we mapped all the ways an unauthenticated user can trigger privileged operations?"</p>
+          <p>These goals are tracked in a live progress system. A goal can be: <em>pending</em>, <em>in progress</em>, or <em>complete</em>. GENESIS does not consider its investigation done until every goal reaches "complete." This prevents the shallow coverage that plagues time-limited automated scans.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">3</div>
+        <div class="step-content">
+          <h4>Reconnaissance Phase — Getting to Know the Target</h4>
+          <p>Two specialist agents run in parallel at the start: the <strong>Recon Agent</strong> and the <strong>Analyst Agent</strong>. Together, they build a complete picture of what they are dealing with.</p>
+          <p>The Recon Agent finds all the doors and windows — what ports are open, what services are running, what subdomains exist, what the network looks like from the outside. The Analyst Agent interprets what those findings mean — what technology is being used, what known weaknesses that technology has, whether there are protective shields like a firewall in place.</p>
+          <p><strong>Coverage gate:</strong> Neither agent is allowed to finish this phase until it has used at least 5 different investigation tools and has made at least 3 meaningful discoveries. This prevents a "quick look" that misses critical context.</p>
+          <div class="analogy">
+            <div class="analogy-label">Analogy</div>
+            <p>Like a building surveyor walking the exterior before any internal inspection begins. They map every entrance, note the security cameras, check what alarm system is installed, and photograph the surroundings before anyone tries a single door handle.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">4</div>
+        <div class="step-content">
+          <h4>Hypothesis Formation — What Could Be Wrong and Why?</h4>
+          <p>Based on what reconnaissance found, GENESIS forms <strong>hypotheses</strong> — educated guesses about specific security weaknesses. A hypothesis is not a finding — it is a structured proposition: "I believe the login endpoint may accept tokens with a forged signature because the code relies on a hand-rolled verification function that does not check the algorithm header." Each hypothesis has a <strong>confidence score</strong> (0 to 1), a list of evidence that supports it, and a proposed way to test it.</p>
+          <p>These hypotheses are managed in a <strong>Hypothesis Market</strong> — a live tracking system where each hypothesis's confidence rises when more evidence supports it and falls when evidence contradicts it. Only hypotheses that reach a high enough confidence score trigger dedicated testing.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">5</div>
+        <div class="step-content">
+          <h4>Specialist Activation — Assembling the Right Team</h4>
+          <p>Based on what was found in reconnaissance, GENESIS activates the right specialist investigators. If the target uses a web application with a login system, the authentication specialist wakes up. If source code is available, the code analysis specialist is added. If the application handles cryptography (encryption, digital signatures), the cryptography specialist joins. If the target is an industrial control system, the OT/IoT specialist is activated.</p>
+          <p>Up to 8 specialist agents can run simultaneously in addition to 3 always-active generalist agents (exploit, code, payload). This creates a coordinated team of up to 11 investigators working on the same target at the same time.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">6</div>
+        <div class="step-content">
+          <h4>Investigation Rounds — The Iterative Discovery Loop</h4>
+          <p>Agents work in <strong>rounds</strong>. Each round, agents take their hypotheses, select the right tools, run them, read the results, update their understanding, and propose new hypotheses based on what they found. Findings that one agent discovers are immediately shared with all other agents in the same session so no team member misses relevant information.</p>
+          <p>After each round, a <strong>Session Judge</strong> — a senior oversight agent — reviews what has been covered and what has been missed. It issues specific directives: "The authentication team has not tested token expiry. Prioritize that next round." These directives are injected directly into the agents' next-round instructions.</p>
+          <p>The loop continues until: all goals are complete, minimum time thresholds are met, and coverage benchmarks are achieved. This is not time-based termination — it is goal-based termination.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">7</div>
+        <div class="step-content">
+          <h4>Adversarial Debate — Testing Every Claim</h4>
+          <p>When an agent proposes a high-confidence finding, it does not go straight to the report. Instead, it goes into a structured debate between a <strong>Red Agent</strong> (the attacker who proposes and defends the finding) and a <strong>Blue Agent</strong> (the defender who challenges every aspect of it). This is called the <strong>Red-Blue Dialectic</strong>. The debate runs for up to 3 rounds. If the Red Agent's case survives the Blue challenge, the finding's confidence is boosted. If it does not survive, the confidence is reduced and the finding may be reclassified.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">8</div>
+        <div class="step-content">
+          <h4>Proof Validation — From Theory to Evidence</h4>
+          <p>Every surviving finding must be <strong>proven</strong>. GENESIS executes a specific, targeted test against your live system to confirm the vulnerability is actually exploitable. For example, if the finding is "SQL injection on the search endpoint," GENESIS actually sends a carefully crafted safe input to that endpoint and checks whether the response confirms that the database query was manipulated. It does not assume — it tests.</p>
+          <p>Only findings that pass this proof test are <strong>promoted to confirmed vulnerabilities</strong>. Everything else remains a candidate that requires further investigation or is discarded. This is the foundation of GENESIS's near-zero false positive rate.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">9</div>
+        <div class="step-content">
+          <h4>Chain Assembly — Finding the Big Picture</h4>
+          <p>Individual confirmed vulnerabilities are fed into a <strong>knowledge graph</strong> — a map that shows how different findings connect. GENESIS looks for chains: can vulnerability A be used to gain access that then makes vulnerability B exploitable? Can combining three medium-severity issues produce a critical-severity attack path? These chains are assembled and scored. The highest-severity chains appear prominently in the final report as <em>end-to-end attack scenarios</em>.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-icon">10</div>
+        <div class="step-content">
+          <h4>Reporting — The Final Brief</h4>
+          <p>The final output includes: every confirmed vulnerability with its proof evidence, severity rating (Critical / High / Medium / Low), risk description in plain English, mapped attack technique codes (MITRE ATT&amp;CK), and specific step-by-step remediation instructions. Attack chains that link multiple findings are presented as complete scenarios so leadership can understand not just individual issues, but the full business impact of leaving them unresolved.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="agents">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <div>
+        <div class="section-title">The Agents — Who Does What</div>
+        <div class="section-sub">Every agent in GENESIS has a specific role, a specific set of tools, and specific rules about when it can claim its work is done.</div>
+      </div>
+    </div>
+
+    <h3>Phase 1 Agents — Always Active at Scan Start</h3>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-recon">Reconnaissance</div>
+        <h4>Recon Agent</h4>
+        <p>Maps the external attack surface. Finds open ports, services, subdomains, DNS records, and any publicly visible infrastructure. Must complete 5 tool calls and make 3 meaningful topology discoveries before it is allowed to finish.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-recon">Analysis</div>
+        <h4>Analyst Agent</h4>
+        <p>Identifies what technologies are in use, whether security shields (WAFs, TLS) are present, what CMS or framework powers the application, and what known weaknesses exist in those technologies. Must emit 3 hypotheses before finishing.</p>
+      </div>
+    </div>
+
+    <h3>Phase 2 Agents — Always Active During Investigation</h3>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-attack">Generalist — Attack</div>
+        <h4>Exploit Agent</h4>
+        <p>The primary hands-on attacker. Tests all discovered endpoints with relevant attack payloads. Runs vulnerability scanners, injection testers, authentication bypass tools, and business logic checks.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Generalist — Code</div>
+        <h4>Code Agent</h4>
+        <p>Analyses application source code or compiled binaries when available. Looks for dangerous patterns: unsanitized inputs, hardcoded secrets, insecure cryptographic implementations, missing ownership checks.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Generalist — Payload</div>
+        <h4>Payload Agent</h4>
+        <p>Creative payload specialist. Invents novel attack inputs that go beyond standard vulnerability scanner payloads. Designed to find the unexpected — uses a less-restrictive AI model configuration for maximum creative latitude.</p>
+      </div>
+    </div>
+
+    <h3>Specialist Agents — Activated by Signal</h3>
+    <p>These agents are only brought into the investigation when Phase 1 detects evidence that their expertise is needed. A maximum of 8 specialists run per session.</p>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Authentication Agent</h4>
+        <p>Deep expertise in login systems, JWT tokens, OAuth flows, SAML assertions, session management, and password reset flows. Active whenever an authentication mechanism is detected.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Cryptography Agent</h4>
+        <p>Tests cryptographic implementations for mathematical weaknesses — weak random number generation, padding oracle attacks, algorithm confusion, hardcoded keys. Active when any encryption or signing mechanism is found.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Network Agent</h4>
+        <p>Tests for HTTP request smuggling, SSRF (making the server fetch internal resources), CORS misconfigurations, and other network-layer vulnerabilities.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Reverse Engineering Agent</h4>
+        <p>Decompiles binary files and firmware to extract logic, hardcoded credentials, and vulnerabilities that are invisible from the outside. Active when compiled binaries are available.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Exploit Development Agent</h4>
+        <p>Crafts full working exploits for confirmed vulnerabilities. Assembles Return-Oriented Programming chains for binary exploitation. Active for high-severity findings that warrant full proof-of-concept construction.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Source Analyst / Invariant Engineer</h4>
+        <p>Analyses large codebases, infers what the code is <em>supposed</em> to do, and identifies gaps between the intended security model and the actual implementation. Can process files exceeding 100,000 lines of code.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>IoT / OT / Embedded Agent</h4>
+        <p>Activated when industrial control systems, embedded devices, or Internet-of-Things hardware are detected. Has specialist tools for these environments which have fundamentally different threat models from web applications.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-attack">Specialist</div>
+        <h4>Mobile Agent</h4>
+        <p>Assesses mobile application backends and APIs. Active when mobile-specific API patterns or mobile app artifacts are detected.</p>
+      </div>
+    </div>
+
+    <h3>Oversight and Reasoning Agents</h3>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-think">Strategic Oversight</div>
+        <h4>Session Judge</h4>
+        <p>After each investigation round, the Session Judge reviews all findings, all coverage gaps, and all incomplete goals. It issues written directives to the specialist agents telling them exactly what to prioritise next. It also decides when the investigation is thorough enough to proceed to validation.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Strategic Oversight</div>
+        <h4>Session Supervisor</h4>
+        <p>Monitors the overall session for coverage drift — situations where the team has been spending too much time on one area while ignoring others. Injects corrective instructions at the beginning of each agent's next turn.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Philosophy</div>
+        <h4>Philosopher Agent</h4>
+        <p>Activated after Round 1. Takes all the anomalies and partial observations the team has gathered and asks: "What deeper bug class would explain all of these observations together?" It proposes 3–5 novel hypotheses that no individual agent would have arrived at alone. This is how GENESIS finds zero-day vulnerabilities.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-debate">Adversarial</div>
+        <h4>Red Agent (Attacker Persona)</h4>
+        <p>Proposes and defends security hypotheses. Takes the role of a motivated attacker who believes the vulnerability is real and exploitable. In debate, it argues for why the finding matters and how it would be exploited.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-debate">Adversarial</div>
+        <h4>Blue Agent (Defender Persona)</h4>
+        <p>Challenges every hypothesis with counter-arguments: "But the WAF would block that payload." "But you need valid credentials first." "But that code path is never called in production." Forces the Red Agent to prove its case is genuinely exploitable.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-debate">Threat Persona</div>
+        <h4>Insider Threat &amp; Nation State Agents</h4>
+        <p>Specialized attacker personas for advanced threat modelling. The Insider Threat agent thinks like a malicious employee with legitimate access. The Nation State agent thinks like a well-resourced, patient adversary willing to spend weeks on a target.</p>
+      </div>
+    </div>
+
+    <h3>How Agents Share Information</h3>
+    <p>All agents in the same session share findings in real time via a shared memory channel (Redis). When the Exploit Agent discovers that a login endpoint accepts any algorithm type on its security tokens, it immediately publishes that finding. The Authentication Agent reads it within seconds and re-orients its next round of tests to focus on token-based attacks. The Code Agent reads it and starts looking for the specific function in the source code that handles token verification. This coordination is continuous and automatic — no human has to copy findings from one team member to another.</p>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="tools">
+    <div class="section-header">
+      <div class="section-number">5</div>
+      <div>
+        <div class="section-title">Tools &amp; MCP Servers — The Scanner's Toolkit</div>
+        <div class="section-sub">Over 50 industry-standard and custom security tools, all orchestrated through a unified interface.</div>
+      </div>
+    </div>
+
+    <p>Agents do not run attacks themselves — they direct tools to do so. GENESIS uses a standardised connection layer called <strong>MCP (Model Context Protocol)</strong> that allows AI agents to call any security tool using a consistent interface, regardless of whether that tool is a commercial scanner, an open-source utility, or a custom-built GENESIS capability.</p>
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Universal Remote</div>
+      <p>MCP is like a universal remote control for security tools. Instead of each agent needing to know how to operate 50 different tools with 50 different interfaces, every agent uses the same "channel up / channel down" controls, and MCP translates those into the correct instructions for each specific tool behind the scenes.</p>
+    </div>
+
+    <h3>Tool Categories</h3>
+    <table>
+      <tr><th>Category</th><th>What These Tools Do</th><th>Example Tools</th></tr>
+      <tr><td><strong>Reconnaissance</strong></td><td>Map the external attack surface — discover ports, services, subdomains, DNS records, and infrastructure</td><td>nmap, masscan, amass, subfinder, dnsrecon</td></tr>
+      <tr><td><strong>Analysis</strong></td><td>Fingerprint technologies, test security headers, probe caches, detect WAFs, analyse TLS/SSL configuration, test AI model injection</td><td>whatweb, wafw00f, sslscan, llm_inject_probe, csp_bypass_probe</td></tr>
+      <tr><td><strong>Exploitation</strong></td><td>Test for injection vulnerabilities, broken authentication, SSRF, IDOR, GraphQL abuse, JWT weaknesses, OAuth flaws</td><td>sqlmap, xsstrike, nuclei, jwt_probe, idor_probe, graphql_probe</td></tr>
+      <tr><td><strong>Static Analysis</strong></td><td>Read and analyse source code without running it — find dangerous patterns, hardcoded secrets, missing validation</td><td>semgrep, bandit, code_pattern_search</td></tr>
+      <tr><td><strong>Cryptography</strong></td><td>Test mathematical weaknesses in encryption and signing — padding oracles, algorithm confusion, weak keys</td><td>padding_oracle, jwt_confusion, ecdsa_nonce_reuse, length_extension</td></tr>
+      <tr><td><strong>Proof Tools</strong></td><td>Execute safe deterministic tests to confirm a vulnerability is real and produce evidence</td><td>forge_runner, curl_probe, oob_check, payload_swarm</td></tr>
+      <tr><td><strong>Binary Analysis</strong></td><td>Decompile compiled programs, execute symbolic analysis, fuzz binary inputs, trace runtime behaviour</td><td>binary_decompile, symbolic_exec, fuzz_binary, instrument_trace</td></tr>
+    </table>
+
+    <h3>How Tools Are Called Based on Hypothesis</h3>
+    <p>Tools are never called randomly. Each tool call follows from a specific hypothesis. The flow is:</p>
+    <div class="pipeline">
+      <div class="pipe-step"><div class="pipe-box">Hypothesis Formed</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box">Reasoning Loop Selects Tool</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box orange">MCP Executes Tool</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box">Agent Reads Result</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box purple">Hypothesis Updated</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box green">Next Tool Selected</div></div>
+    </div>
+    <p style="margin-top:16px;">For example: hypothesis "the login form may be vulnerable to SQL injection" → select <em>sqlmap</em> → run against login endpoint → read result → if confirmed, update confidence to 0.95 and emit a CANDIDATE_FINDING → select <em>forge_runner</em> for proof confirmation.</p>
+
+    <h3>The Forge Sandbox — Testing Without Risk</h3>
+    <p>When GENESIS needs to test a potentially dangerous payload — such as a command injection that could delete files — it first tests it in an isolated <strong>Forge Sandbox</strong>: a replica of your application running in a controlled container environment. This ensures that proof testing never causes damage to your production systems. The sandbox runs 4 parallel replicas to allow simultaneous proof tests across multiple findings.</p>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="adversarial">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div>
+        <div class="section-title">Adversarial Thinking — Red vs. Blue Debate</div>
+        <div class="section-sub">How GENESIS challenges its own conclusions before trusting them.</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Devil's Advocate</div>
+      <p>In a law firm, before a case is filed, a senior partner plays devil's advocate — they argue the opposition's strongest possible case to find the weaknesses in the planned argument. GENESIS does exactly this for every high-confidence security finding. One AI argues the finding is real and dangerous. Another AI argues it is not. The finding only survives if the attacker's case is strong enough to withstand serious challenge.</p>
+    </div>
+
+    <h3>The Red-Blue Dialectic</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon" style="background: linear-gradient(135deg,#ef4444,#dc2626)">R</div>
+        <div class="step-content">
+          <h4>Round 1 — Red Proposes</h4>
+          <p>The Red Agent presents the attack hypothesis: what the vulnerability is, how it would be exploited, what the impact would be, and what evidence supports it. It sets a confidence stake — how strongly it believes in the finding.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon" style="background: linear-gradient(135deg,#3b82f6,#2563eb)">B</div>
+        <div class="step-content">
+          <h4>Round 2 — Blue Challenges</h4>
+          <p>The Blue Agent responds with the strongest possible counter-arguments: "The firewall blocks that request." "The application validates input before it reaches that function." "You need to be authenticated first, which requires bypassing a separate control." "The token you're describing would be rejected by the server."</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-icon" style="background: linear-gradient(135deg,#ef4444,#dc2626)">R</div>
+        <div class="step-content">
+          <h4>Round 3 — Red Defends or Concedes</h4>
+          <p>Red either successfully addresses Blue's challenges (increasing confidence) or concedes that the finding is weaker than initially thought (decreasing its confidence stake by 0.3). This back-and-forth can run up to 3 debate rounds. The full transcript is saved for audit.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Philosopher Agent — Finding What Nobody Looked For</h3>
+    <p>After the first investigation round, the Philosopher Agent reads all the partial observations, anomalies, and unexpected results from every agent's work. It then performs a different kind of reasoning: "What <em>class</em> of bug would explain all these observations together, even if no single observation proves it?" It then proposes 3–5 novel hypotheses that represent attack scenarios no standard tool would have found.</p>
+
+    <div class="card card-accent">
+      <strong>Real Example:</strong> Three agents independently noticed that (1) the token endpoint accepts unusual algorithm headers, (2) the source code shows a hand-written verification function, and (3) the application uses an older version of a cryptographic library. The Philosopher Agent combines these three observations into a single hypothesis: "The hand-written verifier may be susceptible to algorithm substitution attacks where a legitimate signature under one algorithm can be repurposed to forge signatures under another." This is a class of vulnerability that would not appear in any standard scanning checklist.
+    </div>
+
+    <h3>Cross-Model Validation (Independent Second Opinion)</h3>
+    <p>For the highest-stakes findings, GENESIS can invoke a completely different AI model family to review the Red Agent's case. When two independent AI models — trained differently, by different organisations — both agree that a finding is valid, the confidence score receives an additional boost. This is equivalent to getting a second medical opinion from a doctor at a different hospital using different training and methods.</p>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="reasoning">
+    <div class="section-header">
+      <div class="section-number">7</div>
+      <div>
+        <div class="section-title">Reasoning Loops — How GENESIS Thinks Through Hard Problems</div>
+        <div class="section-sub">A structured cycle of ticks, branches, and chosen paths that replaces single-step guessing with disciplined step-by-step investigation.</div>
+      </div>
+    </div>
+
+    <h3>What Is a Reasoning Loop?</h3>
+    <p>A <strong>reasoning loop</strong> is a structured way for the AI to think through a hard problem in smaller, disciplined steps rather than jumping straight to a conclusion. Instead of asking one big question and hoping for the right answer, GENESIS breaks the thinking into a repeating cycle:</p>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Detective at the Whiteboard</div>
+      <p>Imagine a detective standing at a whiteboard with three columns: <em>What I know now</em>, <em>What could be true from here</em>, and <em>The path I will follow next</em>. At each step, the detective writes down the current situation, draws every possible next move on the board, scores each move by how likely it is to reveal the truth, picks the best one, takes that action, then comes back and updates the board. This cycle repeats until the case is solved or conclusively closed. That cycle — observe, branch, choose, act, return — is a reasoning loop.</p>
+    </div>
+
+    <h3>The Three Core Mechanics: Tick, Branch, Chosen Path</h3>
+
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:14px; padding:28px; margin:20px 0;">
+
+      <!-- Tick -->
+      <div style="display:flex; gap:20px; align-items:flex-start; margin-bottom:28px; padding-bottom:28px; border-bottom:1px dashed var(--border);">
+        <div style="min-width:52px; height:52px; background:linear-gradient(135deg,#6366f1,#4f46e5); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:800; flex-shrink:0;">⟳</div>
+        <div>
+          <h4 style="margin:0 0 8px; color:var(--primary); font-size:17px;">TICK — One step forward</h4>
+          <p style="margin:0; color:var(--muted); font-size:14px;">A tick is a single unit of progress inside the loop. At each tick, the agent reads the current state of the problem — what has been found, what tools have been run, what evidence exists — and decides what to do next. A tick always ends with a concrete output: a tool was called, a hypothesis was updated, a branch was pruned, or a conclusion was reached. The loop state is saved to the database after every tick so the investigation can resume exactly where it left off if interrupted.</p>
+          <div style="margin-top:12px; background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:13px; color:var(--text);">
+            <strong>Example:</strong> Tick 1 — agent reads the current hypothesis ("JWT may accept alg=none") and the tool output from the previous step (server returned HTTP 200 to an unsigned token). It updates confidence from 0.6 to 0.9 and emits a candidate finding. Tick complete. State saved.
+          </div>
+        </div>
+      </div>
+
+      <!-- Branch -->
+      <div style="display:flex; gap:20px; align-items:flex-start; margin-bottom:28px; padding-bottom:28px; border-bottom:1px dashed var(--border);">
+        <div style="min-width:52px; height:52px; background:linear-gradient(135deg,#06b6d4,#0891b2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:800; flex-shrink:0;">⎇</div>
+        <div>
+          <h4 style="margin:0 0 8px; color:var(--primary); font-size:17px;">BRANCH — Every possible next move</h4>
+          <p style="margin:0; color:var(--muted); font-size:14px;">At each tick, the agent does not commit immediately. It first generates <strong>multiple candidate branches</strong> — all the reasonable next steps it could take. Each branch is a different direction the investigation could go. Branches are evaluated and scored. Branches with high potential evidence value are kept. Branches that lead to dead ends, repeat already-tested paths, or fall outside scope are pruned and discarded.</p>
+          <div style="margin-top:12px; background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:12px 16px; font-size:13px; color:#0c4a6e;">
+            <strong>Example branches when testing an upload endpoint:</strong>
+            <ul style="margin:8px 0 0 18px; padding:0;">
+              <li style="margin-bottom:4px;">Branch A — test with a file whose content type says image but contains a script (content-type mismatch)</li>
+              <li style="margin-bottom:4px;">Branch B — test with a path traversal in the filename (../../../etc/passwd)</li>
+              <li style="margin-bottom:4px;">Branch C — test with a ZIP bomb to check for resource exhaustion</li>
+              <li style="margin-bottom:4px;">Branch D — test with a double-extension file (shell.php.jpg)</li>
+            </ul>
+            <em>Branches B and D score highest based on prior findings about the server's technology. A and C are queued for later. The agent picks the highest-scoring branch first.</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chosen Path -->
+      <div style="display:flex; gap:20px; align-items:flex-start;">
+        <div style="min-width:52px; height:52px; background:linear-gradient(135deg,#10b981,#059669); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:800; flex-shrink:0;">→</div>
+        <div>
+          <h4 style="margin:0 0 8px; color:var(--primary); font-size:17px;">CHOSEN PATH — The deliberate next action</h4>
+          <p style="margin:0; color:var(--muted); font-size:14px;">The chosen path is the branch the agent commits to for the current tick. The choice is not random — it is based on evidence score, hypothesis confidence, coverage gaps, and judge/supervisor directives. Once chosen, the agent executes the action (calls a tool, updates a hypothesis, emits a finding, escalates to a subagent), records the result, and returns to the top of the loop for the next tick.</p>
+          <div style="margin-top:12px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 16px; font-size:13px; color:#14532d;">
+            <strong>Key property:</strong> The chosen path and the reason it was chosen are both recorded. This means a human reviewer can read the full investigation trail and understand not just <em>what</em> GENESIS tested, but <em>why it tested that specific thing in that specific order</em>. The investigation is auditable end to end.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Full Loop Cycle — Visualised</h3>
+    <div style="background:var(--primary); border-radius:14px; padding:28px; margin:20px 0; color:#e2e8f0; font-size:14px; line-height:2;">
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; justify-content:center;">
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#06b6d4; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">State</div>
+          <div style="font-weight:600;">Read current<br>evidence &amp; goals</div>
+        </div>
+        <div style="color:#6366f1; font-size:24px; font-weight:700;">→</div>
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#f59e0b; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Branch</div>
+          <div style="font-weight:600;">Generate all<br>possible next steps</div>
+        </div>
+        <div style="color:#6366f1; font-size:24px; font-weight:700;">→</div>
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#ef4444; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Prune</div>
+          <div style="font-weight:600;">Score &amp; discard<br>low-value paths</div>
+        </div>
+        <div style="color:#6366f1; font-size:24px; font-weight:700;">→</div>
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#10b981; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Choose</div>
+          <div style="font-weight:600;">Commit to the<br>highest-value path</div>
+        </div>
+        <div style="color:#6366f1; font-size:24px; font-weight:700;">→</div>
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#8b5cf6; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Act (Tick)</div>
+          <div style="font-weight:600;">Execute tool or<br>update hypothesis</div>
+        </div>
+        <div style="color:#6366f1; font-size:24px; font-weight:700;">→</div>
+        <div style="background:#1e3a5f; border:1px solid #334155; border-radius:8px; padding:10px 16px; text-align:center; min-width:110px;">
+          <div style="color:#06b6d4; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:1px;">Save &amp; Return</div>
+          <div style="font-weight:600;">Store state, loop<br>back to top</div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:16px; color:#64748b; font-size:13px;">This cycle repeats until the loop's exit condition is met — problem solved, conclusively closed, or escalated to another agent.</div>
+    </div>
+
+    <h3>How the Loop Knows When to Stop</h3>
+    <p>Every reasoning loop has an <strong>exit condition</strong> — a specific state that means the current problem is resolved. Common exit conditions are:</p>
+    <ul style="padding-left:24px; margin:12px 0 20px;">
+      <li style="margin-bottom:8px;"><strong>Proof confirmed:</strong> The oracle for the current hypothesis has been satisfied — the vulnerability is real and proven. The loop emits a CANDIDATE_FINDING and exits.</li>
+      <li style="margin-bottom:8px;"><strong>All branches exhausted:</strong> Every reasonable path has been tested and none confirmed the hypothesis. The loop marks it unverified or ruled out and exits.</li>
+      <li style="margin-bottom:8px;"><strong>Escalation needed:</strong> The current agent does not have the right tools or scope for the next branch. The loop flags the hypothesis for a specialist agent and suspends.</li>
+      <li style="margin-bottom:8px;"><strong>Coverage threshold reached:</strong> The loop has explored enough branches to satisfy the coverage gate for the current scan profile. It saves a coverage artifact and exits cleanly.</li>
+    </ul>
+
+    <h3>The Eight Reasoning Loop Types in GENESIS</h3>
+    <p>Different problems require different thinking structures. GENESIS routes each hard problem to the loop type best suited to solve it. An agent triggers a loop using the <em>deliberate(loop_type='...')</em> command.</p>
+
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Tree of Thought</h4>
+        <p><strong>When used:</strong> When there are many possible attack approaches and the agent needs to explore several in parallel before committing.<br><strong>What it does:</strong> Grows a tree of branches, scores each, pursues the highest-confidence paths deeper, and prunes the rest. Like a chess player thinking 4 moves ahead on 3 different lines simultaneously.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Hypothesis Decomposition</h4>
+        <p><strong>When used:</strong> When a hypothesis is too broad to test in one step ("this login system might be insecure").<br><strong>What it does:</strong> Each tick breaks the hypothesis into one smaller, testable claim. Branches represent different ways to decompose. Chosen path is the sub-claim most likely to confirm or disprove the parent hypothesis fastest.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Counterfactual</h4>
+        <p><strong>When used:</strong> When the obvious attack is blocked and the agent needs to think around it.<br><strong>What it does:</strong> Each tick asks "if this assumption were false, what would be true?" Branches represent alternative assumptions. Chosen path is the assumption most likely to open a new attack avenue. This is how GENESIS finds the non-obvious bypass routes.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Causal Trace</h4>
+        <p><strong>When used:</strong> When GENESIS sees an unexpected server response and needs to find the root cause in code.<br><strong>What it does:</strong> Each tick steps one level further back in the causal chain. Branches represent different possible causes at each level. Chosen path follows the most specific, evidenced cause. Ensures fixes address root causes, not surface symptoms.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Chain Composer</h4>
+        <p><strong>When used:</strong> After multiple individual confirmed findings exist and the agent asks "can these be combined into one bigger attack?"<br><strong>What it does:</strong> Each tick attempts to link one more finding into the growing chain. Branches represent different linkage orders. Chosen path extends the chain with the finding that most increases combined severity.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Invariant Tracker</h4>
+        <p><strong>When used:</strong> When source code is available and the agent needs to verify that security rules are enforced everywhere, not just in one place.<br><strong>What it does:</strong> Each tick checks one location where the invariant should hold. Branches represent different code paths. Chosen path is the location most likely to be missing the check based on the code structure.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Long-Context Code Analysis</h4>
+        <p><strong>When used:</strong> When source files are very large (100,000+ lines) and the agent needs to reason across the entire file.<br><strong>What it does:</strong> Each tick processes one segment of the file and carries forward a running summary. Branches represent alternative interpretations of the code's security model. Chosen path follows the interpretation with most supporting evidence.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-think">Loop Type</div>
+        <h4>Self-Correcting</h4>
+        <p><strong>When used:</strong> After the agent has produced an analysis that may contain errors, contradictions, or unsupported assumptions.<br><strong>What it does:</strong> Each tick critiques one aspect of the previous reasoning. Branches represent possible corrections. Chosen path is the correction that most improves logical consistency. This is the built-in quality control loop.</p>
+      </div>
+    </div>
+
+    <h3>Reasoning Loops in the Context of the Full Investigation Flow</h3>
+    <div class="card card-accent" style="margin:20px 0;">
+      <p style="margin:0;">Reasoning loops do not replace the main investigation flow — they plug into it at the points where a single observation is not enough to reach a conclusion. When the main loop hits a complex sub-problem, it delegates to a reasoning loop. The reasoning loop runs its tick-branch-choose cycle until it has an answer, then returns that answer to the main flow. The main flow continues from there, now with a richer, more evidence-grounded conclusion than a single-step approach would have produced.</p>
+    </div>
+
+    <h3>Preventing Drift — Staying on Track Over Time</h3>
+    <p>The more ticks a reasoning loop runs, the higher the risk of <strong>drift</strong> — gradually shifting focus away from the original goal toward interesting but off-target branches. GENESIS prevents this with two mechanisms:</p>
+    <ul style="padding-left:24px; margin:12px 0 16px;">
+      <li style="margin-bottom:10px;"><strong>Loop State Persistence:</strong> After every tick, the full loop state — current branch scores, pruned paths, chosen path history, and running evidence summary — is saved to MongoDB. If a session is paused, interrupted, or the model context is compressed, the loop resumes from the exact tick it was at. No progress is lost and no tick is repeated.</li>
+      <li style="margin-bottom:10px;"><strong>Anchor to Original Goal:</strong> At the start of each tick, the loop re-reads the session goal and the original hypothesis that triggered it. If the chosen path drifts more than a defined distance from the original goal, the loop flags itself to the Session Supervisor, which can redirect it with a corrective directive.</li>
+      <li style="margin-bottom:10px;"><strong>Drift Detection (Weekly Audit):</strong> A scheduled background process compares loop state records across all completed sessions to detect systematic patterns of goal abandonment. If a loop type consistently drifts in a particular attack class, the loop's scoring weights are adjusted.</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="databases">
+    <div class="section-header">
+      <div class="section-number">8</div>
+      <div>
+        <div class="section-title">The Memory System — What Gets Saved and Where</div>
+        <div class="section-sub">Six specialized databases, each playing a distinct role in the investigation.</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Investigation Room</div>
+      <p>Every large investigation has different types of records. The official case register lists confirmed conclusions. The evidence locker stores physical proof. The whiteboard holds working theories. The network map shows how suspects connect. The digital archive stores files and screenshots. The search index helps find relevant prior cases. GENESIS uses 6 specialized databases, each playing one of these roles.</p>
+    </div>
+
+    <table>
+      <tr><th>Database</th><th>Analogy</th><th>What Is Stored Here</th><th>Who Writes to It</th></tr>
+      <tr>
+        <td><strong>PostgreSQL</strong><br><em>(The Official Register)</em></td>
+        <td>The signed case file</td>
+        <td>Final confirmed vulnerabilities, session records (start time, status, mode, target), user accounts. This is the authoritative record of what GENESIS has proven.</td>
+        <td>Validation engine writes here only after proof is confirmed. Session manager writes session lifecycle events.</td>
+      </tr>
+      <tr>
+        <td><strong>MongoDB</strong><br><em>(The Working Notes)</em></td>
+        <td>The investigation notebook</td>
+        <td>Candidate findings (unconfirmed), hypotheses, proof run results, Red-Blue debate transcripts, agent thoughts, reasoning loop states, session errors. Everything in-progress lives here.</td>
+        <td>All agents write here continuously. Proof engine updates results here. Adversarial agents write debate transcripts here.</td>
+      </tr>
+      <tr>
+        <td><strong>Redis</strong><br><em>(The Live Bulletin Board)</em></td>
+        <td>The shared whiteboard that everyone sees in real time</td>
+        <td>Shared findings (broadcast to all agents immediately), active session capabilities, rate limit counters, authentication tokens. Everything that needs to be seen by all agents simultaneously.</td>
+        <td>Any agent that discovers a finding publishes it here. The orchestrator reads from here to distribute findings to all active agents.</td>
+      </tr>
+      <tr>
+        <td><strong>Neo4j</strong><br><em>(The Connection Map)</em></td>
+        <td>The relationship diagram on the investigation wall</td>
+        <td>The attack knowledge graph: hosts, services, credentials, and how they connect. Chains showing "finding A enables finding B which enables finding C." MITRE ATT&amp;CK technique mappings. Attack paths from initial access to target impact.</td>
+        <td>Chain Composer reasoning loop writes relationships. Validation engine writes finding-to-finding edges when chains are confirmed.</td>
+      </tr>
+      <tr>
+        <td><strong>ChromaDB</strong><br><em>(The Searchable Memory)</em></td>
+        <td>The indexed case archive that can answer "have we seen something like this before?"</td>
+        <td>Semantic embeddings (mathematical representations) of all vulnerabilities, hypotheses, source code, and provenance records. Used to find similar past findings that might inform current hypotheses.</td>
+        <td>Every confirmed finding generates an embedding stored here. Source code corpus is indexed here for semantic search.</td>
+      </tr>
+      <tr>
+        <td><strong>MinIO</strong><br><em>(The Evidence Locker)</em></td>
+        <td>The physical evidence storage room</td>
+        <td>Screenshots of proof, downloaded source code, binary files, exploit payloads, scan output files. Any large artifact that needs to be preserved as evidence.</td>
+        <td>Proof engine stores screenshots and payload artifacts. Code Agent stores downloaded source files. Binary Agent stores decompiled outputs.</td>
+      </tr>
+    </table>
+
+    <h3>Scheduled Background Intelligence Processes</h3>
+    <p>GENESIS runs several automated background tasks on a schedule to continuously improve its intelligence without human intervention:</p>
+    <table>
+      <tr><th>Task</th><th>Schedule</th><th>What It Does</th></tr>
+      <tr><td>Cross-session pattern miner</td><td>Every 6 hours</td><td>Finds recurring vulnerability patterns across all past sessions — if the same weakness appears on many targets, it becomes a priority for future scans</td></tr>
+      <tr><td>CVE extrapolator</td><td>Daily 3:00 AM</td><td>Checks new public vulnerability disclosures and determines whether they are relevant to any targets GENESIS has previously scanned</td></tr>
+      <tr><td>Surface watcher</td><td>Hourly</td><td>Monitors target attack surfaces for changes — new endpoints, new services, new subdomains</td></tr>
+      <tr><td>Threat intel ingestor</td><td>Every 4 hours</td><td>Imports current threat intelligence feeds and links them to known findings and targets</td></tr>
+      <tr><td>Drift detector</td><td>Weekly Sunday</td><td>Identifies systematic gaps in coverage across all sessions and flags them for improvement</td></tr>
+    </table>
+  </div>
+
+  <!-- SECTION 9 -->
+  <div class="section" id="validation">
+    <div class="section-header">
+      <div class="section-number">9</div>
+      <div>
+        <div class="section-title">Validation Pipeline — From Suspicion to Confirmed Fact</div>
+        <div class="section-sub">The process that ensures every reported finding is real, not theoretical.</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">Analogy — The Evidence Standard in Court</div>
+      <p>In a criminal case, a suspicion is not enough to convict — evidence must meet a specific standard. GENESIS applies the same principle: an agent's belief that something might be vulnerable is not enough to put it in the final report. The finding must pass through four independent reviewers and then be proven by a live test. Only then is it "convicted" — promoted to a confirmed vulnerability.</p>
+    </div>
+
+    <h3>Stage 1 — Candidate Extraction</h3>
+    <p>When an agent believes it has found a vulnerability, it emits a <strong>CANDIDATE_FINDING</strong> block — a structured claim containing: what type of vulnerability it is (attack class), which specific endpoint or code location is affected, what the evidence is, and a proposed way to prove it. This candidate is stored in MongoDB and deduplicated — if two agents independently find the same thing, their evidence is merged into one candidate rather than creating two separate findings.</p>
+
+    <h3>Stage 2 — Four Independent Validators</h3>
+    <p>Each candidate passes through four automated validators. Each validator gives a verdict: <em>pass</em>, <em>flag</em>, or <em>block</em>. A single <em>block</em> verdict stops the candidate from proceeding.</p>
+    <table>
+      <tr><th>Validator</th><th>What It Checks</th></tr>
+      <tr><td><strong>Evidence Validator</strong></td><td>Is there actual evidence for this claim, not just speculation? Is a proof plan included?</td></tr>
+      <tr><td><strong>Endpoint Validator</strong></td><td>For findings that claim a live endpoint is vulnerable — is the endpoint actually reachable? Is there a concrete testable signal?</td></tr>
+      <tr><td><strong>Source Validator</strong></td><td>For findings based on code analysis — is a specific file, function, and dangerous operation identified? Is there taint-flow evidence showing how attacker input reaches the dangerous operation?</td></tr>
+      <tr><td><strong>Counter Validator</strong></td><td>Are there any contradictions? (e.g., a finding claims a vulnerability requires unauthenticated access but the endpoint is clearly authenticated-only)</td></tr>
+    </table>
+
+    <h3>Stage 3 — Proof Planning and Execution</h3>
+    <p>Candidates that pass all four validators proceed to proof. A <strong>Proof Planner</strong> generates a specific, safe, deterministic test — a carefully crafted input or request that will either confirm or deny the vulnerability without causing harm. This test is executed against the live target (or the Forge Sandbox for dangerous payloads).</p>
+    <p>The result is compared against a pre-defined <strong>oracle</strong> — an expected outcome that constitutes confirmation. For example: "If we send this SQL injection payload to the search endpoint, the response will contain data from another user's account." If the oracle is satisfied, the proof passes. If not, the finding is returned to candidate status for further investigation.</p>
+
+    <h3>Stage 4 — Promotion to Confirmed Vulnerability</h3>
+    <div class="pipeline">
+      <div class="pipe-step"><div class="pipe-box">Candidate Finding</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box">4 Validators Pass</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box orange">Proof Executed</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box orange">Oracle Confirmed</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box green">Promoted: Confirmed Vulnerability</div></div>
+    </div>
+    <div class="pipeline" style="margin-top:4px;">
+      <div class="pipe-step"><div class="pipe-box">Candidate Finding</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box red">Validator Blocks</div></div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step"><div class="pipe-box red">Rejected / Needs More Evidence</div></div>
+    </div>
+
+    <h3>Patch-Semantic Deduplication</h3>
+    <p>In long investigations, GENESIS may find several findings that look superficially different but would actually be fixed by the same code change. Rather than presenting these as separate items in the report, a final deduplication step asks: "Would fixing finding A also fix finding B?" If yes, they are grouped under a single report entry with a combined severity. This ensures remediation teams are not overwhelmed by redundant tasks.</p>
+  </div>
+
+  <!-- SECTION 10 -->
+  <div class="section" id="finding-example">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <div>
+        <div class="section-title">A Real Finding, Explained End to End</div>
+        <div class="section-sub">Follow one vulnerability from the moment GENESIS noticed something unusual to the final report entry.</div>
+      </div>
+    </div>
+
+    <p>The following walkthrough traces a real confirmed finding — a critical vulnerability where an attacker can access cloud credentials by making the application fetch a URL it should never reach. We follow it through every step of the GENESIS process.</p>
+
+    <h3>The Finding: SSRF — Server-Side Request Forgery to Cloud Credentials</h3>
+    <div class="analogy">
+      <div class="analogy-label">Plain English Explanation of This Vulnerability</div>
+      <p>Imagine a corporate receptionist who will fetch any document you ask them to get, including documents from the company's private filing cabinet. SSRF is exactly this: the web application has a feature that fetches URLs. An attacker provides not a public URL, but the address of an internal company resource (in cloud environments, this is a special address that returns cloud access keys). The application dutifully fetches it and returns the secret keys to the attacker. These keys can then be used to access the company's entire cloud environment.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 1 — Recon Agent Discovers the Endpoint</h4>
+        <p>The Recon Agent maps all API endpoints. It finds <code>/api/fetch?url=</code> — a feature that takes a URL as a parameter and fetches it. This is published to the shared findings channel immediately.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 2 — Analyst Agent Forms a Hypothesis</h4>
+        <p>The Analyst Agent reads the shared finding and knows that any URL-fetching feature is a candidate for SSRF attacks. It emits a hypothesis: "The <code>/api/fetch</code> endpoint may not validate whether the provided URL points to internal or restricted resources. Confidence: 0.65."</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 3 — Network Agent Tests the Hypothesis</h4>
+        <p>The Network Agent runs a Hypothesis Decomposition loop, breaking the broad hypothesis into specific testable claims: (a) can we reach localhost? (b) can we reach internal Docker network addresses? (c) can we reach the cloud metadata service? It runs the SSRF probe tool against each case.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 4 — Initial Probe: Partial Block Discovered</h4>
+        <p>The tool finds that sending <code>?url=http://127.0.0.1</code> is blocked. A blocklist exists. The hypothesis confidence drops slightly. The Counterfactual reasoning loop activates: "If direct IP is blocked, what bypasses exist?" It generates 4 alternatives: (a) trailing dot hostname, (b) octal encoding, (c) use a hostname that resolves to 127.0.0.1, (d) use the Docker internal hostname <code>metadata</code>.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 5 — Bypass Found</h4>
+        <p>Alternative (d) succeeds. The blocklist only checks for the literal string "127.0.0.1" and a handful of hostname strings, but it does not resolve hostnames to their IP addresses first. Sending <code>?url=http://metadata/latest/meta-data/iam/security-credentials/demo</code> bypasses the filter because "metadata" is not in the blocklist — even though it resolves to an internal address. The response contains cloud access keys. Hypothesis confidence: 0.97.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 6 — Red-Blue Adversarial Debate</h4>
+        <p><strong>Red:</strong> "This is a critical SSRF. The blocklist is bypassed by hostname, cloud credentials are returned, and these credentials can be used to access the entire cloud environment." <strong>Blue:</strong> "The application has a blocklist — it is making an effort to protect itself. Also, the returned credentials may be test credentials with limited scope." <strong>Red (counter):</strong> "The blocklist specifically fails to resolve hostnames, which is a documented SSRF bypass. The credentials are labeled 'ASIAGENESISDEMO' but the pattern is identical to real AWS credential responses. The same technique works against any hostname-based cloud metadata service." — Red survives. Confidence boosted to 1.0.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 7 — Four Validators Pass</h4>
+        <p>Evidence Validator: ✓ (HTTP response containing credentials in evidence). Endpoint Validator: ✓ (endpoint reachable, concrete response). Source Validator: ✓ (function `_blocked_ssrf_target()` identified with specific line-level sink). Counter Validator: ✓ (no contradictions).</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 8 — Proof Execution</h4>
+        <p>The forge_runner sends the exact bypass URL to the live endpoint. The oracle checks: does the response body contain the string "ASIAGENESISDEMO" AND a field matching AWS credential format? Yes. Proof passes. Finding is promoted to Confirmed Vulnerability.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 9 — Chain Assembly</h4>
+        <p>The Chain Composer links this finding to two other confirmed findings in the same session: "unauthenticated admin token endpoint" and "source code disclosure exposing JWT secret." The resulting chain: unauthenticated access → forge admin JWT → use SSRF bypass → steal cloud credentials. This chain is scored at CVSS 10.0 — the maximum possible severity.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <h4>Step 10 — Final Report Entry</h4>
+        <p>The finding appears in the report with its severity badge, CVSS score, step-by-step attack demonstration, MITRE ATT&amp;CK technique codes (T1552.005 — Cloud Instance Metadata API; T1190 — Exploit Public-Facing Application), and a specific three-line code fix for the <code>_blocked_ssrf_target()</code> function.</p>
+      </div>
+    </div>
+
+    <div class="finding-example">
+      <div class="label">CONFIRMED FINDING — GENESIS REPORT ENTRY</div><br>
+      <span class="key">Title:</span> <span class="value">SSRF → Cloud Metadata Credential Exfiltration (Full Chain)</span><br>
+      <span class="key">Severity:</span> <span class="value">CRITICAL</span> &nbsp; <span class="key">CVSS:</span> <span class="value">9.1</span><br>
+      <span class="key">Endpoint:</span> <span class="value">GET /api/fetch?url=</span><br>
+      <span class="key">Attack Class:</span> <span class="value">Server-Side Request Forgery (SSRF)</span><br>
+      <span class="key">MITRE Techniques:</span> <span class="value">T1552.005, T1190</span><br><br>
+      <span class="key">Proof:</span> <span class="value">Request to /api/fetch?url=http://metadata/latest/meta-data/iam/security-credentials/demo</span><br>
+      <span class="value">returned HTTP 200 with body containing ASIAGENESISDEMO credentials. Oracle satisfied.</span><br><br>
+      <span class="key">Root Cause:</span> <span class="value">_blocked_ssrf_target() checks hostname strings without resolving to IP first.</span><br>
+      <span class="value">Any hostname that resolves to a private/metadata IP bypasses the blocklist.</span><br><br>
+      <span class="key">Remediation:</span> <span class="value">Resolve hostname to IP via socket.getaddrinfo() before allowlist comparison.</span><br>
+      <span class="value">Pin the resolved IP into the actual HTTP request to prevent DNS rebinding.</span><br>
+      <span class="value">Fail closed on resolution errors (return blocked = True if resolution fails).</span>
+    </div>
+  </div>
+
+  <!-- SECTION 11 -->
+  <div class="section" id="patches">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <div>
+        <div class="section-title">Patches, Exploitation &amp; Recommendations</div>
+        <div class="section-sub">How GENESIS goes beyond finding problems to telling you exactly how to fix them.</div>
+      </div>
+    </div>
+
+    <h3>Remediation Generation</h3>
+    <p>For every confirmed finding, GENESIS generates a remediation recommendation at the appropriate technical level. If source code is available, the recommendation names the specific file, function, and line number that needs to change, and often includes the corrected code. If only the running application is available, the recommendation describes the architectural or configuration change needed.</p>
+    <p>Remediations are written at three levels to serve different audiences:</p>
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-type type-validate">For Developers</div>
+        <h4>Technical Remediation</h4>
+        <p>Specific code changes: which function to modify, what logic to add, what library to replace. Written with enough precision that a developer can implement the fix without further research.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-validate">For Architects</div>
+        <h4>Architectural Remediation</h4>
+        <p>Design-level recommendations: which component boundary should move, what trust model should be enforced, what security control should be added at the infrastructure level.</p>
+      </div>
+      <div class="agent-card">
+        <div class="agent-type type-validate">For Leadership</div>
+        <h4>Risk Summary</h4>
+        <p>Plain-English impact statement: what an attacker can actually do if this is exploited, what data or systems are at risk, and what the business consequence of a successful attack would be.</p>
+      </div>
+    </div>
+
+    <h3>CVSS Scoring</h3>
+    <p>Every finding is assigned a <strong>CVSS score</strong> — a standardised industry number between 0 and 10 that measures how severe a vulnerability is. GENESIS calculates this score based on: how easy it is to exploit, whether authentication is required, what access the attacker gains, and what data or systems are affected. A score above 9.0 is Critical — meaning it should be fixed within 24-48 hours of discovery.</p>
+
+    <h3>MITRE ATT&amp;CK Mapping</h3>
+    <p><strong>MITRE ATT&amp;CK</strong> is an internationally recognised framework that catalogues every known attacker technique. GENESIS automatically maps every confirmed finding to its corresponding MITRE technique codes. This enables your security operations team to correlate GENESIS findings with threat intelligence, understand which attack patterns attackers are using in the wild, and ensure your detection systems are monitoring for the right behaviours.</p>
+
+    <h3>Exploitation Evidence</h3>
+    <p>For critical and high-severity findings, GENESIS captures a complete exploitation record: the exact request sent, the response received, screenshots of the impact, and the proof oracle result. This evidence serves two purposes: it proves to sceptical stakeholders that the vulnerability is real (not theoretical), and it provides developers with the exact reproduction case they need to test that their fix works.</p>
+  </div>
+
+  <!-- SECTION 12 -->
+  <div class="section" id="ciso-questions">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <div>
+        <div class="section-title">Questions CISOs and Directors Should Ask</div>
+        <div class="section-sub">Due diligence questions for evaluating GENESIS — with the answers.</div>
+      </div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q1: How do we know the findings are real and not false alarms?</div>
+      <div class="qa-a">Every finding in the GENESIS report has passed through a 4-stage validation pipeline and has been proven by an actual live test against your system. The proof result — including the exact request sent and response received — is attached to each finding. Nothing is reported as confirmed unless it has been demonstrated to work. In the benchmark evaluation against a test application with 8 known planted vulnerabilities, GENESIS achieved 0% false positive rate (0 false alarms) and 100% detection rate (all 8 found).</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q2: Is GENESIS going to break our production systems?</div>
+      <div class="qa-a">GENESIS is designed to be non-destructive. For potentially dangerous payloads, it tests against an isolated Forge Sandbox replica before touching your live environment. All proof tests sent to live systems are carefully crafted to confirm the vulnerability without exploiting it destructively — for example, using a read-only SQL injection that returns data without modifying it. GENESIS does not run denial-of-service tests, does not delete data, and does not modify application state unless explicitly authorised to do so.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q3: How is this different from the penetration tests we already do?</div>
+      <div class="qa-a">Traditional penetration testing involves skilled humans spending typically 1-2 weeks on a target. Their coverage depends heavily on the individual tester's experience, available time, and the scope they were given. GENESIS can run a Deep Research scan of equivalent or greater depth in hours, across the full attack surface, with 15 specialist agents working in parallel, 24/7, as frequently as needed. It also remembers what it found in previous scans of the same target, allowing it to focus new scans on what has changed. Human penetration testers are excellent for creative, context-driven assessments — GENESIS is excellent for broad, systematic, repeatable coverage at scale.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q4: Who can see the findings? How is the data secured?</div>
+      <div class="qa-a">GENESIS operates entirely within your controlled environment. All data — findings, session records, proof evidence, credentials used during testing — remains on your infrastructure. There is no call home to external services for result storage. Role-based access controls govern who can view findings in the GENESIS interface. All finding data is persisted to your PostgreSQL and MongoDB instances, which are under your control and your retention policies.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q5: How does GENESIS prioritise what to fix first?</div>
+      <div class="qa-a">GENESIS provides two priority dimensions: CVSS severity score (the industry standard measure of how severe a vulnerability is) and attack chain membership (whether the finding is part of a multi-step attack path to a high-value target). A medium-severity finding that is the first step in a chain ending in cloud credential theft will be flagged more prominently than a standalone critical finding with no further exploitation potential. Recommended remediation order follows: P0 (fix immediately — enables full compromise chains), P1 (fix within sprint — significant standalone risk), P2 (fix within quarter — hardening).</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q6: Can GENESIS find vulnerabilities that no one has ever seen before?</div>
+      <div class="qa-a">Yes — this is one of GENESIS's design goals. The Philosopher Agent specifically looks for novel vulnerability classes not represented in any standard database. In the benchmark evaluation against OWASP Juice Shop v20.0.0, GENESIS identified 50 novel candidates representing 12 distinct vulnerability classes not in any official challenge database, including a hash length-extension attack that required reasoning about multiple cryptographic conditions simultaneously. These are flagged as "novel candidates" in the report and carry a note that they represent potential zero-day risk.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q7: How often should we run GENESIS scans?</div>
+      <div class="qa-a">GENESIS supports continuous scanning models. A baseline deep scan should be run at the start of major development cycles or before significant releases. Lighter-weight scans should be run on any meaningful code change. The Surface Watcher background process monitors your attack surface hourly and can trigger targeted scans when new endpoints or services appear. For applications handling sensitive data or operating in regulated industries, monthly deep scans plus continuous surface monitoring is the recommended baseline.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q8: What is the risk if GENESIS itself is compromised? Does it have privileged access?</div>
+      <div class="qa-a">GENESIS is designed with a minimal-privilege model. Scanning credentials (API tokens, test accounts) used during a session are scoped to the session and rotated regularly. The platform itself should be operated in an isolated scanning network segment with no broader access to production infrastructure. All internal communications use authentication tokens. The production hardening plan includes replacing all default credentials with cryptographically random values, enforcing non-root container execution, and adding TLS to all internal service connections.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q9: Can we see what GENESIS is thinking as it investigates?</div>
+      <div class="qa-a">Yes. GENESIS provides a real-time web interface showing: every agent's current reasoning (agent thoughts), every tool being called and its result, the current hypothesis market with confidence scores, the emerging attack graph, and the Red-Blue debate transcripts. Leaders who want to observe the investigation in progress can watch a live feed of the entire process. Every decision GENESIS makes is logged and auditable after the fact.</div>
+    </div>
+
+    <div class="qa-item">
+      <div class="qa-q">Q10: What happens if GENESIS finds something that our team disagrees with?</div>
+      <div class="qa-a">Every finding includes its full evidence chain: the original hypothesis, the tool outputs that informed it, the adversarial debate transcript, and the proof result. If your team believes a finding is incorrect, they can review this complete evidence trail. Findings can be marked as "disputed" in the system, which flags them for human expert review without removing them from the record. Disputed findings are tracked separately and contribute to GENESIS's calibration — if a pattern of disputes reveals a systematic error, the detection logic is updated.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 13 -->
+  <div class="section" id="value">
+    <div class="section-header">
+      <div class="section-number">13</div>
+      <div>
+        <div class="section-title">Where GENESIS Adds Value — The Business Case</div>
+        <div class="section-sub">Translating technical capabilities into business outcomes.</div>
+      </div>
+    </div>
+
+    <div class="agent-grid">
+      <div class="agent-card card-green" style="border:1px solid var(--border); border-top:4px solid var(--green);">
+        <div class="agent-type type-validate">Business Value</div>
+        <h4>Reduces Risk Faster</h4>
+        <p>GENESIS can complete an assessment in hours that would take a human team days or weeks. Critical vulnerabilities are identified and reported with remediation guidance before they can be discovered and exploited by attackers.</p>
+      </div>
+      <div class="agent-card" style="border:1px solid var(--border); border-top:4px solid var(--accent);">
+        <div class="agent-type type-think">Business Value</div>
+        <h4>Eliminates Alert Fatigue</h4>
+        <p>Traditional scanners generate hundreds of theoretical findings that require expert human review. GENESIS delivers only confirmed, proven findings. Remediation teams know exactly what to fix and in what order — no triage required.</p>
+      </div>
+      <div class="agent-card" style="border:1px solid var(--border); border-top:4px solid var(--orange);">
+        <div class="agent-type type-debate">Business Value</div>
+        <h4>Scales Security Across All Applications</h4>
+        <p>One human security expert can cover one application at a time. GENESIS can run parallel deep assessments across multiple applications simultaneously. Security coverage scales with the size of your portfolio, not with headcount.</p>
+      </div>
+      <div class="agent-card" style="border:1px solid var(--border); border-top:4px solid var(--accent2);">
+        <div class="agent-type type-recon">Business Value</div>
+        <h4>Proves Compliance Coverage</h4>
+        <p>GENESIS findings are mapped to MITRE ATT&amp;CK, CVSS, and CWE standards. This provides auditable evidence for regulatory compliance (PCI-DSS, ISO 27001, SOC 2, DORA) that demonstrates active, continuous security testing — not annual checkbox reviews.</p>
+      </div>
+      <div class="agent-card" style="border:1px solid var(--border); border-top:4px solid #8b5cf6;">
+        <div class="agent-type type-think">Business Value</div>
+        <h4>Finds the Attack Chains That Matter</h4>
+        <p>A single medium-severity vulnerability might be acceptable risk. That same vulnerability, when linked to two others in an attack chain, might represent a path to full system compromise. GENESIS finds these chains automatically — human reviewers often miss them because they review individual findings in isolation.</p>
+      </div>
+      <div class="agent-card" style="border:1px solid var(--border); border-top:4px solid var(--green);">
+        <div class="agent-type type-validate">Business Value</div>
+        <h4>Builds Institutional Security Memory</h4>
+        <p>Every scan GENESIS runs improves its understanding of your specific environment. The target specialist memory system means subsequent scans of the same application are faster and more focused. GENESIS does not start from zero each time — it builds on what it already knows about your systems.</p>
+      </div>
+    </div>
+
+    <h3>GENESIS in the Security Ecosystem</h3>
+    <p>GENESIS is not a replacement for all security activities — it is a force multiplier that makes the rest of your security investment more effective:</p>
+    <table>
+      <tr><th>Activity</th><th>Without GENESIS</th><th>With GENESIS</th></tr>
+      <tr><td>Annual penetration test</td><td>2-3 weeks, limited scope, one team's expertise</td><td>Pre-scope GENESIS scan identifies highest-risk areas, human pentesters focus their time on complex business logic and creative scenarios</td></tr>
+      <tr><td>Pre-release security review</td><td>Blocked on security team availability; often skipped under time pressure</td><td>GENESIS runs automatically as part of the release pipeline; findings available within hours</td></tr>
+      <tr><td>Incident investigation</td><td>Reactive — find the vulnerability after the breach</td><td>Proactive — GENESIS's continuous surface monitoring and periodic scans catch the vulnerability before attackers do</td></tr>
+      <tr><td>Compliance evidence</td><td>Point-in-time scan reports from limited-scope tools</td><td>Continuous, structured, validated evidence with CVSS scores, MITRE mapping, and proof of testing for every finding</td></tr>
+    </table>
+  </div>
+
+  <!-- SECTION 14 -->
+  <div class="section" id="next-steps">
+    <div class="section-header">
+      <div class="section-number">14</div>
+      <div>
+        <div class="section-title">Next Steps — Gaps, Improvements &amp; Roadmap</div>
+        <div class="section-sub">Based on benchmark analysis and architectural review: where GENESIS should grow next.</div>
+      </div>
+    </div>
+
+    <p>The benchmark evaluations against OWASP Juice Shop and the GENESIS Demo Range have highlighted specific coverage gaps and improvement opportunities. The following roadmap items are prioritised by impact.</p>
+
+    <h3>Immediate Priority — Platform Hardening (Before Production Deployment)</h3>
+    <div class="next-grid">
+      <div class="next-card">
+        <div class="priority p0">P0 — Do Before Go-Live</div>
+        <h4>Replace Default Credentials</h4>
+        <p>All default passwords (including the database password visible in configuration) must be replaced with cryptographically random values. Current state is acceptable for lab environments only.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p0">P0 — Do Before Go-Live</div>
+        <h4>Enable TLS for All Services</h4>
+        <p>Internal and external communications should be encrypted. The production hardening plan includes TLS termination via nginx/Caddy with HSTS headers.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p0">P0 — Do Before Go-Live</div>
+        <h4>Non-Root Container Execution</h4>
+        <p>All Docker containers should run as non-root users. Current deployment runs as Uid:0 in several containers, which amplifies the impact of any container breakout.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p0">P0 — Do Before Go-Live</div>
+        <h4>Rate Limiting on Auth Endpoints</h4>
+        <p>The GENESIS platform's own authentication endpoints need rate limiting to prevent brute-force attacks against the platform itself.</p>
+      </div>
+    </div>
+
+    <h3>Coverage Gaps Identified in Benchmark Analysis</h3>
+    <div class="next-grid">
+      <div class="next-card">
+        <div class="priority p1">P1 — High Impact Gap</div>
+        <h4>Web3 / Blockchain Vulnerability Coverage</h4>
+        <p>OWASP Juice Shop v20 introduced smart contract vulnerabilities (NFT Takeover, Wallet Depletion, Mint Honey Pot). The v20 benchmark showed these were not covered. A Web3 specialist agent with tools for Solidity analysis, smart contract fuzzing, and blockchain state manipulation is needed for organisations operating blockchain-based systems.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p1">P1 — High Impact Gap</div>
+        <h4>AI/LLM Security Testing</h4>
+        <p>As organisations deploy AI chatbots and LLM-powered features, a new attack class has emerged: prompt injection, context window manipulation, training data extraction, and model denial-of-service. The v20 benchmark identified 3 Chatbot/AI challenges. A dedicated LLM security specialist agent should be added to GENESIS's specialist roster.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p1">P1 — High Impact Gap</div>
+        <h4>OSINT and Social Engineering Surface</h4>
+        <p>GENESIS currently has strong technical coverage but limited open-source intelligence (OSINT) capability — finding leaked credentials in public repositories, exposed internal documents, or employee information that enables targeted attacks. An OSINT specialist agent would significantly expand coverage of the initial access phase.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p1">P1 — High Impact Gap</div>
+        <h4>Browser-Side JavaScript Analysis</h4>
+        <p>Several challenge categories in the benchmark involved client-side JavaScript vulnerabilities (DOM-based XSS, browser-side logic flaws, postMessage abuse). GENESIS has browser tools but dedicated client-side code analysis — reading and understanding JavaScript running in the browser — would improve coverage of this class.</p>
+      </div>
+    </div>
+
+    <h3>Enhancement Opportunities</h3>
+    <div class="next-grid">
+      <div class="next-card">
+        <div class="priority p2">P2 — Medium Impact</div>
+        <h4>API Discovery Coverage</h4>
+        <p>GraphQL endpoints, hidden API versions, shadow APIs (undocumented endpoints left in production), and developer tooling left exposed in production remain under-covered. Enhanced API enumeration during the recon phase would improve coverage of modern application architectures.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p2">P2 — Medium Impact</div>
+        <h4>Authenticated Scan Depth</h4>
+        <p>Many of the most impactful vulnerabilities — business logic flaws, privilege escalation, IDOR — require authenticated access to test effectively. Expanding GENESIS's ability to maintain complex authentication state across multiple user roles would unlock deeper coverage of authenticated attack scenarios.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p2">P2 — Medium Impact</div>
+        <h4>Supply Chain Dependency Analysis</h4>
+        <p>The benchmark showed that direct mapping of third-party component vulnerabilities (known-vulnerable libraries) was at 28.9% (v14.5.1) and 20.7% (v20). Integrating a dedicated software composition analysis (SCA) engine with a richer dependency graph would improve identification of vulnerable components in application dependencies.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p2">P2 — Medium Impact</div>
+        <h4>Multi-Application Correlation</h4>
+        <p>When GENESIS has scanned multiple applications in an organisation's portfolio, it has the data to identify cross-application patterns: credentials from Application A that work on Application B, vulnerabilities in shared libraries affecting multiple apps, trust relationships between applications that create multi-hop attack paths. Cross-session correlation analysis would surface these organisation-wide risks.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p3">P3 — Longer Term</div>
+        <h4>Continuous Monitoring Mode</h4>
+        <p>Moving from periodic scan sessions to a continuous monitoring model where GENESIS watches for changes to the attack surface and automatically triggers targeted scans when meaningful changes are detected. The Surface Watcher process is the foundation — this extends it to a full continuous security posture management capability.</p>
+      </div>
+      <div class="next-card">
+        <div class="priority p3">P3 — Longer Term</div>
+        <h4>Developer IDE Integration</h4>
+        <p>Bringing GENESIS's code analysis capabilities directly into developer environments (VS Code, IntelliJ) so that security feedback is available during development rather than post-deployment. This shifts security left in the development lifecycle — the most cost-effective point to fix vulnerabilities.</p>
+      </div>
+    </div>
+
+    <h3>Coverage Metrics from Benchmark Evaluation</h3>
+    <p>The following coverage gaps were measured in independent benchmark evaluations and directly inform the roadmap above:</p>
+    <table>
+      <tr><th>Metric</th><th>Measured Result</th><th>Target</th><th>Gap</th></tr>
+      <tr><td>Official challenge coverage (v14.5.1)</td><td>~85%</td><td>95%</td><td>10% — primarily manual/OSINT challenges</td></tr>
+      <tr><td>Official challenge coverage (v20.0.0)</td><td>51.8% (58/112)</td><td>80%</td><td>28.2% — Web3, AI/chatbot, browser-specific</td></tr>
+      <tr><td>Automatable challenge coverage (v20)</td><td>~67%</td><td>90%</td><td>23% — authenticated logic, GraphQL depth</td></tr>
+      <tr><td>CVE advisory package coverage (v14.5.1)</td><td>28.9% (11/38)</td><td>60%</td><td>31.1% — transitive dependency mapping</td></tr>
+      <tr><td>CVE advisory package coverage (v20.0.0)</td><td>20.7% (6/29)</td><td>60%</td><td>39.3% — needs dedicated SCA engine</td></tr>
+      <tr><td>False positive rate (patched benchmark)</td><td><strong>0%</strong></td><td>0%</td><td>None — at target</td></tr>
+      <tr><td>GDV recall (planted benchmark)</td><td><strong>100%</strong></td><td>≥75%</td><td>None — exceeds target</td></tr>
+    </table>
+  </div>
+
+</div><!-- /container -->
+
+<footer>
+  <p><strong>GENESIS Security Platform</strong> — Platform Intelligence Guide v7.0</p>
+  <p style="margin-top:8px;">For authorized use within the GENESIS evaluation environment. This document contains technical details about security scanning methodology and should be treated as confidential.</p>
+  <p style="margin-top:8px;">Generated: 2026-05-24 | Classification: Internal — CISO Distribution</p>
+</footer>
+
+</body>
+</html>

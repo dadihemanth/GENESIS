@@ -3,12 +3,31 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
+import random
 import re
 from typing import Any, Dict, List, Optional, Set
 
+from app.services.llm_providers import apply_anthropic_thinking
 from app.services.mcp_client import MCPClient
 
 logger = logging.getLogger(__name__)
+
+_SUBAGENT_LLM_SEMAPHORE: Optional[asyncio.Semaphore] = None
+_SUBAGENT_LLM_SEMAPHORE_LOOP: Optional[asyncio.AbstractEventLoop] = None
+_SUBAGENT_LLM_CONCURRENCY = max(
+    1,
+    int(os.getenv("GENESIS_SUBAGENT_LLM_CONCURRENCY", "1")),
+)
+
+
+def _get_subagent_llm_semaphore() -> asyncio.Semaphore:
+    global _SUBAGENT_LLM_SEMAPHORE, _SUBAGENT_LLM_SEMAPHORE_LOOP
+    loop = asyncio.get_running_loop()
+    if _SUBAGENT_LLM_SEMAPHORE is None or _SUBAGENT_LLM_SEMAPHORE_LOOP is not loop:
+        _SUBAGENT_LLM_SEMAPHORE = asyncio.Semaphore(_SUBAGENT_LLM_CONCURRENCY)
+        _SUBAGENT_LLM_SEMAPHORE_LOOP = loop
+    return _SUBAGENT_LLM_SEMAPHORE
 
 _SHARED_FINDINGS_KEY_TMPL = "genesis:session:{session_id}:shared_findings"
 _SHARED_FINDINGS_MAX = 200  # cap list length to bound memory
@@ -205,6 +224,78 @@ _BASELINE_SPECIALISTS: Set[str] = {
     "crypto", "auth", "network", "reveng", "exploitdev",
 }
 
+
+def _render_agent_prompt(template: str, target: str) -> str:
+    """Render only the {target} placeholder; leave JSON examples untouched."""
+    return (
+        template
+        .replace("{target}", target)
+        .replace("{{", "{")
+        .replace("}}", "}")
+    )
+
+
+def _is_rate_limit_error(exc: BaseException) -> bool:
+    text = f"{type(exc).__name__}: {exc}".lower()
+    return "ratelimit" in text or "rate limit" in text or "429" in text
+
+
+def _retry_after_seconds(exc: BaseException) -> float:
+    try:
+        response = getattr(exc, "response", None)
+        headers = getattr(response, "headers", None)
+        if headers:
+            retry_ms = headers.get("x-ms-retry-after-ms")
+            if retry_ms:
+                return max(0.0, float(retry_ms) / 1000.0)
+            retry_s = headers.get("retry-after")
+            if retry_s:
+                return max(0.0, float(retry_s))
+    except Exception:
+        pass
+
+    message = str(exc)
+    match = re.search(r"wait\s+(\d+(?:\.\d+)?)\s+seconds?", message, re.I)
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            return 0.0
+    return 0.0
+
+
+async def _create_message_with_subagent_backoff(
+    client: Any,
+    create_kwargs: Dict[str, Any],
+    *,
+    agent_type: str,
+    session_id: str,
+    max_attempts: int = 5,
+) -> Any:
+    """Throttle and retry sub-agent LLM calls that hit provider TPM limits."""
+    for attempt in range(max_attempts):
+        try:
+            async with _get_subagent_llm_semaphore():
+                return await client.messages.create(**create_kwargs)
+        except Exception as exc:  # noqa: BLE001
+            if not _is_rate_limit_error(exc) or attempt >= max_attempts - 1:
+                raise
+            retry_after = _retry_after_seconds(exc)
+            base = retry_after if retry_after > 0 else min(90.0, 10.0 * (2 ** attempt))
+            wait = base + random.uniform(0.0, 4.0)
+            logger.warning(
+                "[RATE_LIMIT] subagent=%s session=%s attempt=%d/%d waiting %.1fs: %s",
+                agent_type,
+                session_id,
+                attempt + 1,
+                max_attempts,
+                wait,
+                str(exc)[:220],
+            )
+            await asyncio.sleep(wait)
+    raise RuntimeError("subagent LLM retry loop exited without result")
+
+
 _SHARED_USAGE_HINT = (
     "\nYou share a Redis list with the other GENESIS agents for runtime coordination. "
     "When you discover something another agent can use (open port + service, live URL/endpoint, "
@@ -250,6 +341,35 @@ _VULNERABILITY_EMISSION_HINT = (
     "attack_chain_id (e.g. chain-1). Use chain_position 1, 2, 3... in the order of exploitation "
     "(recon hit → misconfig → RCE = 1, 2, 3). This is how the Attack Chains tab is built."
 )
+
+_CANDIDATE_EMISSION_HINT = (
+    "\n\nOptional validation lab: when a lead is plausible "
+    "but not yet ready to be reported as a finding, emit a "
+    "CANDIDATE_FINDING block instead of over-claiming a confirmed vulnerability:\n"
+    "{{\"CANDIDATE_FINDING\": {{"
+    "\"title\": \"<short lead>\", "
+    "\"attack_class\": \"sqli|idor|ssrf|auth|...\", "
+    "\"affected_surface\": \"<host:port/path or service>\", "
+    "\"hypothesis\": \"<one testable claim>\", "
+    "\"evidence\": [\"<concrete observation>\"], "
+    "\"reachability_claim\": \"<why attacker input reaches the sink>\", "
+    "\"proposed_proof\": {{\"tool\": \"ai_request_forge|forge_runner|oob_check|browser_session|payload_swarm|fuzz_binary|symbolic_exec|instrument_trace\", \"oracle\": \"<observable that proves it>\"}}, "
+    "\"confidence\": 0.7, "
+    "\"severity\": \"critical|high|medium|low|info\", "
+    "\"endpoint\": \"/path\", "
+    "\"affected_service\": \"<product + version>\""
+    "}}}}\n"
+    "If you are the code/source/binary side of the hunt and have source, "
+    "sourcemaps, artifacts, OpenAPI, taint paths, or commit clues, emit a "
+    "SOURCE_CANDIDATE_FINDING block with source_context, reachability_context, "
+    "sink, source_input, taint_path, invariant, commit_signal, and proof_plan. "
+    "Use live_replay_required=true unless a source-only informational finding "
+    "does not need endpoint proof. Normal findings should still be emitted as "
+    "VULNERABILITY blocks with concrete evidence_for so the platform can apply "
+    "evidence checks and critic review."
+)
+
+_VULNERABILITY_EMISSION_HINT += _CANDIDATE_EMISSION_HINT
 
 _VERIFICATION_DISCIPLINE_HINT = (
     "\n\nVERIFICATION DISCIPLINE — this is how you keep findings from sitting at "
@@ -437,7 +557,21 @@ _AGENT_PROMPTS: Dict[str, str] = {
         "(e.g. body_must_contain='shell', or exit_code_eq=0 when the script lands a session). "
         "Be honest about hardened targets (ASLR/NX/CFI) — a partial primitive with a clear "
         "reachability proof is still a valid finding at high confidence even if you can't land a "
-        "full shell. "
+        "full shell.\n\n"
+        "NATIVE PROVE (memory-safety bugs): When you identify a memory-safety primitive "
+        "(UAF, heap/stack overflow, double-free) in a C/C++ binary AND have a candidate_id from "
+        "a CANDIDATE_FINDING block, emit a NATIVE_PROVE_REQUEST block to trigger ASan-instrumented "
+        "dynamic validation:\n"
+        "  {{\"NATIVE_PROVE_REQUEST\": {{\n"
+        "    \"binary_path\": \"/abs/path/to/target_binary\",\n"
+        "    \"poc_input\": \"<hex-encoded or raw PoC input that triggers the bug>\",\n"
+        "    \"expected_signal\": \"heap-use-after-free|stack-buffer-overflow|double-free\",\n"
+        "    \"candidate_id\": \"<candidate_id from the CANDIDATE_FINDING>\",\n"
+        "    \"compile_flags\": [\"-fsanitize=address\", \"-O1\"],\n"
+        "    \"stdin\": true\n"
+        "  }}}}\n"
+        "The native prover will spawn an ASan replica, run the PoC, and automatically record "
+        "the sanitizer report as proof — promoting the finding if the signal matches.\n"
         "When done, emit: {{\"EXPLOITDEV_COMPLETE\": true, \"findings\": <summary>}}"
         + _SHARED_USAGE_HINT
         + _VERIFICATION_DISCIPLINE_HINT
@@ -886,7 +1020,7 @@ class SubAgent:
         self._network_topology: Dict[str, Any] = {"nodes": [], "edges": []}
 
     def _system_prompt(self) -> str:
-        base = _AGENT_PROMPTS[self.agent_type].format(target=self.target)
+        base = _render_agent_prompt(_AGENT_PROMPTS[self.agent_type], self.target)
         if self._intelligence_context:
             base += f"\n\n## Intelligence from Similar Past Sessions\n{self._intelligence_context}"
         return base
@@ -925,6 +1059,40 @@ class SubAgent:
             "SHARED_FINDINGS (new since last turn — reuse these, do NOT re-enumerate):\n"
             f"{payload}"
         )
+
+    async def _build_directive_injection(self) -> Optional[str]:
+        """LPOP one supervisor directive addressed to this agent type.
+
+        Returns a high-priority instruction block to prepend to the next turn,
+        or None if no directive is queued. Consumed-once (LPOP removes from Redis).
+        """
+        try:
+            from app.services.session_supervisor import SessionSupervisor  # noqa: PLC0415
+            directive = await SessionSupervisor.pop_directive(
+                session_id=self.session_id,
+                agent_type=self.agent_type,
+            )
+            if not directive:
+                return None
+            logger.info(
+                "[SUPERVISOR] session=%s agent=%s consumed directive id=%s",
+                self.session_id, self.agent_type, directive.get("directive_id"),
+            )
+            return (
+                f"[SUPERVISOR DIRECTIVE — priority={directive.get('priority', 1)}]\n"
+                f"The session judge identified a coverage gap in "
+                f"kill-chain phase '{directive.get('phase', 'unknown')}', "
+                f"attack class '{directive.get('attack_class', 'unknown')}'.\n\n"
+                f"Instruction: {directive.get('instruction', '')}\n\n"
+                "Address this gap NOW before continuing your regular workflow. "
+                "This is a HIGH-PRIORITY instruction from the session supervisor. "
+                "Do not emit a FINAL_REPORT until you have made a genuine attempt "
+                "to cover the area described above.\n"
+                "[END SUPERVISOR DIRECTIVE]"
+            )
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] directive poll failed (non-fatal): %s", exc)
+            return None
 
     async def run(self) -> Dict[str, Any]:
         from datetime import datetime, timezone
@@ -1099,11 +1267,13 @@ class SubAgent:
                     timeout=_ANTHROPIC_TIMEOUT_SECONDS,
                 )
                 if supports_thinking:
-                    create_kwargs["thinking"] = {
-                        "type": "enabled",
-                        "budget_tokens": agent_thinking_budget,
-                    }
-                response = await client.messages.create(**create_kwargs)
+                    apply_anthropic_thinking(create_kwargs, model, agent_thinking_budget)
+                response = await _create_message_with_subagent_backoff(
+                    client,
+                    create_kwargs,
+                    agent_type=self.agent_type,
+                    session_id=self.session_id,
+                )
                 try:
                     from app.services.llm_usage import record_llm_usage
                     await record_llm_usage(
@@ -1255,6 +1425,14 @@ class SubAgent:
                 # Topology panels stay empty in multi-agent mode even though
                 # the agents may have emitted the right blocks.
                 try:
+                    await self._ai._extract_and_save_candidates(
+                        self.session_id,
+                        full_text,
+                        source_agent=self.agent_type,
+                    )
+                except Exception as exc:
+                    logger.debug("candidate extract failed (non-fatal): %s", exc)
+                try:
                     await self._ai._extract_and_save_vulnerabilities(
                         self.session_id, full_text
                     )
@@ -1355,6 +1533,8 @@ class SubAgent:
 
                     start_time = datetime.now(timezone.utc)
                     try:
+                        if tool_name == "spawn_replica" and isinstance(tool_params, dict):
+                            tool_params.setdefault("session_id", self.session_id)
                         if tool_name == "deliberate":
                             # v7.x — multi-agent parity for reasoning loops.
                             # Same dispatch shape as the single-agent path.
@@ -1454,6 +1634,10 @@ class SubAgent:
                         ),
                     })
                     content_blocks.extend(vision_blocks)
+                # v8 — supervisor directive (consumed-once, prepended for visibility)
+                directive_text = await self._build_directive_injection()
+                if directive_text:
+                    content_blocks.insert(0, {"type": "text", "text": directive_text})
                 refresh = await self._build_shared_findings_refresh()
                 if refresh:
                     content_blocks.append({"type": "text", "text": refresh})
@@ -1514,6 +1698,88 @@ class MultiAgentOrchestrator:
         except Exception:
             self._max_rounds_override = 0
 
+    async def _bootstrap_validated_reasoning_views(self) -> None:
+        """Populate reasoning/adversarial tabs early for validated_dynamic."""
+        from app.services.reasoning import registry as _reasoning_registry
+
+        try:
+            from app.database.mongodb import get_db
+            db = await get_db()
+            loop_count = await db["loop_state"].count_documents(
+                {"session_id": str(self.session_id)}
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("[BOOTSTRAP] loop count lookup failed: %s", exc)
+            loop_count = 1
+
+        if loop_count == 0:
+            try:
+                await _reasoning_registry.dispatch(
+                    session_id=self.session_id,
+                    loop_type="hypothesis_decomp",
+                    inputs={
+                        "text": (
+                            "Initial validated_dynamic prepare hypothesis for "
+                            f"target {self.target}: build endpoint inventory, "
+                            "identify auth/session boundaries, map input "
+                            "parameters to parser/sink behavior, then collect "
+                            "concrete evidence before reporting any medium, "
+                            "high, or critical vulnerability."
+                        ),
+                        "max_atoms": 5,
+                        "source": "validated_dynamic_bootstrap",
+                    },
+                    # No LLM call here: HypothesisDecompLoop falls back to
+                    # deterministic clause splitting while still persisting a
+                    # replayable loop_state trace.
+                    llm_call=None,
+                )
+                logger.info(
+                    "[BOOTSTRAP] session=%s seeded initial reasoning loop",
+                    self.session_id,
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("[BOOTSTRAP] initial loop failed: %s", exc)
+
+        try:
+            from app.database.mongodb import get_adversarial_reasoning_collection
+            adv_count = await get_adversarial_reasoning_collection().count_documents(
+                {"session_id": str(self.session_id)}
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("[BOOTSTRAP] adversarial count lookup failed: %s", exc)
+            adv_count = 1
+
+        if adv_count == 0:
+            try:
+                context = (
+                    "Pre-scan bootstrap for validated_dynamic mode.\n"
+                    f"Target: {self.target}\n"
+                    "Scope: authorized defensive assessment.\n"
+                    "Important constraint: this is before endpoint inventory "
+                    "is complete, so hypotheses must be framed as testable "
+                    "candidate probes and must not assume SSH, admin panels, "
+                    "or specific products unless evidence appears later.\n"
+                    "Expected workflow: prepare endpoint/source surface, emit "
+                    "normal findings when evidence is concrete, and use "
+                    "candidate findings for optional proof follow-up when a "
+                    "lead still needs validation."
+                )
+                rb = await self._ai._get_red_blue(self._client, self._model)
+                await rb.synthesize(
+                    session_id=self.session_id,
+                    target_context=context,
+                    max_pairs=1,
+                    trigger="pre_scan_bootstrap",
+                    publish_fn=self._publish,
+                )
+                logger.info(
+                    "[BOOTSTRAP] session=%s seeded pre-scan red/blue debate",
+                    self.session_id,
+                )
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("[BOOTSTRAP] pre-scan red/blue failed: %s", exc)
+
     async def run(self) -> None:
         from app.services.ai_orchestrator import _now_iso
 
@@ -1565,6 +1831,28 @@ class MultiAgentOrchestrator:
             },
             "timestamp": _now_iso(),
         })
+
+        # v9 demo/validated-dynamic UX: the old placement seeded reasoning
+        # loops and adversarial debate only after Phase 1 completed. On deep
+        # scans Phase 1 can run for many minutes, leaving the Loops and
+        # Adversarial tabs blank even though the session is healthy. Start a
+        # lightweight, clearly-labelled bootstrap trace now; the full Phase-1
+        # grounded seed below still runs once recon/analysis finishes.
+        if self._scan_profile == "validated_dynamic":
+            _bootstrap_task = asyncio.create_task(
+                self._bootstrap_validated_reasoning_views()
+            )
+
+            def _log_bootstrap_done(task: asyncio.Task) -> None:
+                try:
+                    task.result()
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug(
+                        "[BOOTSTRAP] validated_dynamic early reasoning failed: %s",
+                        exc,
+                    )
+
+            _bootstrap_task.add_done_callback(_log_bootstrap_done)
 
         def _make_agent(
             agent_type: str, prior: Optional[Dict[str, Any]] = None
@@ -1620,6 +1908,12 @@ class MultiAgentOrchestrator:
         session_tools_used: Set[str] = set()
         session_tools_used |= getattr(recon_agent, "_tools_used", set())
         session_tools_used |= getattr(analyst_agent, "_tools_used", set())
+        # v8 — kill-chain coverage tracker; seeded with Phase-1 tools
+        from app.services.killchain_coverage import KillChainCoverage  # noqa: PLC0415
+        killchain_coverage = KillChainCoverage()
+        for _t in session_tools_used:
+            killchain_coverage.record_tool(_t)
+        _last_judge_round: int = -1
         try:
             await self._ai._update_session(
                 self.session_id, iteration=session_iter_total,
@@ -1816,7 +2110,11 @@ class MultiAgentOrchestrator:
             # Aggregate iterations and tools_used across this round.
             for agent in phase2_agents:
                 session_iter_total += int(getattr(agent, "_iteration_used", 0))
-                session_tools_used |= getattr(agent, "_tools_used", set())
+                _round_tools = getattr(agent, "_tools_used", set())
+                session_tools_used |= _round_tools
+                # v8 — update kill-chain coverage from this round's tools
+                for _t in _round_tools:
+                    killchain_coverage.record_tool(_t)
             try:
                 await self._ai._update_session(
                     self.session_id, iteration=session_iter_total,
@@ -1942,8 +2240,47 @@ class MultiAgentOrchestrator:
                         "[ADVERSARIAL] philosopher dispatch failed: %s", exc,
                     )
 
+            # ── v8 — SessionJudge + Supervisor (once per round) ───────────
+            if round_idx != _last_judge_round:
+                _last_judge_round = round_idx
+                try:
+                    from app.services.session_judge import SessionJudge  # noqa: PLC0415
+                    from app.services.session_supervisor import SessionSupervisor  # noqa: PLC0415
+                    from app.services.llm_routing import get_client_and_model_for_role  # noqa: PLC0415
+                    _ai_settings = getattr(self._ai, "_app_settings", {}) or {}
+                    _j_client, _j_model, _ = await get_client_and_model_for_role(
+                        "judge", _ai_settings,
+                    )
+                    _j_vcounts = await self._ai._fetch_vulnerability_counts(self.session_id)
+                    _j_verdict = await SessionJudge(_j_client, _j_model).evaluate(
+                        session_id=self.session_id,
+                        round_idx=round_idx,
+                        killchain_coverage=killchain_coverage.to_dict(),
+                        tools_used=session_tools_used,
+                        goal_tree=await self._ai._fetch_goal_tree(self.session_id),
+                        goal_progress=await self._ai._fetch_goal_progress(self.session_id),
+                        hypothesis_stats=await self._ai._fetch_hypothesis_stats(self.session_id),
+                        finding_count=_j_vcounts["total"],
+                        confirmed_finding_count=_j_vcounts["confirmed"],
+                        coverage_pct=killchain_coverage.overall_pct(),
+                        publish_fn=self._publish,
+                    )
+                    await SessionSupervisor.dispatch_from_verdict(
+                        session_id=self.session_id,
+                        verdict=_j_verdict,
+                        publish_fn=self._publish,
+                        max_directives=5,
+                    )
+                except Exception as _judge_exc:
+                    logger.warning(
+                        "[JUDGE] session=%s round=%d fire failed (non-fatal): %s",
+                        self.session_id, round_idx, _judge_exc,
+                    )
+
             # ── Gate evaluation ────────────────────────────────────────────
-            # Three gates, ANY of which can keep us in the loop:
+            # Gates 1–3: ANY can keep us in the loop.
+            # Gate 4 (v8): kill-chain coverage ≥ threshold per phase (AND gate,
+            # only for exhaustive/deep_research profiles).
             #   1. floor: session_iter_total < min_iterations
             #   2. goal-progress: any sub-goal still in_progress / pending
             #   3. round cap: round_idx < max_rounds AND we haven't satisfied
@@ -1983,7 +2320,35 @@ class MultiAgentOrchestrator:
                     gp_reason, session_iter_total,
                 )
                 continue
-            # All session-level gates satisfied — exit the rounds loop.
+            # ── Gate 4: kill-chain coverage ≥ per-phase threshold ──────────
+            # Only applied for exhaustive / deep_research profiles where
+            # thorough coverage is the explicit objective.
+            if self._scan_profile in ("exhaustive", "deep_research"):
+                if not killchain_coverage.gate_passed():
+                    _kc_pct = killchain_coverage.overall_pct()
+                    _kc_gaps = killchain_coverage.gap_report()
+                    logger.info(
+                        "[KC_GATE] session=%s blocking termination — "
+                        "kill-chain coverage=%.1f%% gaps=%s",
+                        self.session_id, _kc_pct,
+                        [g["phase"] for g in _kc_gaps],
+                    )
+                    try:
+                        await self._publish(self.session_id, {
+                            "type": "killchain_gate_blocked",
+                            "data": {
+                                "coverage_pct": round(_kc_pct, 1),
+                                "gaps": _kc_gaps[:4],
+                                "round": round_idx,
+                            },
+                            "timestamp": __import__("datetime").datetime.now(
+                                __import__("datetime").timezone.utc
+                            ).isoformat(),
+                        })
+                    except Exception:
+                        pass
+                    continue
+            # All gates satisfied — exit the rounds loop.
             logger.info(
                 "[MA_ROUND] all gates satisfied at round=%d "
                 "(session_iter_total=%d) — terminating multi-agent run",

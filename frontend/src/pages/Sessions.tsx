@@ -27,6 +27,7 @@ import {
   Typography,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import ArticleIcon from '@mui/icons-material/Article';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
@@ -69,6 +70,7 @@ const Sessions: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [htmlDownloadingId, setHtmlDownloadingId] = useState<string | null>(null);
   const [snack, setSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
     open: false, message: '', severity: 'success',
   });
@@ -112,6 +114,27 @@ const Sessions: React.FC = () => {
       setSnack({ open: true, message: err instanceof Error ? err.message : String(err), severity: 'error' });
     } finally {
       setDownloadingId(null);
+    }
+  }, []);
+
+  const downloadHtmlReport = useCallback(async (id: string) => {
+    setHtmlDownloadingId(id);
+    try {
+      const { filename, body } = await sessionsApi.downloadHtmlReport(id);
+      const blob = new Blob([body], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setSnack({ open: true, message: `Downloaded ${filename}`, severity: 'success' });
+    } catch (err) {
+      setSnack({ open: true, message: err instanceof Error ? err.message : String(err), severity: 'error' });
+    } finally {
+      setHtmlDownloadingId(null);
     }
   }, []);
 
@@ -224,6 +247,20 @@ const Sessions: React.FC = () => {
                               {downloadingId === s.id
                                 ? <CircularProgress size={14} />
                                 : <DownloadIcon sx={{ fontSize: 18 }} />}
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        <Tooltip title="Download HTML report">
+                          <span>
+                            <IconButton
+                              size="small"
+                              onClick={() => downloadHtmlReport(s.id)}
+                              disabled={htmlDownloadingId === s.id}
+                              sx={{ color: '#137a4e' }}
+                            >
+                              {htmlDownloadingId === s.id
+                                ? <CircularProgress size={14} />
+                                : <ArticleIcon sx={{ fontSize: 18 }} />}
                             </IconButton>
                           </span>
                         </Tooltip>

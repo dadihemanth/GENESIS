@@ -198,6 +198,21 @@ async def ingest_repository(
             "errors": errors[:10],
         }
         logger.info("repo_ingest: session=%s files=%d chunks=%d", session_id, file_count, len(add_ids))
+
+        # validation milestone 2 — analyze commit history for security-sensitive changes.
+        # Runs after source embedding so the scan surface prioritization is
+        # available to architectural_reasoner before hypothesis generation.
+        try:
+            from app.services.commit_analyzer import analyze_commits
+            commit_summary = await analyze_commits(session_id, str(source_dir))
+            summary["commit_analysis"] = {
+                "commits_scanned": commit_summary.get("commits_scanned", 0),
+                "high_risk_commits": commit_summary.get("high_risk_commits", 0),
+                "prioritized_surface_files": len(commit_summary.get("prioritized_surface", [])),
+            }
+        except Exception as exc:
+            logger.debug("commit_analyzer skipped (non-fatal): %s", exc)
+
         return summary
 
     except Exception as exc:

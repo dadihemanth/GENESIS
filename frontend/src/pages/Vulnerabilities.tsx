@@ -324,9 +324,40 @@ const Vulnerabilities: React.FC = () => {
               {selected.title}
             </Typography>
 
-            <Typography variant="body2" sx={{ color: '#5a6478', mb: 3, lineHeight: 1.7 }}>
-              {selected.description}
-            </Typography>
+            {selected.plain_language ? (
+              <Box sx={{ mb: 3 }}>
+                {[
+                  ['Description', selected.plain_language.description],
+                  ['Why it matters', selected.plain_language.why_it_matters],
+                  ['Proof', selected.plain_language.proof],
+                  ['Solution', selected.plain_language.solution],
+                  ['Validation note', selected.plain_language.validation_note],
+                ].map(([label, text]) => (
+                  <Box key={label} sx={{ mb: 1.4 }}>
+                    <Typography variant="caption" sx={{ color: '#8a93a6', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      {label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#2a3045', lineHeight: 1.65 }}>
+                      {text}
+                    </Typography>
+                  </Box>
+                ))}
+                {selected.description && (
+                  <Box sx={{ mt: 1.5, p: 1.5, borderRadius: 1, backgroundColor: '#f6f8fc', border: '1px solid #dfe3ec' }}>
+                    <Typography variant="caption" sx={{ color: '#8a93a6', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                      Technical description
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#5a6478', mt: 0.5, lineHeight: 1.6 }}>
+                      {selected.description}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              <Typography variant="body2" sx={{ color: '#5a6478', mb: 3, lineHeight: 1.7 }}>
+                {selected.description}
+              </Typography>
+            )}
 
             <Divider sx={{ mb: 2 }} />
 
@@ -459,8 +490,8 @@ const Vulnerabilities: React.FC = () => {
               <Typography variant="subtitle2" sx={{ color: '#5a6478', mb: 1, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.72rem' }}>
                 Remediation
               </Typography>
-              <Typography variant="body2" sx={{ color: '#c8e6c9', lineHeight: 1.7, fontSize: '0.85rem' }}>
-                {selected.remediation}
+              <Typography variant="body2" sx={{ color: '#2e7d32', lineHeight: 1.7, fontSize: '0.85rem' }}>
+                {selected.plain_language?.solution || selected.remediation}
               </Typography>
             </Box>
 

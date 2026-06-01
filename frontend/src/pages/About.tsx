@@ -387,7 +387,7 @@ const About: React.FC = () => (
           Autonomous Security Intelligence Platform · v7.0 · Tier 9
         </Typography>
       </Box>
-      <Chip label="MYTHOS" size="small" sx={{ backgroundColor: 'rgba(244,67,54,0.15)', color: '#f44336', fontWeight: 700, ml: 1 }} />
+      <Chip label="GENESIS" size="small" sx={{ backgroundColor: 'rgba(244,67,54,0.15)', color: '#f44336', fontWeight: 700, ml: 1 }} />
     </Box>
 
     <Alert severity="warning" sx={{ mb: 2, backgroundColor: 'rgba(255,152,0,0.08)', color: '#ff9800', border: '1px solid rgba(255,152,0,0.2)', '& .MuiAlert-icon': { color: '#ff9800' } }}>
@@ -414,7 +414,7 @@ const About: React.FC = () => (
           What is GENESIS?
         </Typography>
         <Typography sx={{ color: '#c0c0c0', mb: 2, lineHeight: 1.7, fontSize: '0.9rem' }}>
-          GENESIS MYTHOS is an autonomous AI-powered security assessment platform. Unlike script-based scanners, GENESIS
+          GENESIS is an autonomous AI-powered security assessment platform. Unlike script-based scanners, GENESIS
           uses Claude's extended thinking + a 12-loop deliberation framework to reason about attack surfaces, form
           hypotheses, chain tools dynamically, and adapt strategy based on what it discovers — behaving like an elite
           red team operator.
@@ -637,7 +637,7 @@ const About: React.FC = () => (
           <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
             <Box component="thead">
               <Box component="tr">
-                {['Dimension', 'Traditional Pen Test', 'Script / Scanner', 'GENESIS MYTHOS'].map((h, i) => (
+                {['Dimension', 'Traditional Pen Test', 'Script / Scanner', 'GENESIS'].map((h, i) => (
                   <Box component="th" key={h} sx={{
                     p: 1.5, textAlign: 'left', borderBottom: '1px solid #dfe3ec',
                     color: i === 3 ? '#4e5ced' : '#5a6478',
@@ -990,7 +990,7 @@ const About: React.FC = () => (
     <Box sx={{ mt: 3, p: 2, backgroundColor: 'rgba(78,92,237,0.04)', borderRadius: 2, border: '1px solid rgba(78,92,237,0.1)' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
         <SecurityIcon sx={{ color: '#4e5ced', fontSize: 16 }} />
-        <Typography sx={{ color: '#4e5ced', fontSize: '0.82rem', fontWeight: 700 }}>GENESIS MYTHOS</Typography>
+        <Typography sx={{ color: '#4e5ced', fontSize: '0.82rem', fontWeight: 700 }}>GENESIS</Typography>
       </Box>
       <Typography sx={{ color: '#8a93a6', fontSize: '0.75rem' }}>
         Powered by Claude Opus 4.7 with extended thinking + 12-loop deliberation framework. Built for authorized penetration testing and security research.

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>GENESIS — Production Gantt (v8 Complete / v9 Track)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Consolas, monospace;
+    background: #0d1117;
+    color: #c9d1d9;
+    padding: 24px;
+    min-width: 1160px;
+  }
+
+  h1 { font-size: 20px; font-weight: 700; color: #f0f6fc; margin-bottom: 3px; letter-spacing: 1px; }
+  .subtitle { font-size: 12px; color: #8b949e; margin-bottom: 16px; }
+
+  /* ── Legend ───────────────────────────────────────────────────── */
+  .legend { display: flex; gap: 18px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8b949e; }
+  .legend-swatch { width: 13px; height: 13px; border-radius: 3px; opacity: 0.9; }
+
+  /* ── Parallel-track callout ──────────────────────────────────── */
+  .callout {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #161b22; border: 1px solid #30363d;
+    border-left: 3px solid #f1c40f;
+    padding: 6px 12px; border-radius: 5px;
+    font-size: 11px; color: #8b949e;
+    margin-bottom: 16px;
+  }
+  .callout b { color: #f1c40f; }
+
+  /* ── Chart shell ─────────────────────────────────────────────── */
+  .chart-wrap {
+    display: flex;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #161b22;
+  }
+
+  /* left labels */
+  .labels-col { width: 280px; min-width: 280px; border-right: 1px solid #21262d; }
+  .labels-header { height: 56px; border-bottom: 1px solid #21262d; background: #0d1117; }
+
+  .label-row {
+    display: flex; align-items: center;
+    height: 28px; padding: 0 10px 0 14px;
+    border-bottom: 1px solid #1c2128;
+    font-size: 11px; color: #c9d1d9;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .label-row.phase-header {
+    height: 32px; font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    border-bottom: 1px solid #30363d; background: #0d1117;
+    padding-left: 10px;
+  }
+  .label-row.phase-header::before {
+    content: ''; display: inline-block;
+    width: 4px; height: 14px; border-radius: 2px;
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .ph0::before  { background: #da3633; }
+  .ph1::before  { background: #e3803a; }
+  .phv8::before { background: #06b6d4; }
+  .phv9::before { background: #f59e0b; }
+  .ph2::before  { background: #388bfd; }
+  .ph3::before  { background: #3fb950; }
+  .ph4::before  { background: #bc8cff; }
+
+  .label-row.milestone-row {
+    height: 22px; font-size: 10px; color: #8b949e;
+    font-style: italic; background: #0d1117;
+    border-bottom: 1px solid #21262d;
+  }
+  .label-row.milestone-row::before { content: '◆'; margin-right: 6px; font-size: 9px; color: #f1c40f; }
+
+  .label-row.track-sep {
+    height: 6px; background: #0d1117;
+    border-bottom: 2px dashed #21262d;
+  }
+
+  /* ── Timeline area ───────────────────────────────────────────── */
+  .timeline-area { flex: 1; overflow: hidden; }
+
+  .week-header {
+    position: relative; height: 56px;
+    border-bottom: 1px solid #21262d; background: #0d1117;
+  }
+  .week-label {
+    position: absolute; top: 8px; font-size: 10px;
+    color: #8b949e; transform: translateX(-50%); white-space: nowrap;
+  }
+  .week-label span.big { display: block; font-size: 11px; color: #6e7681; font-weight: 600; }
+  .week-label span.wnum { display: block; font-size: 9px; color: #484f58; }
+
+  .bars-area { position: relative; }
+
+  .bar-row {
+    position: relative; height: 28px;
+    border-bottom: 1px solid #1c2128;
+  }
+  .bar-row.phase-header { height: 32px; background: #0d1117; border-bottom: 1px solid #30363d; }
+  .bar-row.milestone-row { height: 22px; background: #0d1117; border-bottom: 1px solid #21262d; }
+  .bar-row.track-sep { height: 6px; background: #0d1117; border-bottom: 2px dashed #21262d; }
+
+  /* grid lines */
+  .grid-line {
+    position: absolute; top: 0; bottom: 0;
+    width: 1px; background: #21262d; pointer-events: none;
+  }
+
+  /* today line */
+  .today-line {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px; background: #f78166; z-index: 10; pointer-events: none;
+  }
+  .today-label-wh {
+    position: absolute; top: 6px;
+    font-size: 9px; color: #f78166; font-weight: 700;
+    transform: translateX(-50%);
+    background: #0d1117; padding: 1px 4px;
+    border-radius: 2px; z-index: 11; white-space: nowrap;
+  }
+
+  /* task bar */
+  .bar {
+    position: absolute; height: 18px; top: 5px;
+    border-radius: 4px; display: flex; align-items: center;
+    padding: 0 6px; font-size: 9px; color: #fff; font-weight: 600;
+    overflow: hidden; white-space: nowrap; cursor: default;
+    opacity: 0.9; transition: opacity 0.15s, filter 0.15s;
+  }
+  .bar:hover { opacity: 1; filter: brightness(1.15); }
+  .bar-row.phase-header .bar { height: 22px; top: 5px; opacity: 0.25; font-size: 0; border-radius: 5px; }
+  .bar-row.track-sep .bar { display: none; }
+
+  /* milestone diamond */
+  .milestone {
+    position: absolute; width: 12px; height: 12px;
+    transform: rotate(45deg) translateX(-50%);
+    border-radius: 2px; z-index: 5; background: #f1c40f;
+  }
+
+  /* go-live star */
+  .golive-star {
+    position: absolute; font-size: 18px; top: 2px;
+    z-index: 5; transform: translateX(-50%);
+    filter: drop-shadow(0 0 4px #bc8cff);
+  }
+
+  /* phase colours */
+  .c0  { background: #da3633; }
+  .c1  { background: #e3803a; }
+  .cv8 { background: #06b6d4; }
+  .cv8-dim { background: #0e7490; }
+  .cv9 { background: #f59e0b; }
+  .cv9-dim { background: #b45309; }
+  .c2  { background: #388bfd; }
+  .c3  { background: #3fb950; }
+  .c4  { background: #bc8cff; }
+
+  /* parallel-overlap shading: alternating row bg */
+  .par-a { background: #161b22; }
+  .par-b { background: #13181f; }
+
+  /* bottom stats bar */
+  .stats-bar {
+    display: flex; gap: 24px; margin-top: 14px;
+    padding: 10px 16px; background: #161b22;
+    border: 1px solid #21262d; border-radius: 6px;
+    flex-wrap: wrap;
+  }
+  .stat { font-size: 11px; color: #8b949e; }
+  .stat b { color: #f0f6fc; font-size: 13px; }
+  .stat-sep { width: 1px; background: #21262d; }
+</style>
+</head>
+<body>
+
+<h1>GENESIS Production Gantt — v8 Complete, v9 Track Active</h1>
+<div class="subtitle">
+  May 15 → Jun 14, 2026 &nbsp;|&nbsp; 30 days &nbsp;|&nbsp;
+  v7 hardening + v8 validated hybrid complete + v9 training flywheel &nbsp;|&nbsp;
+  <span style="color:#f78166;">▌ Today: May 21, 2026</span> &nbsp;|&nbsp;
+  <span style="color:#3fb950;">✓ v8 completed</span> &nbsp;|&nbsp;
+  <span style="color:#bc8cff;">🚀 Go-live: Jun 14</span>
+</div>
+
+<div class="callout">
+  <b>⚡ Parallel execution model:</b>
+  Phase 0 → Phase 1 → overlaps → v8 completion gate → v9 track runs concurrently with Phases 1, 2, 3 &nbsp;|&nbsp;
+  All 12 v8 blocks (T167–T178) completed May 21 &nbsp;|&nbsp; v9 track (T179–T190) May 22–Jun 9 &nbsp;|&nbsp; Final validation Jun 11–14
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch c0"></div> Ph0 · Critical security</div>
+  <div class="legend-item"><div class="legend-swatch c1"></div> Ph1 · Infrastructure</div>
+  <div class="legend-item"><div class="legend-swatch cv8"></div> Ph V8 · Validated hybrid scanner (DONE)</div>
+  <div class="legend-item"><div class="legend-swatch cv9"></div> Ph V9 · Training flywheel</div>
+  <div class="legend-item"><div class="legend-swatch c2"></div> Ph2 · Test environment</div>
+  <div class="legend-item"><div class="legend-swatch c3"></div> Ph3 · Validation &amp; fixes</div>
+  <div class="legend-item"><div class="legend-swatch c4"></div> Ph4 · Go-live</div>
+  <div class="legend-item" style="margin-left:8px;"><span style="color:#f1c40f;font-size:13px;">◆</span>&nbsp;Milestone</div>
+  <div class="legend-item"><div style="width:14px;height:3px;background:#f78166;border-radius:2px;"></div>&nbsp;Today</div>
+</div>
+
+<div class="chart-wrap" id="chartWrap">
+  <div class="labels-col" id="labelsCol"></div>
+  <div class="timeline-area" id="timelineArea">
+    <div class="week-header" id="weekHeader"></div>
+    <div class="bars-area" id="barsArea"></div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">Timeline <b>30 days</b></div>
+  <div class="stat-sep"></div>
+  <div class="stat">Today <b style="color:#f78166;">May 21, 2026</b></div>
+  <div class="stat-sep"></div>
+  <div class="stat">v8 status <b style="color:#3fb950;">Completed</b></div>
+  <div class="stat-sep"></div>
+  <div class="stat">Original plan <b>63 days</b> → compressed <b>52%</b></div>
+  <div class="stat-sep"></div>
+  <div class="stat">v9 tasks <b>12</b> (T179–T190)</div>
+  <div class="stat-sep"></div>
+  <div class="stat">Parallel tracks <b>4</b> (Security/Infra · V8 Done · V9 Flywheel · Testing)</div>
+  <div class="stat-sep"></div>
+  <div class="stat">Milestones <b>7</b></div>
+  <div class="stat-sep"></div>
+  <div class="stat">Go-live <b style="color:#bc8cff;">Jun 14, 2026</b></div>
+</div>
+
+<script>
+// Day 0 = May 15, 2026.  Day 30 = Jun 14, 2026.
+// TOTAL span = 31 slots (0..30).
+const TOTAL = 31;
+const TODAY = 6; // May 21, 2026
+
+const WEEKS = [
+  { day:  0, label: 'May 15', wnum: 'Week 1' },
+  { day:  7, label: 'May 22', wnum: 'Week 2' },
+  { day: 14, label: 'May 29', wnum: 'Week 3' },
+  { day: 21, label: 'Jun 5',  wnum: 'Week 4' },
+  { day: 28, label: 'Jun 12', wnum: 'Week 5' },
+  { day: 30, label: 'Jun 14', wnum: '' },
+];
+
+// ── Row definitions ───────────────────────────────────────────────────────
+// type: 'phase' | 'task' | 'milestone' | 'sep'
+// bar: { start, dur, cls, label }
+// milestone: { day }
+// alt: true  → slightly darker row bg (visual parallelism cue)
+const ROWS = [
+
+  // ══ PHASE 0 — Critical Security (days 0–5, May 15–20) ════════════════
+  { type:'phase', hdrCls:'ph0',
+    label:'Phase 0 — Critical Security',
+    bar:{ start:0, dur:5, cls:'c0', label:'' } },
+
+  { type:'task', label:'0.1  Secrets + JWT hardening',
+    bar:{ start:0, dur:2, cls:'c0', label:'Secrets / JWT' } },
+
+  { type:'task', label:'0.2  HTTPS / TLS + security headers',
+    bar:{ start:1, dur:2, cls:'c0', label:'HTTPS' } },
+
+  { type:'task', label:'0.3  CORS production config',
+    bar:{ start:2, dur:1, cls:'c0', label:'CORS' } },
+
+  { type:'task', label:'0.4  Rate limiting (fastapi-limiter)',
+    bar:{ start:2, dur:2, cls:'c0', label:'Rate Limit' } },
+
+  { type:'task', label:'0.5  Docker non-root + resource caps',
+    bar:{ start:3, dur:2, cls:'c0', label:'Non-root' } },
+
+  { type:'milestone', label:'M0: Security baseline  (May 20)',
+    milestone:{ day:5 } },
+
+  { type:'sep' },
+
+  // ══ PHASE 1 — Infrastructure (days 3–14, May 18–29) ══════════════════
+  // Starts day 3 — overlaps Phase 0 end intentionally
+  { type:'phase', hdrCls:'ph1',
+    label:'Phase 1 — Infrastructure  ⟵ parallel from day 3',
+    bar:{ start:3, dur:11, cls:'c1', label:'' } },
+
+  { type:'task', label:'1.1  Structured JSON logging + request IDs',
+    bar:{ start:3, dur:2, cls:'c1', label:'Logging' } },
+
+  { type:'task', label:'1.2  Token revocation + session timeout',
+    bar:{ start:5, dur:2, cls:'c1', label:'Sessions' } },
+
+  { type:'task', label:'1.3  Prometheus + Grafana + alerting',
+    bar:{ start:6, dur:4, cls:'c1', label:'Monitoring' } },
+
+  { type:'task', label:'1.4  DB backups (pg/mongo/Neo4j → MinIO)',
+    bar:{ start:9, dur:2, cls:'c1', label:'Backups' } },
+
+  { type:'task', label:'1.5  .env.production.example + startup validation',
+    bar:{ start:10, dur:2, cls:'c1', label:'Env docs' } },
+
+  { type:'task', label:'1.6  Audit log archival + SIEM export',
+    bar:{ start:11, dur:3, cls:'c1', label:'Audit logs' } },
+
+  { type:'milestone', label:'M1: Infrastructure complete  (May 29)',
+    milestone:{ day:14 } },
+
+  { type:'sep' },
+
+  // ══ PHASE V8 — Validated Hybrid Scanner (days 0–6, May 15–21) ═════════
+  { type:'phase', hdrCls:'phv8',
+    label:'Phase V8 — Validated Hybrid Scanner (T167–T178)  ✓ complete',
+    bar:{ start:0, dur:6, cls:'cv8', label:'' } },
+
+  { type:'task', label:'T167  candidate-first scanner state',
+    bar:{ start:0, dur:2, cls:'cv8', label:'T167 Candidates' } },
+
+  { type:'task', label:'T168  independent validator matrix',
+    bar:{ start:1, dur:2, cls:'cv8', label:'T168 Validators' }, alt:true },
+
+  { type:'task', label:'T169  TargetSurfaceGraph endpoint/source map',
+    bar:{ start:1, dur:3, cls:'cv8', label:'T169 Surface Graph' } },
+
+  { type:'task', label:'T170  source-grounded candidate generation',
+    bar:{ start:2, dur:2, cls:'cv8', label:'T170 Source Candidates' }, alt:true },
+
+  { type:'task', label:'T171  ProofRun normalization',
+    bar:{ start:3, dur:2, cls:'cv8', label:'T171 ProofRun' } },
+
+  { type:'task', label:'T172  promotion policy and proof gate',
+    bar:{ start:3, dur:2, cls:'cv8', label:'T172 Promotion Gate' }, alt:true },
+
+  { type:'task', label:'T173  root-cause and patch-style dedup',
+    bar:{ start:4, dur:1, cls:'cv8', label:'T173 Dedup' } },
+
+  { type:'task', label:'T174  cross-file comparison loop',
+    bar:{ start:4, dur:1, cls:'cv8', label:'T174 Cross-file' }, alt:true },
+
+  { type:'task', label:'T175  validated benchmark reports',
+    bar:{ start:5, dur:1, cls:'cv8', label:'T175 Benchmarks' } },
+
+  { type:'task', label:'T176  Validated UI/API surface',
+    bar:{ start:5, dur:1, cls:'cv8', label:'T176 UI/API' }, alt:true },
+
+  { type:'task', label:'T177  hybrid source/live replay status model',
+    bar:{ start:5, dur:1, cls:'cv8-dim', label:'T177 Replay Status' } },
+
+  { type:'task', label:'T178  regression-tested validation logic',
+    bar:{ start:5, dur:1, cls:'cv8-dim', label:'T178 Smoke Green' }, alt:true },
+
+  { type:'milestone', label:'M_V8: v8 completed today  (May 21)',
+    milestone:{ day:6 } },
+
+  { type:'sep' },
+
+  // ══ PHASE V9 — Training Flywheel (days 7–25, May 22–Jun 9) ═══════════
+  { type:'phase', hdrCls:'phv9',
+    label:'Phase V9 — Training Flywheel (T179–T190)  ⟵ parallel',
+    bar:{ start:7, dur:18, cls:'cv9', label:'' } },
+
+  { type:'task', label:'T179  exploit_corpus_curator (daemon)',
+    bar:{ start:7, dur:3, cls:'cv9', label:'T179 Corpus Curator' } },
+
+  { type:'task', label:'T180  counterexample_miner',
+    bar:{ start:9, dur:3, cls:'cv9', label:'T180 Counterexample' }, alt:true },
+
+  { type:'task', label:'T181  synthetic_data_generator',
+    bar:{ start:9, dur:3, cls:'cv9', label:'T181 Synthetic Data' } },
+
+  { type:'task', label:'T182  corpus_quality_gate (HITL queue)',
+    bar:{ start:12, dur:2, cls:'cv9', label:'T182 Quality Gate' }, alt:true },
+
+  { type:'task', label:'T184  reward_model wire-up',
+    bar:{ start:13, dur:3, cls:'cv9', label:'T184 Reward Model' } },
+
+  { type:'task', label:'T183  per_specialist_lora_pipeline',
+    bar:{ start:14, dur:4, cls:'cv9', label:'T183 LoRA Pipeline' }, alt:true },
+
+  { type:'task', label:'T185  distillation_pipeline (Opus → Haiku)',
+    bar:{ start:17, dur:3, cls:'cv9', label:'T185 Distillation' } },
+
+  { type:'task', label:'T186  continual_learning_loop',
+    bar:{ start:19, dur:3, cls:'cv9', label:'T186 Continual Learning' }, alt:true },
+
+  { type:'task', label:'T189  model_portfolio_router',
+    bar:{ start:19, dur:4, cls:'cv9', label:'T189 Portfolio Router' } },
+
+  { type:'task', label:'T187  t13_conformance_test_suite',
+    bar:{ start:21, dur:3, cls:'cv9-dim', label:'T187 Conformance' }, alt:true },
+
+  { type:'task', label:'T188  genesis_ab_harness (yield vs raw Claude)',
+    bar:{ start:22, dur:3, cls:'cv9-dim', label:'T188 A/B Harness' } },
+
+  { type:'task', label:'T190  closed_loop_improvement (The Flywheel)',
+    bar:{ start:24, dur:1, cls:'cv9', label:'T190 Flywheel' }, alt:true },
+
+  { type:'milestone', label:'M_V9: Flywheel scaffold ready  (Jun 9)',
+    milestone:{ day:25 } },
+
+  { type:'sep' },
+
+  // ══ PHASE 2 — Test Environment (days 12–22, May 27–Jun 6) ════════════
+  { type:'phase', hdrCls:'ph2',
+    label:'Phase 2 — Vuln Image + Test Suite  ⟵ parallel from day 12',
+    bar:{ start:12, dur:10, cls:'c2', label:'' } },
+
+  { type:'task', label:'2.1  genesis-vuln-lab:1.0 Docker image',
+    bar:{ start:12, dur:3, cls:'c2', label:'Vuln image' } },
+
+  { type:'task', label:'2.2  E2E automated test runner (pytest)',
+    bar:{ start:15, dur:3, cls:'c2', label:'E2E tests' }, alt:true },
+
+  { type:'task', label:'2.3  Unit tests (auth / config / adversarial)',
+    bar:{ start:15, dur:4, cls:'c2', label:'Unit tests' } },
+
+  { type:'task', label:'2.4  MCP tool smoke tests',
+    bar:{ start:19, dur:3, cls:'c2', label:'Smoke tests' }, alt:true },
+
+  { type:'milestone', label:'M2: Test suite ≥60% cov, E2E green  (Jun 6)',
+    milestone:{ day:22 } },
+
+  { type:'sep' },
+
+  // ══ PHASE 3 — Testing, Bugs & Validation (days 22–27, Jun 6–11) ══════
+  { type:'phase', hdrCls:'ph3',
+    label:'Phase 3 — Testing, Fixes & UAT',
+    bar:{ start:22, dur:5, cls:'c3', label:'' } },
+
+  { type:'task', label:'3.1  Full GENESIS scan vs vuln-lab  (recall ≥80%)',
+    bar:{ start:22, dur:2, cls:'c3', label:'Full scan' } },
+
+  { type:'task', label:'3.2  Regression bug fixes (7 pre-scheduled bugs)',
+    bar:{ start:22, dur:4, cls:'c3', label:'Bug fixes' }, alt:true },
+
+  { type:'task', label:'3.3  Perf baseline + Locust load test',
+    bar:{ start:24, dur:2, cls:'c3', label:'Perf test' } },
+
+  { type:'task', label:'3.4  Security scan — Trivy / Bandit / Semgrep',
+    bar:{ start:24, dur:2, cls:'c3', label:'Sec scan' }, alt:true },
+
+  { type:'task', label:'3.5  User acceptance testing (UAT)',
+    bar:{ start:25, dur:2, cls:'c3', label:'UAT' } },
+
+  { type:'milestone', label:'M3: All bugs fixed, UAT signed off  (Jun 11)',
+    milestone:{ day:27 } },
+
+  { type:'sep' },
+
+  // ══ PHASE 4 — Go-Live (days 27–30, Jun 11–14) ════════════════════════
+  { type:'phase', hdrCls:'ph4',
+    label:'Phase 4 — Pre-Prod Review & Go-Live',
+    bar:{ start:27, dur:3, cls:'c4', label:'' } },
+
+  { type:'task', label:'4.1  Pre-production hardening checklist',
+    bar:{ start:27, dur:2, cls:'c4', label:'Hardening' } },
+
+  { type:'task', label:'4.2  Final pentest (GENESIS dogfoods itself)',
+    bar:{ start:27, dur:2, cls:'c4', label:'Pentest' }, alt:true },
+
+  { type:'task', label:'4.3  Deploy genesis:v8.0.0-prod + v9 preview flags + 24h monitoring',
+    bar:{ start:29, dur:1, cls:'c4', label:'🚀 Deploy' } },
+
+  { type:'milestone', label:'M5: 🚀 Go-live  Jun 14, 2026',
+    milestone:{ day:30, golive:true } },
+];
+
+// ── Build week header ─────────────────────────────────────────────────────
+const weekHeader = document.getElementById('weekHeader');
+WEEKS.forEach(w => {
+  const el = document.createElement('div');
+  el.className = 'week-label';
+  el.style.left = pct(w.day);
+  el.innerHTML = `<span class="big">${w.label}</span><span class="wnum">${w.wnum}</span>`;
+  weekHeader.appendChild(el);
+});
+
+// Today label on header
+const todayLbl = document.createElement('div');
+todayLbl.className = 'today-label-wh';
+todayLbl.style.left = pct(TODAY);
+todayLbl.textContent = '▼ Today · May 21';
+weekHeader.appendChild(todayLbl);
+
+// ── Build rows ────────────────────────────────────────────────────────────
+const labelsCol = document.getElementById('labelsCol');
+const barsArea  = document.getElementById('barsArea');
+
+// Spacer for labels header
+const lh = document.createElement('div');
+lh.className = 'labels-header';
+labelsCol.appendChild(lh);
+
+ROWS.forEach(row => {
+  // ── Label ──────────────────────────────────────────────────────
+  const lbl = document.createElement('div');
+
+  if (row.type === 'phase') {
+    lbl.className = `label-row phase-header ${row.hdrCls}`;
+    lbl.textContent = row.label;
+  } else if (row.type === 'milestone') {
+    lbl.className = 'label-row milestone-row';
+    lbl.textContent = row.label;
+  } else if (row.type === 'sep') {
+    lbl.className = 'label-row track-sep';
+  } else {
+    lbl.className = 'label-row' + (row.alt ? ' par-b' : ' par-a');
+    lbl.textContent = row.label;
+  }
+  labelsCol.appendChild(lbl);
+
+  // ── Bar row ────────────────────────────────────────────────────
+  const barRow = document.createElement('div');
+  barRow.className = 'bar-row';
+  if (row.type === 'phase')     barRow.classList.add('phase-header');
+  if (row.type === 'milestone') barRow.classList.add('milestone-row');
+  if (row.type === 'sep')       barRow.classList.add('track-sep');
+  if (row.alt && row.type === 'task') barRow.classList.add('par-b');
+
+  // Grid lines on every row
+  WEEKS.forEach(w => {
+    const gl = document.createElement('div');
+    gl.className = 'grid-line';
+    gl.style.left = pct(w.day);
+    barRow.appendChild(gl);
+  });
+
+  if ((row.type === 'phase' || row.type === 'task') && row.bar) {
+    const bar = document.createElement('div');
+    bar.className = `bar ${row.bar.cls}`;
+    bar.style.left  = pct(row.bar.start);
+    bar.style.width = pct(row.bar.dur);
+    bar.textContent = row.bar.label;
+    bar.title = `${row.label}  |  Day ${row.bar.start}–${row.bar.start + row.bar.dur}`;
+    barRow.appendChild(bar);
+  }
+
+  if (row.type === 'milestone') {
+    if (row.milestone.golive) {
+      // big star for go-live
+      const star = document.createElement('div');
+      star.className = 'golive-star';
+      star.style.left = pct(row.milestone.day);
+      star.textContent = '★';
+      barRow.appendChild(star);
+    } else {
+      const d = document.createElement('div');
+      d.className = 'milestone';
+      d.style.left = pct(row.milestone.day);
+      d.style.top  = '5px';
+      barRow.appendChild(d);
+    }
+  }
+
+  barsArea.appendChild(barRow);
+});
+
+// ── Today line spanning all rows ─────────────────────────────────────────
+const tl = document.createElement('div');
+tl.className = 'today-line';
+tl.style.left = pct(TODAY);
+barsArea.appendChild(tl);
+
+// ── Helper ────────────────────────────────────────────────────────────────
+function pct(day) { return (day / TOTAL * 100).toFixed(3) + '%'; }
+</script>
+</body>
+</html>

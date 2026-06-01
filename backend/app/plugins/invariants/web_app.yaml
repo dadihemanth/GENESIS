@@ -1,0 +1,74 @@
+domain: "web_application"
+description: "Common web application security invariants for OWASP Top-10 and API security"
+
+invariants:
+
+  - name: "auth_required_before_data_access"
+    rule: "Every endpoint that accesses user-owned data must verify authentication before returning results"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go", "*.rb", "*.php"]
+    keywords: ["authenticate", "authorization", "session", "token", "bearer", "jwt"]
+    confidence: "high"
+
+  - name: "parameterized_queries_only"
+    rule: "Database queries must use parameterized statements or ORM methods — never string concatenation with user input"
+    severity: "critical"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go", "*.rb", "*.php"]
+    keywords: ["execute", "query", "cursor", "db.query", "connection.query"]
+    confidence: "high"
+
+  - name: "output_encoding_before_render"
+    rule: "All user-controlled data must be HTML-encoded before being written to an HTML response"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.html", "*.jinja2", "*.ejs"]
+    keywords: ["innerHTML", "document.write", "render_template", "Response", "HttpResponse"]
+    confidence: "medium"
+
+  - name: "csrf_token_on_state_change"
+    rule: "Every state-changing operation (POST/PUT/PATCH/DELETE) must validate a CSRF token"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java"]
+    keywords: ["csrf", "POST", "PUT", "PATCH", "DELETE", "form"]
+    confidence: "medium"
+
+  - name: "rate_limit_on_auth_endpoints"
+    rule: "Authentication endpoints (login, password reset, OTP) must apply rate limiting"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go"]
+    keywords: ["login", "signin", "password_reset", "verify_otp", "two_factor"]
+    confidence: "high"
+
+  - name: "jwt_signature_verified"
+    rule: "JWT tokens must have their signature cryptographically verified; never decode without verify=True"
+    severity: "critical"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go"]
+    keywords: ["jwt", "decode", "verify", "none", "alg"]
+    confidence: "high"
+
+  - name: "object_ownership_check"
+    rule: "Before returning or modifying an object, verify the requesting user owns or has explicit permission for it"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go", "*.rb"]
+    keywords: ["user_id", "owner", "owner_id", "resource_id", "find_by_id", "get_object_or_404"]
+    confidence: "medium"
+
+  - name: "tls_required_for_sensitive_data"
+    rule: "Sensitive data (credentials, PII, session tokens) must only be transmitted over TLS"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.yaml", "*.json", "*.conf"]
+    keywords: ["http://", "ssl", "tls", "verify=False", "secure=False"]
+    confidence: "medium"
+
+  - name: "constant_time_secret_comparison"
+    rule: "Comparison of secrets (tokens, passwords, HMACs) must use constant-time comparison to prevent timing attacks"
+    severity: "high"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.go"]
+    keywords: ["hmac", "compare", "token", "secret", "digest", "=="]
+    confidence: "medium"
+
+  - name: "path_traversal_prevention"
+    rule: "File paths derived from user input must be normalized and validated to prevent directory traversal"
+    severity: "critical"
+    applies_to: ["*.py", "*.js", "*.ts", "*.java", "*.php", "*.go"]
+    keywords: ["open(", "file_path", "filename", "join", "os.path", "readFile", "createReadStream"]
+    confidence: "high"

@@ -2,7 +2,7 @@
 
 Read-only. Drives the Settings → Agents tab so an operator can see at a
 glance how the multi-agent layout is composed and which tools each
-agent is allowed to call. The single-agent (Mythos) orchestrator is
+agent is allowed to call. The single-agent (GENESIS) orchestrator is
 also reported with its full union of tool access.
 """
 from __future__ import annotations
@@ -64,11 +64,11 @@ async def list_agents() -> Dict[str, Any]:
             "tools": list(tools),
         })
 
-    # Single-agent ("solo Mythos") is reported separately so the UI can show
+    # Single-agent ("solo GENESIS") is reported separately so the UI can show
     # it alongside the multi-agent roster. It has access to the union.
     solo_tools = sorted({t for ts in _AGENT_TOOL_SETS.values() for t in ts})
     solo = {
-        "name": "mythos",
+        "name": "genesis",
         "kind": "solo",
         "phase": "all",
         "description": "Single-agent mode — one Opus instance with the full tool union.",

@@ -98,6 +98,15 @@ desktop.ini
 *.sqlite3
 *.db
 
-claude_mythos_capabilities.txt
-Coverage Cyber killchain.txt
+genesis-demo-range/artifacts/
 
+claude_capabilities.txt
+Coverage Cyber killchain.txt
+genesis-demo-range
+genesis-validation
+cluster_findings.py
+cluster_novel.py
+claude_mythos_capabilities.txt
+GENESIS_Analysis_Report.md
+official-challenges-v14.5.1.yml
+official-challenges-v20.0.0.yml

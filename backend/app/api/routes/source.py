@@ -62,6 +62,11 @@ async def ingest_source(req: IngestRequest) -> Dict[str, Any]:
     )
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
+    try:
+        from app.services.validated_scanner import record_source_ingest_summary
+        await record_source_ingest_summary(req.session_id, result)
+    except Exception:
+        pass
     return result
 
 

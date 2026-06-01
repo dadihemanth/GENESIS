@@ -94,7 +94,7 @@ const Dashboard: React.FC = () => {
   // 1h floor) for normal use; deep_research (6h floor, 10 multi-agent
   // rounds, mandatory PoC verification) for thorough scans that match the
   // 8-11h sessions which historically produced 200-450 findings.
-  const [scanProfile, setScanProfile] = useState<'exhaustive' | 'deep_research'>('exhaustive');
+  const [scanProfile, setScanProfile] = useState<'exhaustive' | 'deep_research' | 'validated_dynamic'>('exhaustive');
   // Solo mode is no longer operator-selectable. Every scan runs in
   // multi-agent mode (recon + analyst + exploit + code generalists, plus
   // any specialists Phase-1 detection activates).
@@ -144,9 +144,22 @@ const Dashboard: React.FC = () => {
 
   const validateIp = (value: string): boolean => {
     const v = value.trim();
-    if (v === 'localhost' || v === '127.0.0.1' || v.startsWith('127.')) return false;
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$|^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return ipRegex.test(v);
+    if (!v) return false;
+    try {
+      const parsed = new URL(v.includes('://') ? v : `http://${v}`);
+      const host = parsed.hostname.toLowerCase();
+      if (host === 'localhost' || host === '127.0.0.1' || host.startsWith('127.')) return false;
+      if (parsed.port && !/^\d{1,5}$/.test(parsed.port)) return false;
+      if (parsed.port && Number(parsed.port) > 65535) return false;
+      const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+      const hostRegex = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (ipRegex.test(host)) {
+        return host.split('.').every(part => Number(part) >= 0 && Number(part) <= 255);
+      }
+      return hostRegex.test(host);
+    } catch {
+      return false;
+    }
   };
 
   const handleStartResearch = async () => {
@@ -255,7 +268,7 @@ const Dashboard: React.FC = () => {
               <TextField
                 fullWidth
                 label="Target IP / Hostname"
-                placeholder="192.168.1.1 or example.com"
+                placeholder="192.168.1.1, example.com, or http://target.local:8080"
                 value={targetIp}
                 onChange={e => {
                   setTargetIp(e.target.value);
@@ -301,13 +314,24 @@ const Dashboard: React.FC = () => {
                   onChange={(_, v) => { if (v) setScanProfile(v); }}
                   sx={{ width: '100%', '& .MuiToggleButton-root': { textTransform: 'none', fontSize: '0.75rem', flex: 1 } }}
                 >
-                  <Tooltip title="Default. ~1h wallclock floor, 5 multi-agent rounds, 14/16 attack-class checklist. Best for routine scans.">
+                  <Tooltip title="Default discovery depth with evidence checks and critic validation. Findings appear directly as confirmed, disputed, or unverified.">
                     <ToggleButton value="exhaustive">Exhaustive</ToggleButton>
                   </Tooltip>
                   <Tooltip title="Long-horizon. 6h wallclock floor, 10 multi-agent rounds, 16/16 attack-class checklist, mandatory PoC re-verification. Best for thorough audits — empirically produces 200-450 findings vs 50-150 for exhaustive.">
                     <ToggleButton value="deep_research">Deep Research (6h+)</ToggleButton>
                   </Tooltip>
+                  <Tooltip title="Hybrid discovery with optional validation-lab artifacts, proof runs, scorecards, and source/runtime correlation.">
+                    <ToggleButton value="validated_dynamic">Validated</ToggleButton>
+                  </Tooltip>
                 </ToggleButtonGroup>
+                <Typography sx={{ fontSize: '0.7rem', color: '#1565c0', mt: 0.5 }}>
+                  Findings are saved through GENESIS evidence checks and critic review. The Validation Lab is optional follow-up for extra proof, scorecards, and CISO demo evidence.
+                </Typography>
+                {scanProfile === 'validated_dynamic' && (
+                  <Typography sx={{ fontSize: '0.7rem', color: '#1565c0', mt: 0.5 }}>
+                    Validated mode spends more effort on hybrid source/runtime mapping, proof artifacts, and benchmark-ready reporting without delaying normal findings.
+                  </Typography>
+                )}
                 {scanProfile === 'deep_research' && (
                   <Typography sx={{ fontSize: '0.7rem', color: '#b8740c', mt: 0.5 }}>
                     ⚠ Will run for at least 6 hours and use 5–10× the tokens of an exhaustive scan.
